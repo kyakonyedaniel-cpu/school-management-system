@@ -120,6 +120,9 @@ export default function FeaturesPage() {
           </div>
           <span className="font-bold text-sm">{schoolName}</span>
         </div>
+        <Link href="/dashboard" className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted text-sm mb-2">
+          ← Full Dashboard
+        </Link>
         <nav className="space-y-1">
           <Link href="/dashboard" className="flex items-center gap-2 px-3 py-2 rounded-lg text-foreground/70 hover:bg-muted text-sm">Dashboard</Link>
           <Link href="/dashboard/features" className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 text-primary font-medium text-sm">Features</Link>
