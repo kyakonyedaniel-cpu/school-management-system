@@ -114,83 +114,80 @@ export default function DashboardPage() {
         </div>
 
         <nav className="p-4 space-y-1">
-          <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary font-medium">
-            <FileText size={20} />
-            Dashboard
-          </Link>
-          <Link href="/dashboard/features" className="flex items-center gap-3 px-4 py-3 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
-            <FileText size={20} />
+          <div className="pb-4 mb-4 border-b border-border">
+            <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary font-medium">
+              <FileText size={20} />
+              Dashboard
+            </Link>
+          </div>
+
+          <p className="px-4 py-2 text-xs font-medium text-foreground/50 uppercase tracking-wider">Main</p>
+          <Link href="/dashboard/features" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
+            <FileText size={18} />
             Features
           </Link>
-          <Link href="/dashboard/students" className="flex items-center gap-3 px-4 py-3 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
-            <Users size={20} />
+          <Link href="/dashboard/students" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
+            <Users size={18} />
             Students
           </Link>
-          <Link href="/dashboard/fees" className="flex items-center gap-3 px-4 py-3 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
-            <TrendingUp size={20} />
+          <Link href="/dashboard/fees" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
+            <TrendingUp size={18} />
             Fees
           </Link>
-          <Link href="/dashboard/attendance" className="flex items-center gap-3 px-4 py-3 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
-            <CheckCircle size={20} />
+          <Link href="/dashboard/attendance" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
+            <CheckCircle size={18} />
             Attendance
           </Link>
-          <Link href="/dashboard/calendar" className="flex items-center gap-3 px-4 py-3 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
-            <CalendarIcon size={20} />
-            Calendar
-          </Link>
-          <div className="pt-4 mt-4 border-t border-border">
-            <p className="px-4 py-2 text-xs font-medium text-foreground/50 uppercase tracking-wider">African Features</p>
+
+          <div className="pt-4 mt-2 border-t border-border">
+            <p className="px-4 py-2 text-xs font-medium text-foreground/50 uppercase tracking-wider">Academic</p>
             <Link href="/dashboard/curriculum" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
               <BookOpen size={18} />
               Curriculum
-            </Link>
-            <Link href="/dashboard/exams" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
-              <FileText size={18} />
-              Exams
-            </Link>
-            <Link href="/dashboard/academics" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
-              <CalendarIcon size={18} />
-              Academics
-            </Link>
-            <Link href="/dashboard/boarding" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
-              <Bed size={18} />
-              Boarding
-            </Link>
-            <Link href="/dashboard/reports" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
-              <FileText size={18} />
-              Reports
-            </Link>
-            <Link href="/dashboard/staff" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
-              <Users size={18} />
-              Staff
-            </Link>
-            <Link href="/dashboard/houses" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
-              <Heart size={18} />
-              Houses
-            </Link>
-            <Link href="/dashboard/parents" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
-              <Users size={18} />
-              PTA
-            </Link>
-            <Link href="/dashboard/admissions" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
-              <Award size={18} />
-              Admissions
-            </Link>
-            <Link href="/dashboard/library" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
-              <BookOpen size={18} />
-              Library
             </Link>
             <Link href="/dashboard/timetable" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
               <Calendar size={18} />
               Timetable
             </Link>
-            <Link href="/dashboard/discipline" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
-              <Shield size={18} />
-              Discipline
+            <Link href="/dashboard/exams" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
+              <FileText size={18} />
+              Exams
             </Link>
-            <Link href="/dashboard/health" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
+            <Link href="/dashboard/results" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
+              <FileText size={18} />
+              Results
+            </Link>
+            <Link href="/dashboard/reports" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
+              <FileText size={18} />
+              Reports
+            </Link>
+          </div>
+
+          <div className="pt-4 mt-2 border-t border-border">
+            <p className="px-4 py-2 text-xs font-medium text-foreground/50 uppercase tracking-wider">People</p>
+            <Link href="/dashboard/staff" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
+              <Users size={18} />
+              Staff
+            </Link>
+            <Link href="/dashboard/parents" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
+              <Users size={18} />
+              Parents (PTA)
+            </Link>
+            <Link href="/dashboard/houses" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
               <Heart size={18} />
-              Health
+              Houses
+            </Link>
+          </div>
+
+          <div className="pt-4 mt-2 border-t border-border">
+            <p className="px-4 py-2 text-xs font-medium text-foreground/50 uppercase tracking-wider">Campus</p>
+            <Link href="/dashboard/library" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
+              <BookOpen size={18} />
+              Library
+            </Link>
+            <Link href="/dashboard/boarding" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
+              <Bed size={18} />
+              Boarding
             </Link>
             <Link href="/dashboard/transport" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
               <MapPin size={18} />
@@ -200,9 +197,17 @@ export default function DashboardPage() {
               <Trophy size={18} />
               Sports
             </Link>
-            <Link href="/dashboard/results" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
-              <FileText size={18} />
-              Results
+          </div>
+
+          <div className="pt-4 mt-2 border-t border-border">
+            <p className="px-4 py-2 text-xs font-medium text-foreground/50 uppercase tracking-wider">Administration</p>
+            <Link href="/dashboard/admissions" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
+              <Award size={18} />
+              Admissions
+            </Link>
+            <Link href="/dashboard/calendar" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
+              <CalendarIcon size={18} />
+              Calendar
             </Link>
             <Link href="/dashboard/budget" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
               <DollarSign size={18} />
@@ -216,11 +221,28 @@ export default function DashboardPage() {
               <CalendarDays size={18} />
               Leave
             </Link>
+            <Link href="/dashboard/health" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
+              <Heart size={18} />
+              Health
+            </Link>
+            <Link href="/dashboard/discipline" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
+              <Shield size={18} />
+              Discipline
+            </Link>
+          </div>
+
+          <div className="pt-4 mt-2 border-t border-border">
+            <p className="px-4 py-2 text-xs font-medium text-foreground/50 uppercase tracking-wider">Settings</p>
             <Link href="/subscription" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
               <Award size={18} />
               Subscription
             </Link>
+            <Link href="/dashboard/profile" className="flex items-center gap-3 px-4 py-2 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
+              <Users size={18} />
+              Profile
+            </Link>
           </div>
+
           <div className="pt-4 mt-4 border-t border-border">
             <Link href="/" className="flex items-center gap-3 px-4 py-3 rounded-lg text-foreground/70 hover:bg-muted transition-colors">
               <FileText size={20} />
