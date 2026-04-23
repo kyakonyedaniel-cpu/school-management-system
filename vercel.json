@@ -1,5 +1,4 @@
 {
   "name": "school-management",
-  "framework": "nextjs",
-  "alias": ["school-management"]
+  "framework": "nextjs"
 }
