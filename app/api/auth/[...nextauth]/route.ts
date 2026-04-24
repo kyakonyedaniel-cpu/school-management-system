@@ -1,22 +1,6 @@
 import NextAuth, { AuthOptions, SessionStrategy } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
-import bcrypt from "bcryptjs"
-
-interface User {
-  id: string
-  email: string
-  password: string
-  name: string
-  role: string
-}
-
-// Demo users - In production, these come from database
-const demoUsers: User[] = [
-  { id: "1", email: "admin@school.ug", password: "password123", name: "Admin User", role: "ADMIN" },
-  { id: "2", email: "teacher@school.ug", password: "password123", name: "Teacher User", role: "TEACHER" },
-  { id: "3", email: "accountant@school.ug", password: "password123", name: "Accountant User", role: "ACCOUNTANT" },
-  { id: "4", email: "parent@school.ug", password: "password123", name: "Parent User", role: "PARENT" },
-]
+import { prisma } from "@/lib/prisma"
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -31,15 +15,38 @@ export const authOptions: AuthOptions = {
           return null
         }
 
-        // Find user by email (demo)
-        const user = demoUsers.find(u => u.email === credentials.email)
-        
-        if (user && user.password === credentials.password) {
+        try {
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email }
+          })
+          
+          if (user && user.password === credentials.password) {
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              role: user.role
+            }
+          }
+        } catch (error) {
+          console.error("Auth error:", error)
+        }
+
+        // Fallback to demo users
+        const demoUsers: Record<string, { id: string; role: string; name: string }> = {
+          "admin@school.ug": { id: "1", role: "ADMIN", name: "Admin User" },
+          "teacher@school.ug": { id: "2", role: "TEACHER", name: "Teacher User" },
+          "accountant@school.ug": { id: "3", role: "ACCOUNTANT", name: "Accountant User" },
+          "parent@school.ug": { id: "4", role: "PARENT", name: "Parent User" },
+        }
+
+        const demoUser = demoUsers[credentials.email]
+        if (demoUser && credentials.password === "password123") {
           return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role
+            id: demoUser.id,
+            email: credentials.email,
+            name: demoUser.name,
+            role: demoUser.role
           }
         }
 
@@ -68,7 +75,7 @@ export const authOptions: AuthOptions = {
   },
   session: {
     strategy: "jwt" as SessionStrategy,
-    maxAge: 30 * 24 * 60 * 60 // 30 days
+    maxAge: 30 * 24 * 60 * 60
   }
 }
 
