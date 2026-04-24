@@ -64,7 +64,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen bg-muted/30 flex">
       {/* Sidebar */}
-      <aside className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-border transform transition-transform duration-200`}>
+      <aside className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static fixed inset-y-0 left-0 z-50 w-64 bg-background border-r border-border transform transition-transform duration-200`}>
         <div className="lg:hidden p-4 flex items-center justify-between border-b border-border">
           <span className="font-bold">Menu</span>
           <button onClick={() => setSidebarOpen(false)}><X size={20} /></button>
