@@ -122,7 +122,7 @@ export function PricingSection() {
               className={`relative rounded-2xl transition-all duration-300 overflow-hidden group ${
                 plan.highlighted
                   ? 'bg-gradient-to-br from-primary via-primary to-primary/90 text-white scale-105 md:scale-110 shadow-2xl hover:shadow-3xl'
-                  : 'bg-white border border-border hover:border-primary/50 hover:shadow-xl'
+                  : 'bg-background border border-border hover:border-primary/50 hover:shadow-xl'
               }`}
             >
               {/* Glow effect on hover */}
@@ -131,7 +131,7 @@ export function PricingSection() {
               )}
 
               {plan.highlighted && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-white text-primary px-4 py-1 rounded-full text-xs font-bold whitespace-nowrap shadow-lg">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-background text-primary px-4 py-1 rounded-full text-xs font-bold whitespace-nowrap shadow-lg">
                   MOST POPULAR
                 </div>
               )}

@@ -111,7 +111,7 @@ export function FeaturesSection() {
                 {/* Background glow on hover */}
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/0 group-hover:from-primary/10 group-hover:to-primary/5 rounded-xl transition-all duration-300 blur-xl" />
                 
-                <div className="relative bg-white rounded-xl p-8 border border-border group-hover:border-primary/50 shadow-sm group-hover:shadow-lg transition-all duration-300 h-full flex flex-col">
+                <div className="relative bg-background rounded-xl p-8 border border-border group-hover:border-primary/50 shadow-sm group-hover:shadow-lg transition-all duration-300 h-full flex flex-col">
                   {/* Icon Container */}
                   <div className="mb-6 p-4 w-fit rounded-lg bg-secondary group-hover:bg-primary/15 group-hover:scale-110 transition-all duration-300">
                     <Icon className="text-primary" size={28} />

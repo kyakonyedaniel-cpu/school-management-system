@@ -47,7 +47,7 @@ export default function SignInPage() {
           <span>Back to home</span>
         </Link>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-border">
+        <div className="bg-background rounded-2xl shadow-xl p-8 border border-border">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
               <School className="w-6 h-6 text-primary" />

@@ -95,18 +95,18 @@ export default function SubscriptionPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow mb-8">
+          <div className="bg-background rounded-lg shadow mb-8">
             <div className="p-4 flex justify-center">
-              <div className="bg-gray-100 p-1 rounded-lg inline-flex">
+              <div className="bg-muted p-1 rounded-lg inline-flex">
                 <button
                   onClick={() => setBillingCycle("monthly")}
-                  className={`px-4 py-2 rounded-lg ${billingCycle === "monthly" ? "bg-white shadow" : ""}`}
+                  className={`px-4 py-2 rounded-lg ${billingCycle === "monthly" ? "bg-background shadow" : ""}`}
                 >
                   Monthly
                 </button>
                 <button
                   onClick={() => setBillingCycle("yearly")}
-                  className={`px-4 py-2 rounded-lg ${billingCycle === "yearly" ? "bg-white shadow" : ""}`}
+                  className={`px-4 py-2 rounded-lg ${billingCycle === "yearly" ? "bg-background shadow" : ""}`}
                 >
                   Yearly <span className="text-green-600 text-sm">-20%</span>
                 </button>
@@ -118,7 +118,7 @@ export default function SubscriptionPage() {
             {plans.map((plan) => (
               <div
                 key={plan.name}
-                className={`bg-white rounded-lg shadow p-6 ${plan.popular ? "border-2 border-blue-500 relative" : ""}`}
+                className={`bg-background rounded-lg shadow p-6 ${plan.popular ? "border-2 border-blue-500 relative" : ""}`}
               >
                 {plan.popular && (
                   <span className="absolute top-0 right-0 bg-blue-500 text-white text-xs px-2 py-1 rounded-bl-lg rounded-tr-lg">
@@ -169,7 +169,7 @@ export default function SubscriptionPage() {
             ))}
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-background rounded-lg shadow p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Frequently Asked Questions</h2>
             <div className="space-y-4">
               <div>

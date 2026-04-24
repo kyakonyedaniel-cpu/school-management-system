@@ -103,7 +103,7 @@ export function HeroSection() {
             {/* Floating Glow */}
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent rounded-2xl blur-3xl -z-10" />
             
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-white border border-border">
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-background border border-border">
               {/* Dashboard Header */}
               <div className="bg-gradient-to-r from-primary/10 to-primary/5 px-6 py-4 border-b border-border flex items-center justify-between">
                 <div className="flex items-center gap-2">

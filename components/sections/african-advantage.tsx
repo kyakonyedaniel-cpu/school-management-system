@@ -96,7 +96,7 @@ export function AfricanAdvantageSection() {
               <motion.div
                 key={index}
                 variants={itemVariants}
-                className="bg-white rounded-xl p-8 border border-border hover:border-primary/30 hover:shadow-lg transition-all duration-300"
+                className="bg-background rounded-xl p-8 border border-border hover:border-primary/30 hover:shadow-lg transition-all duration-300"
               >
                 <div className="mb-4 p-3 w-fit rounded-lg bg-secondary">
                   <Icon className="text-primary" size={24} />
@@ -117,7 +117,7 @@ export function AfricanAdvantageSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ delay: 0.6, duration: 0.6 }}
-          className="mt-16 bg-white rounded-xl p-8 md:p-12 border border-border"
+          className="mt-16 bg-background rounded-xl p-8 md:p-12 border border-border"
         >
           <h3 className="text-2xl font-bold text-foreground mb-8 text-center">
             Supported Payment Methods
