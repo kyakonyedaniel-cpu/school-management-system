@@ -1,202 +1,147 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { useTheme } from "next-themes";
-import { 
-  School, Menu, X, Bell, Search, Settings, LogOut, ChevronDown, Moon, Sun,
-  FileText, Users, TrendingUp, CheckCircle, Calendar as CalendarIcon, BookOpen, 
-  Calendar, Shield, Heart, MapPin, Trophy, DollarSign, Package, CalendarDays, Award, Bed 
-} from "lucide-react";
+import { useSession, signOut } from 'next-auth/react';
+import { useRouter, usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import {
+  Home, Users, GraduationCap, UserCheck, Calendar, BookOpen, DollarSign,
+  Library, FileText, ClipboardList, Bus, Settings, LogOut, Menu, X,
+  BarChart3, Trophy, Heart, Clock, AlertTriangle, UsersRound, Building,
+  Bed, Stethoscope, MessageSquare, Award, MapPin
+} from 'lucide-react';
 
-const navItems = [
-  { name: "Dashboard", href: "/dashboard", icon: FileText },
-  { name: "Features", href: "/dashboard/features", icon: FileText },
-  { name: "Students", href: "/dashboard/students", icon: Users },
-  { name: "Fees", href: "/dashboard/fees", icon: TrendingUp },
-  { name: "Attendance", href: "/dashboard/attendance", icon: CheckCircle },
-];
-
-const academicItems = [
-  { name: "Curriculum", href: "/dashboard/curriculum", icon: BookOpen },
-  { name: "Timetable", href: "/dashboard/timetable", icon: Calendar },
-  { name: "Exams", href: "/dashboard/exams", icon: FileText },
-  { name: "Results", href: "/dashboard/results", icon: FileText },
-  { name: "Reports", href: "/dashboard/reports", icon: FileText },
-];
-
-const peopleItems = [
-  { name: "Staff", href: "/dashboard/staff", icon: Users },
-  { name: "Parents (PTA)", href: "/dashboard/parents", icon: Users },
-  { name: "Houses", href: "/dashboard/houses", icon: Heart },
-];
-
-const campusItems = [
-  { name: "Library", href: "/dashboard/library", icon: BookOpen },
-  { name: "Boarding", href: "/dashboard/boarding", icon: Bed },
-  { name: "Transport", href: "/dashboard/transport", icon: MapPin },
-  { name: "Sports", href: "/dashboard/sports", icon: Trophy },
-];
-
-const adminItems = [
-  { name: "Admissions", href: "/dashboard/admissions", icon: Award },
-  { name: "Calendar", href: "/dashboard/calendar", icon: CalendarIcon },
-  { name: "Budget", href: "/dashboard/budget", icon: DollarSign },
-  { name: "Inventory", href: "/dashboard/inventory", icon: Package },
-  { name: "Leave", href: "/dashboard/leave", icon: CalendarDays },
-  { name: "Health", href: "/dashboard/health", icon: Heart },
-  { name: "Discipline", href: "/dashboard/discipline", icon: Shield },
-];
-
-const settingsItems = [
-  { name: "Subscription", href: "/subscription", icon: Award },
-  { name: "Profile", href: "/dashboard/profile", icon: Users },
+const navigation = [
+  { name: 'Dashboard', href: '/dashboard', icon: Home },
+  { name: 'Students', href: '/dashboard/students', icon: Users },
+  { name: 'Staff', href: '/dashboard/staff', icon: UserCheck },
+  { name: 'Attendance', href: '/dashboard/attendance', icon: Calendar },
+  { name: 'Exams', href: '/dashboard/exams', icon: FileText },
+  { name: 'Results', href: '/dashboard/results', icon: BarChart3 },
+  { name: 'Fees', href: '/dashboard/fees', icon: DollarSign },
+  { name: 'Library', href: '/dashboard/library', icon: BookOpen },
+  { name: 'Leave', href: '/dashboard/leave', icon: Clock },
+  { name: 'Timetable', href: '/dashboard/timetable', icon: ClipboardList },
+  { name: 'Calendar', href: '/dashboard/calendar', icon: Calendar },
+  { name: 'Transport', href: '/dashboard/transport', icon: Bus },
+  { name: 'Admissions', href: '/dashboard/admissions', icon: Award },
+  { name: 'Discipline', href: '/dashboard/discipline', icon: AlertTriangle },
+  { name: 'Health', href: '/dashboard/health', icon: Stethoscope },
+  { name: 'Sports', href: '/dashboard/sports', icon: Trophy },
+  { name: 'Houses', href: '/dashboard/houses', icon: Heart },
+  { name: 'Boarding', href: '/dashboard/boarding', icon: Bed },
+  { name: 'Parents', href: '/dashboard/parents', icon: UsersRound },
+  { name: 'Inventory', href: '/dashboard/inventory', icon: Building },
+  { name: 'Budget', href: '/dashboard/budget', icon: DollarSign },
+  { name: 'Reports', href: '/dashboard/reports', icon: FileText },
+  { name: 'Curriculum', href: '/dashboard/curriculum', icon: BookOpen },
+  { name: 'Academics', href: '/dashboard/academics', icon: GraduationCap },
+  { name: 'Features', href: '/dashboard/features', icon: Settings },
+  { name: 'Profile', href: '/dashboard/profile', icon: Settings },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const pathname = usePathname();
-  const { resolvedTheme, setTheme } = useTheme();
-  const schoolName = "Your School";
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    }
+  }, [status, router]);
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-foreground/60">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return null;
+  }
 
   return (
-    <div className="min-h-screen bg-muted/30 flex">
+    <div className="min-h-screen bg-muted">
+      {/* Mobile sidebar toggle */}
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-background rounded-lg shadow-md"
+      >
+        {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+
       {/* Sidebar */}
-      <aside className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static fixed inset-y-0 left-0 z-50 w-64 bg-background border-r border-border transform transition-transform duration-200`}>
-        <div className="lg:hidden p-4 flex items-center justify-between border-b border-border">
-          <span className="font-bold">Menu</span>
-          <button onClick={() => setSidebarOpen(false)}><X size={20} /></button>
+      <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-background border-r transform transition-transform lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="flex flex-col h-full">
+          <div className="p-4 border-b">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                <GraduationCap className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="font-bold">SmartSchool</h2>
+                <p className="text-xs text-foreground/60">Pro Edition</p>
+              </div>
+            </div>
+          </div>
+
+          <nav className="flex-1 overflow-y-auto p-4 space-y-1">
+            {navigation.map((item) => {
+              const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+              return (
+                <a
+                  key={item.name}
+                  href={item.href}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm ${
+                    isActive
+                      ? 'bg-primary text-white'
+                      : 'text-foreground/70 hover:bg-muted hover:text-foreground'
+                  }`}
+                >
+                  <item.icon size={18} />
+                  {item.name}
+                </a>
+              );
+            })}
+          </nav>
+
+          <div className="p-4 border-t">
+            <div className="mb-3 px-3 py-2 bg-muted rounded-lg">
+              <p className="font-medium text-sm truncate">{session.user?.name}</p>
+              <p className="text-xs text-foreground/60">{session.user?.role}</p>
+            </div>
+            <button
+              onClick={() => signOut({ callbackUrl: '/login' })}
+              className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-red-600 hover:bg-red-50"
+            >
+              <LogOut size={18} />
+              Sign Out
+            </button>
+          </div>
         </div>
-
-        <nav className="p-4 space-y-1 overflow-y-auto h-full">
-          <div className="pb-4 mb-4 border-b border-border">
-            <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary font-medium">
-              <School size={20} />Dashboard
-            </Link>
-          </div>
-
-          <p className="px-4 py-2 text-xs font-medium text-foreground/50 uppercase tracking-wider">Main</p>
-          {navItems.map((item) => (
-            <Link key={item.href} href={item.href}
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg ${pathname === item.href ? 'bg-primary/10 text-primary font-medium' : 'text-foreground/70 hover:bg-muted'}`}>
-              <item.icon size={18} />{item.name}
-            </Link>
-          ))}
-
-          <div className="pt-2 mt-2 border-t border-border">
-            <p className="px-4 py-2 text-xs font-medium text-foreground/50 uppercase tracking-wider">Academic</p>
-            {academicItems.map((item) => (
-              <Link key={item.href} href={item.href}
-                className={`flex items-center gap-3 px-4 py-2 rounded-lg ${pathname === item.href ? 'bg-primary/10 text-primary font-medium' : 'text-foreground/70 hover:bg-muted'}`}>
-                <item.icon size={18} />{item.name}
-              </Link>
-            ))}
-          </div>
-
-          <div className="pt-2 mt-2 border-t border-border">
-            <p className="px-4 py-2 text-xs font-medium text-foreground/50 uppercase tracking-wider">People</p>
-            {peopleItems.map((item) => (
-              <Link key={item.href} href={item.href}
-                className={`flex items-center gap-3 px-4 py-2 rounded-lg ${pathname === item.href ? 'bg-primary/10 text-primary font-medium' : 'text-foreground/70 hover:bg-muted'}`}>
-                <item.icon size={18} />{item.name}
-              </Link>
-            ))}
-          </div>
-
-          <div className="pt-2 mt-2 border-t border-border">
-            <p className="px-4 py-2 text-xs font-medium text-foreground/50 uppercase tracking-wider">Campus</p>
-            {campusItems.map((item) => (
-              <Link key={item.href} href={item.href}
-                className={`flex items-center gap-3 px-4 py-2 rounded-lg ${pathname === item.href ? 'bg-primary/10 text-primary font-medium' : 'text-foreground/70 hover:bg-muted'}`}>
-                <item.icon size={18} />{item.name}
-              </Link>
-            ))}
-          </div>
-
-          <div className="pt-2 mt-2 border-t border-border">
-            <p className="px-4 py-2 text-xs font-medium text-foreground/50 uppercase tracking-wider">Administration</p>
-            {adminItems.map((item) => (
-              <Link key={item.href} href={item.href}
-                className={`flex items-center gap-3 px-4 py-2 rounded-lg ${pathname === item.href ? 'bg-primary/10 text-primary font-medium' : 'text-foreground/70 hover:bg-muted'}`}>
-                <item.icon size={18} />{item.name}
-              </Link>
-            ))}
-          </div>
-
-          <div className="pt-2 mt-2 border-t border-border">
-            <p className="px-4 py-2 text-xs font-medium text-foreground/50 uppercase tracking-wider">Settings</p>
-            {settingsItems.map((item) => (
-              <Link key={item.href} href={item.href}
-                className={`flex items-center gap-3 px-4 py-2 rounded-lg ${pathname === item.href ? 'bg-primary/10 text-primary font-medium' : 'text-foreground/70 hover:bg-muted'}`}>
-                <item.icon size={18} />{item.name}
-              </Link>
-            ))}
-          </div>
-
-          <div className="pt-4 mt-4 border-t border-border">
-            <Link href="/" className="flex items-center gap-3 px-4 py-3 rounded-lg text-foreground/70 hover:bg-muted">
-              <FileText size={20} />View Landing Page
-            </Link>
-          </div>
-        </nav>
       </aside>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        <header className="bg-background border-b border-border px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button onClick={() => setSidebarOpen(true)} className="lg:hidden"><Menu size={24} /></button>
-            <div className="relative hidden sm:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" size={20} />
-              <input type="text" placeholder="Search students, fees..."
-                className="pl-10 pr-4 py-2 rounded-lg border border-border w-64 lg:w-80 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none" />
-            </div>
-          </div>
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 z-30"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-              className="p-2 rounded-lg hover:bg-muted"
-            >
-              {resolvedTheme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
-            <button className="relative p-2 rounded-lg hover:bg-muted">
-              <Bell size={20} /><span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-            </button>
-            <button className="p-2 rounded-lg hover:bg-muted"><Settings size={20} /></button>
-
-            <div className="relative">
-              <button onClick={() => setProfileOpen(!profileOpen)} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted">
-                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-medium">
-                  {schoolName.charAt(0).toUpperCase()}
-                </div>
-                <ChevronDown size={16} />
-              </button>
-
-              {profileOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-background rounded-lg shadow-lg border border-border py-2 z-50">
-                  <div className="px-4 py-2 border-b border-border">
-                    <p className="font-medium">{schoolName}</p>
-                    <p className="text-sm text-foreground/60">Administrator</p>
-                  </div>
-                  <Link href="/dashboard/profile" className="block px-4 py-2 hover:bg-muted">Profile Settings</Link>
-                  <button className="w-full text-left px-4 py-2 hover:bg-muted flex items-center gap-2">
-                    <LogOut size={16} />Sign Out
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
-
-        <main className="flex-1 p-6">
+      {/* Main content */}
+      <main className="lg:pl-64">
+        <div className="p-4 lg:p-6">
           {children}
-        </main>
-      </div>
-
-      {sidebarOpen && <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />}
+        </div>
+      </main>
     </div>
   );
 }
