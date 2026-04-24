@@ -127,7 +127,7 @@ export function HeroSection() {
                   </div>
                   <div className="bg-gradient-to-br from-emerald-100/30 to-emerald-100/10 rounded-lg p-4 border border-emerald-200/30">
                     <div className="text-xs text-foreground/70 mb-2">Fees Collected</div>
-                    <div className="text-2xl font-bold text-emerald-600">₦45.2M</div>
+                    <div className="text-2xl font-bold text-emerald-600">UGX 45.2M</div>
                   </div>
                   <div className="bg-gradient-to-br from-blue-100/30 to-blue-100/10 rounded-lg p-4 border border-blue-200/30">
                     <div className="text-xs text-foreground/70 mb-2">Attendance</div>

@@ -14,7 +14,7 @@ export const metadata = {
   description:
     'Digital school management platform for African schools. Manage students, fees, attendance, and more. Built for offline, supports MTN MoMo & Airtel Money.',
   keywords:
-    'school management, student management, fee tracking, attendance, African schools, Uganda, Kenya, Nigeria',
+    'school management, student management, fee tracking, attendance, African schools, Uganda, Kenya, Tanzania',
   authors: [{ name: 'SmartSchool Pro' }],
   openGraph: {
     title: 'SmartSchool Pro - School Management Made Simple',

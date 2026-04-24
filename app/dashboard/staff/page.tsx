@@ -12,7 +12,7 @@ const staffMembers = [
   { id: 6, name: 'Ms. Sarah Nakayiza', role: 'Secretary', department: 'Administration', phone: '0777XXX', email: 'sarah@school.ug' },
 ];
 
-const formatUGX = (amount: number) => new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX', maximumFractionDigits: 0 }).format(amount);
+const formatUGX = (amount: number) => `UGX ${amount.toLocaleString('en-US')}`;
 
 export default function StaffPage() {
   const [searchTerm, setSearchTerm] = useState('');

@@ -35,7 +35,7 @@ export default function FeesPage() {
     { name: 'Overdue', value: 17 },
   ];
 
-  const formatUGX = (amount: number) => new Intl.NumberFormat('en-UG', { style: 'currency', currency: 'UGX', maximumFractionDigits: 0 }).format(amount);
+  const formatUGX = (amount: number) => `UGX ${amount.toLocaleString('en-US')}`;
 
   return (
     <div className="space-y-6">
