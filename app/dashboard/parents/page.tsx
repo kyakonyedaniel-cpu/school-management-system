@@ -1,6 +1,8 @@
 'use client';
 
-import { Users, Calendar, DollarSign, Plus, Phone, Mail } from 'lucide-react';
+import { useState } from 'react';
+import { Users, Calendar, DollarSign, Plus, Phone, Mail, X } from 'lucide-react';
+import { useStudents } from '@/lib/data';
 
 const ptaMembers = [
   { id: 1, name: 'Mr. James Okello', role: 'Chairman', child: 'John Okello P.7', phone: '0770XXX', email: 'james@gmail.com' },
@@ -14,14 +16,35 @@ const meetings = [
 ];
 
 export default function ParentsPage() {
+  const { students } = useStudents();
+  const [showNew, setShowNew] = useState(false);
+  const [newMeeting, setNewMeeting] = useState({ title: '', date: '', venue: '' });
+
+  const handleAddMeeting = (e: React.FormEvent) => {
+    e.preventDefault();
+    setShowNew(false);
+    setNewMeeting({ title: '', date: '', venue: '' });
+  };
+
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Parent Portal</h1>
+          <p className="text-foreground/60">Manage PTA and parent communications</p>
+        </div>
+        <button onClick={() => setShowNew(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
+          <Plus size={18} />Schedule Meeting
+        </button>
+      </div>
+
       <div className="grid sm:grid-cols-3 gap-4">
         <div className="bg-background rounded-xl p-6 border border-border">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center"><Users className="w-6 h-6 text-blue-600" /></div>
             <div>
-              <h3 className="text-2xl font-bold">300</h3>
+              <h3 className="text-2xl font-bold">{students.length}</h3>
               <p className="text-sm text-foreground/60">Registered Parents</p>
             </div>
           </div>
@@ -30,7 +53,7 @@ export default function ParentsPage() {
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center"><Calendar className="w-6 h-6 text-green-600" /></div>
             <div>
-              <h3 className="text-2xl font-bold">4</h3>
+              <h3 className="text-2xl font-bold">{meetings.length}</h3>
               <p className="text-sm text-foreground/60">Meetings This Year</p>
             </div>
           </div>
@@ -50,7 +73,6 @@ export default function ParentsPage() {
         <div className="bg-background rounded-xl border border-border">
           <div className="p-4 border-b border-border flex items-center justify-between">
             <h2 className="font-semibold">PTA Executive Committee</h2>
-            <button className="text-sm text-primary hover:underline">View All Parents</button>
           </div>
           <div className="divide-y divide-border">
             {ptaMembers.map((member) => (
@@ -61,7 +83,7 @@ export default function ParentsPage() {
                   </div>
                   <div>
                     <h3 className="font-medium">{member.name}</h3>
-                    <p className="text-sm text-foreground/60">{member.role} • Parent of {member.child}</p>
+                    <p className="text-sm text-foreground/60">{member.role} - Parent of {member.child}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -76,7 +98,6 @@ export default function ParentsPage() {
         <div className="bg-background rounded-xl border border-border">
           <div className="p-4 border-b border-border flex items-center justify-between">
             <h2 className="font-semibold">Upcoming Meetings</h2>
-            <button className="text-sm text-primary hover:underline">Schedule New</button>
           </div>
           <div className="divide-y divide-border">
             {meetings.map((meeting) => (
@@ -91,7 +112,7 @@ export default function ParentsPage() {
                 {meeting.attendance > 0 && (
                   <div className="flex items-center gap-4 mt-2 text-sm text-foreground/60">
                     <span>{meeting.attendance} parents attended</span>
-                    <span>•</span>
+                    <span>-</span>
                     <span>UGX {meeting.contributions.toLocaleString()} raised</span>
                   </div>
                 )}
@@ -100,6 +121,38 @@ export default function ParentsPage() {
           </div>
         </div>
       </div>
+
+      {showNew && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-xl border border-border w-full max-w-md p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Schedule Meeting</h2>
+              <button onClick={() => setShowNew(false)}><X size={20} /></button>
+            </div>
+            <form onSubmit={handleAddMeeting} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Meeting Title</label>
+                <input type="text" required value={newMeeting.title} onChange={(e) => setNewMeeting({ ...newMeeting, title: e.target.value })}
+                  className="w-full px-4 py-2 rounded-lg border border-border" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Date</label>
+                <input type="date" required value={newMeeting.date} onChange={(e) => setNewMeeting({ ...newMeeting, date: e.target.value })}
+                  className="w-full px-4 py-2 rounded-lg border border-border" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Venue</label>
+                <input type="text" required value={newMeeting.venue} onChange={(e) => setNewMeeting({ ...newMeeting, venue: e.target.value })}
+                  className="w-full px-4 py-2 rounded-lg border border-border" />
+              </div>
+              <div className="flex gap-4 pt-4">
+                <button type="button" onClick={() => setShowNew(false)} className="flex-1 px-4 py-2 border border-border rounded-lg">Cancel</button>
+                <button type="submit" className="flex-1 px-4 py-2 bg-primary text-white rounded-lg">Schedule</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

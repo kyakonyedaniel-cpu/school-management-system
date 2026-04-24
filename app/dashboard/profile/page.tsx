@@ -1,13 +1,36 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Save, School, Mail, Phone, MapPin } from 'lucide-react';
 
+interface SchoolProfile {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+}
+
 export default function ProfilePage() {
-  const [schoolName, setSchoolName] = useState('Your School');
-  const [schoolEmail, setSchoolEmail] = useState('admin@school.ug');
-  const [schoolPhone, setSchoolPhone] = useState('0772 XXX XXX');
-  const [schoolAddress, setSchoolAddress] = useState('Kampala, Uganda');
+  const [profile, setProfile] = useState<SchoolProfile>({
+    name: 'Your School Name',
+    email: 'admin@school.ug',
+    phone: '0772 XXX XXX',
+    address: 'Kampala, Uganda'
+  });
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('school_profile');
+    if (stored) {
+      setProfile(JSON.parse(stored));
+    }
+  }, []);
+
+  const handleSave = () => {
+    localStorage.setItem('school_profile', JSON.stringify(profile));
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
 
   return (
     <div className="space-y-6">
@@ -16,8 +39,9 @@ export default function ProfilePage() {
           <h1 className="text-2xl font-bold">School Profile</h1>
           <p className="text-foreground/60">Manage your school settings</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg">
-          <Save size={18} />Save Changes
+        <button onClick={handleSave}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg ${saved ? 'bg-green-600 text-white' : 'bg-primary text-white hover:bg-primary/90'}`}>
+          <Save size={18} />{saved ? 'Saved!' : 'Save Changes'}
         </button>
       </div>
 
@@ -29,7 +53,7 @@ export default function ProfilePage() {
               <label className="block text-sm font-medium mb-1">School Name</label>
               <div className="relative">
                 <School className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" size={20} />
-                <input type="text" value={schoolName} onChange={(e) => setSchoolName(e.target.value)}
+                <input type="text" value={profile.name} onChange={(e) => setProfile({ ...profile, name: e.target.value })}
                   className="w-full pl-10 pr-4 py-2 rounded-lg border border-border" />
               </div>
             </div>
@@ -37,7 +61,7 @@ export default function ProfilePage() {
               <label className="block text-sm font-medium mb-1">Email</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" size={20} />
-                <input type="email" value={schoolEmail} onChange={(e) => setSchoolEmail(e.target.value)}
+                <input type="email" value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })}
                   className="w-full pl-10 pr-4 py-2 rounded-lg border border-border" />
               </div>
             </div>
@@ -45,7 +69,7 @@ export default function ProfilePage() {
               <label className="block text-sm font-medium mb-1">Phone</label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" size={20} />
-                <input type="tel" value={schoolPhone} onChange={(e) => setSchoolPhone(e.target.value)}
+                <input type="tel" value={profile.phone} onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
                   className="w-full pl-10 pr-4 py-2 rounded-lg border border-border" />
               </div>
             </div>
@@ -53,7 +77,7 @@ export default function ProfilePage() {
               <label className="block text-sm font-medium mb-1">Address</label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" size={20} />
-                <input type="text" value={schoolAddress} onChange={(e) => setSchoolAddress(e.target.value)}
+                <input type="text" value={profile.address} onChange={(e) => setProfile({ ...profile, address: e.target.value })}
                   className="w-full pl-10 pr-4 py-2 rounded-lg border border-border" />
               </div>
             </div>

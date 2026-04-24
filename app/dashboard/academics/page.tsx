@@ -1,6 +1,7 @@
 'use client';
 
 import { Plus } from 'lucide-react';
+import { useExams } from '@/lib/data';
 
 const academicTerms = [
   { term: 1, name: 'Term I', startDate: 'Feb 2, 2026', endDate: 'Apr 24, 2026', status: 'Current', progress: 75 },
@@ -8,17 +9,29 @@ const academicTerms = [
   { term: 3, name: 'Term III', startDate: 'Sep 7, 2026', endDate: 'Nov 27, 2026', status: 'Upcoming', progress: 0 },
 ];
 
-const importantDates = [
-  { event: 'Mid-Term Exams', date: 'Mar 20 - Mar 27, 2026', type: 'Exam' },
-  { event: 'Parent-Teacher Meeting', date: 'Mar 28, 2026', type: 'Event' },
-  { event: 'End of Term Exams', date: 'Apr 14 - Apr 21, 2026', type: 'Exam' },
-  { event: 'Term I Ends', date: 'Apr 24, 2026', type: 'Holiday' },
-  { event: 'Holiday Begins', date: 'Apr 25, 2026', type: 'Holiday' },
-];
-
 export default function AcademicsPage() {
+  const { exams } = useExams();
+
+  const importantDates = [
+    { event: 'Mid-Term Exams', date: 'Mar 20 - Mar 27, 2026', type: 'Exam' },
+    { event: 'Parent-Teacher Meeting', date: 'Mar 28, 2026', type: 'Event' },
+    { event: 'End of Term Exams', date: 'Apr 14 - Apr 21, 2026', type: 'Exam' },
+    { event: 'Term I Ends', date: 'Apr 24, 2026', type: 'Holiday' },
+    { event: 'Holiday Begins', date: 'Apr 25, 2026', type: 'Holiday' },
+  ];
+
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Academics</h1>
+          <p className="text-foreground/60">Academic terms and important dates</p>
+        </div>
+        <button className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
+          <Plus size={18} />Add Event
+        </button>
+      </div>
+
       <div className="grid lg:grid-cols-3 gap-4">
         {academicTerms.map((term) => (
           <div key={term.term} className={`bg-background rounded-xl border-2 p-6 ${term.status === 'Current' ? 'border-primary' : 'border-border'}`}>
@@ -68,6 +81,33 @@ export default function AcademicsPage() {
               </span>
             </div>
           ))}
+        </div>
+      </div>
+
+      <div className="bg-background rounded-xl border border-border">
+        <div className="p-4 border-b border-border">
+          <h2 className="font-semibold">Upcoming Exams</h2>
+        </div>
+        <div className="p-4">
+          {exams.length > 0 ? (
+            <div className="space-y-3">
+              {exams.slice(0, 5).map(exam => (
+                <div key={exam.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                  <div>
+                    <p className="font-medium">{exam.name}</p>
+                    <p className="text-sm text-foreground/60">{exam.class} - {exam.date}</p>
+                  </div>
+                  <span className={`px-2 py-1 rounded-full text-xs ${
+                    exam.status === 'Upcoming' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'
+                  }`}>
+                    {exam.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-foreground/60 py-4">No exams scheduled. Add exams from the Exams page.</p>
+          )}
         </div>
       </div>
     </div>

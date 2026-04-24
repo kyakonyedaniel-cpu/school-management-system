@@ -1,32 +1,30 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Clock, Calendar as CalendarIcon } from 'lucide-react';
-
-const timetable = {
-  'P.7': [
-    { time: '7:30 - 8:30', mon: 'English', tue: 'Math', wed: 'Science', thu: 'Social Studies', fri: 'English' },
-    { time: '8:30 - 9:30', mon: 'Math', tue: 'Science', wed: 'English', thu: 'Math', fri: 'Science' },
-    { time: '9:30 - 10:30', mon: 'Science', tue: 'English', wed: 'Math', thu: 'Science', fri: 'Math' },
-    { time: '10:30 - 11:00', mon: 'Break', tue: 'Break', wed: 'Break', thu: 'Break', fri: 'Break' },
-    { time: '11:00 - 12:00', mon: 'Social Studies', tue: 'PE', wed: 'CRE', thu: 'Art', fri: 'Music' },
-    { time: '12:00 - 1:00', mon: 'CRE', tue: 'Social Studies', wed: 'PE', thu: 'Art', fri: 'Library' },
-  ],
-  'S.1': [
-    { time: '7:30 - 8:30', mon: 'Math', tue: 'English', wed: 'Biology', thu: 'Chemistry', fri: 'Physics' },
-    { time: '8:30 - 9:30', mon: 'English', tue: 'Physics', wed: 'Math', thu: 'English', fri: 'Chemistry' },
-    { time: '9:30 - 10:30', mon: 'Chemistry', tue: 'Biology', wed: 'Physics', thu: 'Math', fri: 'Biology' },
-    { time: '10:30 - 11:00', mon: 'Break', tue: 'Break', wed: 'Break', thu: 'Break', fri: 'Break' },
-    { time: '11:00 - 12:00', mon: 'Geography', tue: 'History', wed: 'CRE', thu: 'Computer', fri: 'Geography' },
-    { time: '12:00 - 1:00', mon: 'History', tue: 'Geography', wed: 'Computer', thu: 'CRE', fri: 'History' },
-  ],
-};
+import { Plus, Clock, Calendar as CalendarIcon, X } from 'lucide-react';
+import { useTimetable } from '@/lib/data';
 
 export default function TimetablePage() {
+  const { timetable, schedules } = useTimetable();
   const [selectedClass, setSelectedClass] = useState('P.7');
+
+  const classes = ['P.1', 'P.2', 'P.3', 'P.4', 'P.5', 'P.6', 'P.7', 'S.1', 'S.2', 'S.3', 'S.4', 'S.5', 'S.6'];
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Timetable</h1>
+          <p className="text-foreground/60">Class schedules and exam calendar</p>
+        </div>
+        <select value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)}
+          className="px-4 py-2 rounded-lg border border-border">
+          {classes.map(c => (
+            <option key={c} value={c}>{c}</option>
+          ))}
+        </select>
+      </div>
+
       <div className="bg-background rounded-xl border border-border overflow-hidden">
         <div className="p-4 border-b border-border">
           <h2 className="font-semibold">Weekly Timetable - {selectedClass}</h2>
@@ -44,8 +42,8 @@ export default function TimetablePage() {
               </tr>
             </thead>
             <tbody>
-              {timetable[selectedClass as keyof typeof timetable]?.map((row, index) => (
-                <tr key={index} className={`border-t border-border ${row.mon === 'Break' ? 'bg-yellow-50' : ''}`}>
+              {(timetable[selectedClass] || []).map((row, index) => (
+                <tr key={row.id || index} className={`border-t border-border ${row.mon === 'Break' ? 'bg-yellow-50' : ''}`}>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2 text-sm">
                       <Clock size={14} className="text-foreground/50" />
@@ -61,27 +59,26 @@ export default function TimetablePage() {
               ))}
             </tbody>
           </table>
+          {(!timetable[selectedClass] || timetable[selectedClass].length === 0) && (
+            <div className="p-8 text-center text-foreground/60">
+              No timetable available for {selectedClass}. Contact administration to add timetable.
+            </div>
+          )}
         </div>
       </div>
 
       <div className="bg-background rounded-xl border border-border p-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold">Examination Timetable - Term I 2026</h2>
-          <button className="text-sm text-primary hover:underline">View All</button>
         </div>
         <div className="grid sm:grid-cols-3 gap-4">
-          <div className="p-4 border border-border rounded-lg">
-            <p className="text-sm font-medium">Mid-Term Exams</p>
-            <p className="text-xs text-foreground/60 mt-1">Mar 20 - Mar 27, 2026</p>
-          </div>
-          <div className="p-4 border border-border rounded-lg">
-            <p className="text-sm font-medium">End of Term Exams</p>
-            <p className="text-xs text-foreground/60 mt-1">Apr 14 - Apr 21, 2026</p>
-          </div>
-          <div className="p-4 border border-border rounded-lg">
-            <p className="text-sm font-medium">UNEB Mock Exams</p>
-            <p className="text-xs text-foreground/60 mt-1">May 5 - May 12, 2026</p>
-          </div>
+          {schedules.map((schedule) => (
+            <div key={schedule.id} className="p-4 border border-border rounded-lg">
+              <p className="text-sm font-medium">{schedule.name}</p>
+              <p className="text-xs text-foreground/60 mt-1">{schedule.date}</p>
+              <p className="text-xs text-foreground/60">Duration: {schedule.duration}</p>
+            </div>
+          ))}
         </div>
       </div>
     </div>
