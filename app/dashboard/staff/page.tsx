@@ -35,7 +35,7 @@ export default function StaffPage() {
       </div>
 
       {/* Staff List */}
-      <div className="bg-white rounded-lg border">
+      <div className="bg-background rounded-lg border">
         <div className="p-4 border-b">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" size={20} />

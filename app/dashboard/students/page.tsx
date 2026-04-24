@@ -49,7 +49,7 @@ export default function StudentsPage() {
         </button>
       </div>
 
-      <div className="bg-white rounded-xl border border-border">
+      <div className="bg-background rounded-xl border border-border">
         <div className="p-4 border-b border-border flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" size={20} />

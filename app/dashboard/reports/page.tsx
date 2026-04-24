@@ -22,7 +22,7 @@ export default function ReportsPage() {
   return (
     <div className="space-y-6">
       <div className="grid sm:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl p-6 border border-border">
+        <div className="bg-background rounded-xl p-6 border border-border">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center"><FileText className="w-6 h-6 text-blue-600" /></div>
             <div>
@@ -31,7 +31,7 @@ export default function ReportsPage() {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl p-6 border border-border">
+        <div className="bg-background rounded-xl p-6 border border-border">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center"><Users className="w-6 h-6 text-green-600" /></div>
             <div>
@@ -40,7 +40,7 @@ export default function ReportsPage() {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl p-6 border border-border">
+        <div className="bg-background rounded-xl p-6 border border-border">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center"><TrendingUp className="w-6 h-6 text-yellow-600" /></div>
             <div>
@@ -49,7 +49,7 @@ export default function ReportsPage() {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl p-6 border border-border">
+        <div className="bg-background rounded-xl p-6 border border-border">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center"><Star className="w-6 h-6 text-purple-600" /></div>
             <div>
@@ -61,7 +61,7 @@ export default function ReportsPage() {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white rounded-xl border border-border">
+        <div className="lg:col-span-2 bg-background rounded-xl border border-border">
           <div className="p-4 border-b border-border flex items-center justify-between">
             <h2 className="font-semibold">Recent Reports</h2>
             <button className="text-sm text-primary hover:underline">View All</button>
@@ -85,7 +85,7 @@ export default function ReportsPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-border">
+        <div className="bg-background rounded-xl border border-border">
           <div className="p-4 border-b border-border">
             <h2 className="font-semibold">Grading System</h2>
           </div>

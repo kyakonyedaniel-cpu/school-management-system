@@ -12,25 +12,25 @@ export default function HealthPage() {
   return (
     <div className="space-y-6">
       <div className="grid sm:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl p-6 border border-border">
+        <div className="bg-background rounded-xl p-6 border border-border">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center"><HealthIcon className="w-6 h-6 text-blue-600" /></div>
             <div><h3 className="text-2xl font-bold">300</h3><p className="text-sm text-foreground/60">Total Students</p></div>
           </div>
         </div>
-        <div className="bg-white rounded-xl p-6 border border-border">
+        <div className="bg-background rounded-xl p-6 border border-border">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center"><HealthIcon className="w-6 h-6 text-yellow-600" /></div>
             <div><h3 className="text-2xl font-bold">8</h3><p className="text-sm text-foreground/60">With Conditions</p></div>
           </div>
         </div>
-        <div className="bg-white rounded-xl p-6 border border-border">
+        <div className="bg-background rounded-xl p-6 border border-border">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center"><HealthIcon className="w-6 h-6 text-red-600" /></div>
             <div><h3 className="text-2xl font-bold">15</h3><p className="text-sm text-foreground/60">With Allergies</p></div>
           </div>
         </div>
-        <div className="bg-white rounded-xl p-6 border border-border">
+        <div className="bg-background rounded-xl p-6 border border-border">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center"><CheckCircle className="w-6 h-6 text-green-600" /></div>
             <div><h3 className="text-2xl font-bold">95%</h3><p className="text-sm text-foreground/60">Immunized</p></div>
@@ -38,7 +38,7 @@ export default function HealthPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-border">
+      <div className="bg-background rounded-xl border border-border">
         <div className="p-4 border-b border-border">
           <h2 className="font-semibold">Student Health Records</h2>
         </div>

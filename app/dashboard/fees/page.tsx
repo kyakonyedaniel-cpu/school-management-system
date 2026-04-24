@@ -51,7 +51,7 @@ export default function FeesPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-lg border">
+        <div className="bg-background p-4 rounded-lg border">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
               <DollarSign className="text-blue-600" />
@@ -62,7 +62,7 @@ export default function FeesPage() {
             </div>
           </div>
         </div>
-        <div className="bg-white p-4 rounded-lg border">
+        <div className="bg-background p-4 rounded-lg border">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
               <TrendingUp className="text-green-600" />
@@ -73,7 +73,7 @@ export default function FeesPage() {
             </div>
           </div>
         </div>
-        <div className="bg-white p-4 rounded-lg border">
+        <div className="bg-background p-4 rounded-lg border">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
               <Clock className="text-yellow-600" />
@@ -84,7 +84,7 @@ export default function FeesPage() {
             </div>
           </div>
         </div>
-        <div className="bg-white p-4 rounded-lg border">
+        <div className="bg-background p-4 rounded-lg border">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
               <AlertTriangle className="text-red-600" />
@@ -99,7 +99,7 @@ export default function FeesPage() {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-white p-4 rounded-lg border">
+        <div className="bg-background p-4 rounded-lg border">
           <h3 className="font-semibold mb-4">Monthly Collection</h3>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={collectionData}>
@@ -112,7 +112,7 @@ export default function FeesPage() {
             </BarChart>
           </ResponsiveContainer>
         </div>
-        <div className="bg-white p-4 rounded-lg border">
+        <div className="bg-background p-4 rounded-lg border">
           <h3 className="font-semibold mb-4">Payment Status</h3>
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
@@ -128,7 +128,7 @@ export default function FeesPage() {
       </div>
 
       {/* Fee Structure Table */}
-      <div className="bg-white rounded-lg border">
+      <div className="bg-background rounded-lg border">
         <div className="p-4 border-b">
           <h3 className="font-semibold">Fee Structure by Class</h3>
         </div>
@@ -159,7 +159,7 @@ export default function FeesPage() {
       </div>
 
       {/* Recent Payments */}
-      <div className="bg-white rounded-lg border">
+      <div className="bg-background rounded-lg border">
         <div className="p-4 border-b">
           <h3 className="font-semibold">Recent Payments</h3>
         </div>

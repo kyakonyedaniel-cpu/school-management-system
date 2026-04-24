@@ -53,7 +53,7 @@ export default function BudgetPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-background rounded-lg shadow p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Total Budget</p>
@@ -68,7 +68,7 @@ export default function BudgetPage() {
               </p>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-background rounded-lg shadow p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Total Spent</p>
@@ -81,7 +81,7 @@ export default function BudgetPage() {
               <p className="text-sm text-gray-500 mt-2">January - June</p>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-background rounded-lg shadow p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Remaining</p>
@@ -94,7 +94,7 @@ export default function BudgetPage() {
               <p className="text-sm text-green-600 mt-2">32% remaining</p>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-background rounded-lg shadow p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Pending Requests</p>
@@ -108,7 +108,7 @@ export default function BudgetPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow mb-8">
+          <div className="bg-background rounded-lg shadow mb-8">
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900">Budget Overview</h2>
@@ -162,7 +162,7 @@ export default function BudgetPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow">
+          <div className="bg-background rounded-lg shadow">
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900">Budget Requests</h2>

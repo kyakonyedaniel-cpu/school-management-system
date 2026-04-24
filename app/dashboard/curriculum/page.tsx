@@ -39,7 +39,7 @@ export default function CurriculumPage() {
       </div>
 
       {/* Primary */}
-      <div className="bg-white rounded-lg border">
+      <div className="bg-background rounded-lg border">
         <div className="p-4 border-b">
           <h3 className="font-semibold">Primary (P.1 - P.7)</h3>
         </div>
@@ -60,7 +60,7 @@ export default function CurriculumPage() {
       </div>
 
       {/* Secondary */}
-      <div className="bg-white rounded-lg border">
+      <div className="bg-background rounded-lg border">
         <div className="p-4 border-b">
           <h3 className="font-semibold">Secondary (S.1 - S.6)</h3>
         </div>

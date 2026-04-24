@@ -22,7 +22,7 @@ export default function ProfilePage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg border p-6">
+        <div className="bg-background rounded-lg border p-6">
           <h3 className="font-semibold mb-4">Basic Information</h3>
           <div className="space-y-4">
             <div>
@@ -60,7 +60,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border p-6">
+        <div className="bg-background rounded-lg border p-6">
           <h3 className="font-semibold mb-4">System Information</h3>
           <div className="space-y-3">
             <div className="flex justify-between py-2 border-b">

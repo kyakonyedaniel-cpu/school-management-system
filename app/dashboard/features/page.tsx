@@ -106,7 +106,7 @@ export default function FeaturesPage() {
     <div className="space-y-6">
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {africanFeatures.map((feature) => (
-          <div key={feature.id} className="bg-white rounded-xl border border-border p-6 hover:shadow-lg transition-shadow">
+          <div key={feature.id} className="bg-background rounded-xl border border-border p-6 hover:shadow-lg transition-shadow">
             <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${feature.color}`}>
               <feature.icon className="w-6 h-6" />
             </div>
@@ -122,7 +122,7 @@ export default function FeaturesPage() {
       <div className="bg-gradient-to-r from-primary to-primary/80 rounded-xl p-8 text-white">
         <h2 className="text-2xl font-bold mb-4">Need Something Specific?</h2>
         <p className="mb-6 opacity-90">We can customize features to match your school&apos;s unique requirements. Contact us to discuss your needs.</p>
-        <button className="px-6 py-3 bg-white text-primary font-semibold rounded-lg hover:bg-white/90 transition-colors">
+        <button className="px-6 py-3 bg-background text-primary font-semibold rounded-lg hover:bg-background/90 transition-colors">
           Contact Support
         </button>
       </div>

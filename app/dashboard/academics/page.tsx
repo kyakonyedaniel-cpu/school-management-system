@@ -21,7 +21,7 @@ export default function AcademicsPage() {
     <div className="space-y-6">
       <div className="grid lg:grid-cols-3 gap-4">
         {academicTerms.map((term) => (
-          <div key={term.term} className={`bg-white rounded-xl border-2 p-6 ${term.status === 'Current' ? 'border-primary' : 'border-border'}`}>
+          <div key={term.term} className={`bg-background rounded-xl border-2 p-6 ${term.status === 'Current' ? 'border-primary' : 'border-border'}`}>
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-lg font-bold">{term.name}</h3>
@@ -49,7 +49,7 @@ export default function AcademicsPage() {
         ))}
       </div>
 
-      <div className="bg-white rounded-xl border border-border">
+      <div className="bg-background rounded-xl border border-border">
         <div className="p-4 border-b border-border">
           <h2 className="font-semibold">Important Academic Dates - Term I</h2>
         </div>

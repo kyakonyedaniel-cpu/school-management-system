@@ -144,4 +144,25 @@ html {
   body {
     @apply bg-background text-foreground;
   }
+  .bg-background {
+    background-color: var(--background) !important;
+  }
+  .text-foreground {
+    color: var(--foreground);
+  }
+  .border-border {
+    border-color: var(--border);
+  }
+  .bg-muted {
+    background-color: var(--muted);
+  }
+  .text-foreground\/60 {
+    color: var(--muted-foreground);
+  }
+  .text-foreground\/50 {
+    color: var(--muted-foreground);
+  }
+  .text-foreground\/40 {
+    color: var(--muted-foreground);
+  }
 }

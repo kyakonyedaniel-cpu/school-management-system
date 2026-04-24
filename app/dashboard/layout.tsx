@@ -145,7 +145,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        <header className="bg-white border-b border-border px-6 py-4 flex items-center justify-between">
+        <header className="bg-background border-b border-border px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button onClick={() => setSidebarOpen(true)} className="lg:hidden"><Menu size={24} /></button>
             <div className="relative hidden sm:block">
@@ -176,7 +176,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </button>
 
               {profileOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-border py-2 z-50">
+                <div className="absolute right-0 mt-2 w-48 bg-background rounded-lg shadow-lg border border-border py-2 z-50">
                   <div className="px-4 py-2 border-b border-border">
                     <p className="font-medium">{schoolName}</p>
                     <p className="text-sm text-foreground/60">Administrator</p>

@@ -19,25 +19,25 @@ export default function SportsPage() {
   return (
     <div className="space-y-6">
       <div className="grid sm:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl p-6 border border-border">
+        <div className="bg-background rounded-xl p-6 border border-border">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center"><Trophy className="w-6 h-6 text-blue-600" /></div>
             <div><h3 className="text-2xl font-bold">4</h3><p className="text-sm text-foreground/60">Active Teams</p></div>
           </div>
         </div>
-        <div className="bg-white rounded-xl p-6 border border-border">
+        <div className="bg-background rounded-xl p-6 border border-border">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center"><Users className="w-6 h-6 text-green-600" /></div>
             <div><h3 className="text-2xl font-bold">55</h3><p className="text-sm text-foreground/60">Total Athletes</p></div>
           </div>
         </div>
-        <div className="bg-white rounded-xl p-6 border border-border">
+        <div className="bg-background rounded-xl p-6 border border-border">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center"><Trophy className="w-6 h-6 text-yellow-600" /></div>
             <div><h3 className="text-2xl font-bold">18</h3><p className="text-sm text-foreground/60">Wins This Season</p></div>
           </div>
         </div>
-        <div className="bg-white rounded-xl p-6 border border-border">
+        <div className="bg-background rounded-xl p-6 border border-border">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center"><Calendar className="w-6 h-6 text-primary" /></div>
             <div><h3 className="text-2xl font-bold">3</h3><p className="text-sm text-foreground/60">Upcoming Events</p></div>
@@ -46,7 +46,7 @@ export default function SportsPage() {
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-border">
+        <div className="bg-background rounded-xl border border-border">
           <div className="p-4 border-b border-border"><h2 className="font-semibold">School Teams</h2></div>
           <div className="divide-y divide-border">
             {teams.map((team) => (
@@ -63,7 +63,7 @@ export default function SportsPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-border">
+        <div className="bg-background rounded-xl border border-border">
           <div className="p-4 border-b border-border"><h2 className="font-semibold">Upcoming Competitions</h2></div>
           <div className="divide-y divide-border">
             {competitions.map((comp) => (

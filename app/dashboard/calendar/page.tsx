@@ -32,7 +32,7 @@ export default function CalendarPage() {
   return (
     <div className="space-y-6">
       <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white rounded-xl border border-border">
+        <div className="lg:col-span-2 bg-background rounded-xl border border-border">
           <div className="p-4 border-b border-border flex items-center justify-between">
             <h2 className="text-lg font-semibold">{format(currentDate, 'MMMM yyyy')}</h2>
             <div className="flex items-center gap-2">
@@ -61,7 +61,7 @@ export default function CalendarPage() {
         </div>
 
         <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-border">
+          <div className="bg-background rounded-xl border border-border">
             <div className="p-4 border-b border-border"><h3 className="font-semibold">Upcoming Events</h3></div>
             <div className="p-4 space-y-3">
               {mockEvents.map(event => (
@@ -76,7 +76,7 @@ export default function CalendarPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-border">
+          <div className="bg-background rounded-xl border border-border">
             <div className="p-4 border-b border-border"><h3 className="font-semibold">Quick Stats</h3></div>
             <div className="p-4 space-y-4">
               <div className="flex items-center justify-between">

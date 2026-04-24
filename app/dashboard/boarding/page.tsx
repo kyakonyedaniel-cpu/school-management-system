@@ -21,7 +21,7 @@ export default function BoardingPage() {
   return (
     <div className="space-y-6">
       <div className="grid sm:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl p-6 border border-border">
+        <div className="bg-background rounded-xl p-6 border border-border">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center"><Users className="w-6 h-6 text-orange-600" /></div>
             <div>
@@ -30,7 +30,7 @@ export default function BoardingPage() {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl p-6 border border-border">
+        <div className="bg-background rounded-xl p-6 border border-border">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center"><Bed className="w-6 h-6 text-blue-600" /></div>
             <div>
@@ -39,7 +39,7 @@ export default function BoardingPage() {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl p-6 border border-border">
+        <div className="bg-background rounded-xl p-6 border border-border">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center"><Utensils className="w-6 h-6 text-green-600" /></div>
             <div>
@@ -48,7 +48,7 @@ export default function BoardingPage() {
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl p-6 border border-border">
+        <div className="bg-background rounded-xl p-6 border border-border">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center"><Home className="w-6 h-6 text-red-600" /></div>
             <div>
@@ -60,7 +60,7 @@ export default function BoardingPage() {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white rounded-xl border border-border">
+        <div className="lg:col-span-2 bg-background rounded-xl border border-border">
           <div className="p-4 border-b border-border flex items-center justify-between">
             <h2 className="font-semibold">Boarding Students</h2>
             <div className="flex items-center gap-2">
@@ -99,7 +99,7 @@ export default function BoardingPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-border">
+        <div className="bg-background rounded-xl border border-border">
           <div className="p-4 border-b border-border">
             <h2 className="font-semibold">Dormitory Occupancy</h2>
           </div>

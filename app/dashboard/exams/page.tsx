@@ -30,7 +30,7 @@ export default function ExamsPage() {
       </div>
 
       {/* Upcoming Exams */}
-      <div className="bg-white rounded-lg border">
+      <div className="bg-background rounded-lg border">
         <div className="p-4 border-b">
           <h3 className="font-semibold">Upcoming Exams</h3>
         </div>
@@ -68,7 +68,7 @@ export default function ExamsPage() {
       </div>
 
       {/* Past Exams */}
-      <div className="bg-white rounded-lg border">
+      <div className="bg-background rounded-lg border">
         <div className="p-4 border-b">
           <h3 className="font-semibold">Past Exam Results</h3>
         </div>

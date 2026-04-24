@@ -45,7 +45,7 @@ export default function InventoryPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-background rounded-lg shadow p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Total Items</p>
@@ -58,7 +58,7 @@ export default function InventoryPage() {
               <p className="text-sm text-gray-500 mt-2">Across {categories.length} categories</p>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-background rounded-lg shadow p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Low Stock Alerts</p>
@@ -71,7 +71,7 @@ export default function InventoryPage() {
               <p className="text-sm text-red-600 mt-2">Items below minimum</p>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-background rounded-lg shadow p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Categories</p>
@@ -84,7 +84,7 @@ export default function InventoryPage() {
               <p className="text-sm text-gray-500 mt-2">Item types tracked</p>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-background rounded-lg shadow p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Good Condition</p>
@@ -114,7 +114,7 @@ export default function InventoryPage() {
             </div>
           )}
 
-          <div className="bg-white rounded-lg shadow">
+          <div className="bg-background rounded-lg shadow">
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <h2 className="text-lg font-semibold text-gray-900">Inventory Items</h2>

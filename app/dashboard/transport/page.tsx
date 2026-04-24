@@ -22,7 +22,7 @@ export default function TransportPage() {
         </button>
       </div>
 
-      <div className="bg-white rounded-lg border">
+      <div className="bg-background rounded-lg border">
         <table className="w-full">
           <thead className="bg-muted/30">
             <tr>

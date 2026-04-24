@@ -37,22 +37,22 @@ export default function LibraryPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-4 rounded-lg border">
+        <div className="bg-background p-4 rounded-lg border">
           <p className="text-sm text-foreground/60">Total Books</p>
           <p className="text-2xl font-bold">{books.reduce((sum, b) => sum + b.copies, 0)}</p>
         </div>
-        <div className="bg-white p-4 rounded-lg border">
+        <div className="bg-background p-4 rounded-lg border">
           <p className="text-sm text-foreground/60">Available</p>
           <p className="text-2xl font-bold">{books.reduce((sum, b) => sum + b.available, 0)}</p>
         </div>
-        <div className="bg-white p-4 rounded-lg border">
+        <div className="bg-background p-4 rounded-lg border">
           <p className="text-sm text-foreground/60">On Loan</p>
           <p className="text-2xl font-bold">{recentLoans.length}</p>
         </div>
       </div>
 
       {/* Books */}
-      <div className="bg-white rounded-lg border">
+      <div className="bg-background rounded-lg border">
         <div className="p-4 border-b">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" size={20} />
@@ -91,7 +91,7 @@ export default function LibraryPage() {
       </div>
 
       {/* Recent Loans */}
-      <div className="bg-white rounded-lg border">
+      <div className="bg-background rounded-lg border">
         <div className="p-4 border-b">
           <h3 className="font-semibold">Recent Loans</h3>
         </div>

@@ -14,7 +14,7 @@ export default function HousesPage() {
     <div className="space-y-6">
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {houses.sort((a, b) => b.points - a.points).map((house, index) => (
-          <div key={house.id} className="bg-white rounded-xl border-2 overflow-hidden">
+          <div key={house.id} className="bg-background rounded-xl border-2 overflow-hidden">
             <div className={`${house.color} p-4 text-white`}>
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-bold">{house.name}</h3>
@@ -41,7 +41,7 @@ export default function HousesPage() {
         ))}
       </div>
 
-      <div className="bg-white rounded-xl border border-border">
+      <div className="bg-background rounded-xl border border-border">
         <div className="p-4 border-b border-border">
           <h2 className="font-semibold">Inter-House Competitions</h2>
         </div>

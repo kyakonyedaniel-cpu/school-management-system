@@ -13,25 +13,25 @@ export default function DisciplinePage() {
   return (
     <div className="space-y-6">
       <div className="grid sm:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl p-6 border border-border">
+        <div className="bg-background rounded-xl p-6 border border-border">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center"><AlertTriangle className="w-6 h-6 text-yellow-600" /></div>
             <div><h3 className="text-2xl font-bold">12</h3><p className="text-sm text-foreground/60">Pending Cases</p></div>
           </div>
         </div>
-        <div className="bg-white rounded-xl p-6 border border-border">
+        <div className="bg-background rounded-xl p-6 border border-border">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center"><AlertTriangle className="w-6 h-6 text-red-600" /></div>
             <div><h3 className="text-2xl font-bold">3</h3><p className="text-sm text-foreground/60">Under Review</p></div>
           </div>
         </div>
-        <div className="bg-white rounded-xl p-6 border border-border">
+        <div className="bg-background rounded-xl p-6 border border-border">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center"><FileText className="w-6 h-6 text-blue-600" /></div>
             <div><h3 className="text-2xl font-bold">45</h3><p className="text-sm text-foreground/60">Total Incidents</p></div>
           </div>
         </div>
-        <div className="bg-white rounded-xl p-6 border border-border">
+        <div className="bg-background rounded-xl p-6 border border-border">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center"><CheckCircle className="w-6 h-6 text-green-600" /></div>
             <div><h3 className="text-2xl font-bold">38</h3><p className="text-sm text-foreground/60">Resolved</p></div>
@@ -39,7 +39,7 @@ export default function DisciplinePage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-border">
+      <div className="bg-background rounded-xl border border-border">
         <div className="p-4 border-b border-border">
           <h2 className="font-semibold">Recent Discipline Cases</h2>
         </div>

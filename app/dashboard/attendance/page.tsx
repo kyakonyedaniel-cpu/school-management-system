@@ -52,7 +52,7 @@ export default function AttendancePage() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-lg border">
+        <div className="bg-background p-4 rounded-lg border">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
               <CheckCircle className="text-green-600" />
@@ -63,7 +63,7 @@ export default function AttendancePage() {
             </div>
           </div>
         </div>
-        <div className="bg-white p-4 rounded-lg border">
+        <div className="bg-background p-4 rounded-lg border">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
               <XCircle className="text-red-600" />
@@ -74,7 +74,7 @@ export default function AttendancePage() {
             </div>
           </div>
         </div>
-        <div className="bg-white p-4 rounded-lg border">
+        <div className="bg-background p-4 rounded-lg border">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
               <Clock className="text-blue-600" />
@@ -88,7 +88,7 @@ export default function AttendancePage() {
       </div>
 
       {/* Attendance List */}
-      <div className="bg-white rounded-lg border">
+      <div className="bg-background rounded-lg border">
         <div className="p-4 border-b flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" size={20} />

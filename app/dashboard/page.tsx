@@ -32,7 +32,7 @@ export default function DashboardPage() {
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat, index) => (
-          <div key={index} className="bg-white p-4 rounded-lg border">
+          <div key={index} className="bg-background p-4 rounded-lg border">
             <div className="flex items-center justify-between mb-2">
               <stat.icon className="w-5 h-5 text-foreground/60" />
               <span className={`text-xs ${stat.value.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
@@ -47,7 +47,7 @@ export default function DashboardPage() {
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-white p-4 rounded-lg border">
+        <div className="bg-background p-4 rounded-lg border">
           <h3 className="font-semibold mb-4">Revenue Overview</h3>
           <div className="h-48 flex items-end gap-2">
             {[65, 80, 72, 90].map((height, i) => (
@@ -64,7 +64,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-lg border">
+        <div className="bg-background p-4 rounded-lg border">
           <h3 className="font-semibold mb-4">Students by Class</h3>
           <div className="space-y-3">
             {['P.1-P.3', 'P.4-P.7', 'S.1-S.4', 'S.5-S.6'].map((level, i) => (
@@ -83,7 +83,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Students */}
-      <div className="bg-white rounded-lg border">
+      <div className="bg-background rounded-lg border">
         <div className="p-4 border-b">
           <h3 className="font-semibold">Recent Students</h3>
         </div>

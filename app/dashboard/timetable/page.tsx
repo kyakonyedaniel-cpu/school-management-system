@@ -27,7 +27,7 @@ export default function TimetablePage() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-xl border border-border overflow-hidden">
+      <div className="bg-background rounded-xl border border-border overflow-hidden">
         <div className="p-4 border-b border-border">
           <h2 className="font-semibold">Weekly Timetable - {selectedClass}</h2>
         </div>
@@ -64,7 +64,7 @@ export default function TimetablePage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-border p-4">
+      <div className="bg-background rounded-xl border border-border p-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold">Examination Timetable - Term I 2026</h2>
           <button className="text-sm text-primary hover:underline">View All</button>
