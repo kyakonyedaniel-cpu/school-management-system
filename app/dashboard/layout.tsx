@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useTheme } from "next-themes";
 import { 
-  School, Menu, X, Bell, Search, Settings, LogOut, ChevronDown,
+  School, Menu, X, Bell, Search, Settings, LogOut, ChevronDown, Moon, Sun,
   FileText, Users, TrendingUp, CheckCircle, Calendar as CalendarIcon, BookOpen, 
   Calendar, Shield, Heart, MapPin, Trophy, DollarSign, Package, CalendarDays, Award, Bed 
 } from "lucide-react";
@@ -57,6 +58,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const pathname = usePathname();
+  const { resolvedTheme, setTheme } = useTheme();
   const schoolName = "Your School";
 
   return (
@@ -154,6 +156,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
 
           <div className="flex items-center gap-4">
+            <button
+              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+              className="p-2 rounded-lg hover:bg-muted"
+            >
+              {resolvedTheme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
             <button className="relative p-2 rounded-lg hover:bg-muted">
               <Bell size={20} /><span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
             </button>
