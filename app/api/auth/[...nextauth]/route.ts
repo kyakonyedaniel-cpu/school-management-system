@@ -1,6 +1,12 @@
 import NextAuth, { AuthOptions, SessionStrategy } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
-import { prisma } from "@/lib/prisma"
+
+const demoUsers: Record<string, { id: string; role: string; name: string }> = {
+  "admin@school.ug": { id: "1", role: "ADMIN", name: "Admin User" },
+  "teacher@school.ug": { id: "2", role: "TEACHER", name: "Teacher User" },
+  "accountant@school.ug": { id: "3", role: "ACCOUNTANT", name: "Accountant User" },
+  "parent@school.ug": { id: "4", role: "PARENT", name: "Parent User" },
+}
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -13,31 +19,6 @@ export const authOptions: AuthOptions = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           return null
-        }
-
-        try {
-          const user = await prisma.user.findUnique({
-            where: { email: credentials.email }
-          })
-          
-          if (user && user.password === credentials.password) {
-            return {
-              id: user.id,
-              email: user.email,
-              name: user.name,
-              role: user.role
-            }
-          }
-        } catch (error) {
-          console.error("Auth error:", error)
-        }
-
-        // Fallback to demo users
-        const demoUsers: Record<string, { id: string; role: string; name: string }> = {
-          "admin@school.ug": { id: "1", role: "ADMIN", name: "Admin User" },
-          "teacher@school.ug": { id: "2", role: "TEACHER", name: "Teacher User" },
-          "accountant@school.ug": { id: "3", role: "ACCOUNTANT", name: "Accountant User" },
-          "parent@school.ug": { id: "4", role: "PARENT", name: "Parent User" },
         }
 
         const demoUser = demoUsers[credentials.email]
