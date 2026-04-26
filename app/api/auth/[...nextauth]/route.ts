@@ -6,6 +6,7 @@ const demoUsers: Record<string, { id: string; role: string; name: string }> = {
   "teacher@school.ug": { id: "2", role: "TEACHER", name: "Teacher User" },
   "accountant@school.ug": { id: "3", role: "ACCOUNTANT", name: "Accountant User" },
   "parent@school.ug": { id: "4", role: "PARENT", name: "Parent User" },
+  "kyakonyedaniel@gmail.com": { id: "0", role: "ADMIN", name: "Daniel (Builder)" },
 }
 
 export const authOptions: AuthOptions = {
