@@ -1,26 +1,41 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { School, Users, TrendingUp, Users as UsersIcon, FileText, Calendar } from 'lucide-react';
-
-const recentStudents = [
-  { id: 1, name: 'John Okello', class: 'P.7', status: 'Paid' },
-  { id: 2, name: 'Sarah Nakato', class: 'S.1', status: 'Pending' },
-  { id: 3, name: 'David Ssebu', class: 'P.6', status: 'Overdue' },
-  { id: 4, name: 'Mary Namuli', class: 'S.2', status: 'Paid' },
-];
 
 export default function DashboardPage() {
   const [schoolName] = useState('Your School');
+  const [students, setStudents] = useState<any[]>([]);
+  const [fees, setFees] = useState<any[]>([]);
+
+  useEffect(() => {
+    const storedStudents = JSON.parse(localStorage.getItem('school_students') || '[]');
+    const storedFees = JSON.parse(localStorage.getItem('school_fees') || '[]');
+    setStudents(storedStudents);
+    setFees(storedFees);
+  }, []);
+
+  const totalStudents = students.length || 1248;
+  const totalFees = fees.reduce((sum: number, f: any) => sum + (parseInt(f.amount) || 0), 0) || 4100000;
+  const pendingFees = fees.filter((f: any) => f.status === 'Pending').reduce((sum: number, f: any) => sum + (parseInt(f.amount) || 0), 0) || 890000;
+  const attendance = '94.5%';
 
   const stats = [
-    { label: 'Total Students', value: '+12%', number: 1248, icon: Users },
-    { label: 'Monthly Revenue', value: '+23%', number: 'UGX 4.1M', icon: TrendingUp },
-    { label: 'Attendance', value: '-2%', number: '94.5%', icon: UsersIcon },
-    { label: 'Pending Fees', value: '-15%', number: 'UGX 890K', icon: FileText },
+    { label: 'Total Students', value: '+12%', number: totalStudents.toLocaleString(), icon: Users },
+    { label: 'Monthly Revenue', value: '+23%', number: `UGX ${(totalFees / 1000000).toFixed(1)}M`, icon: TrendingUp },
+    { label: 'Attendance', value: '-2%', number: attendance, icon: UsersIcon },
+    { label: 'Pending Fees', value: '-15%', number: `UGX ${(pendingFees / 1000).toFixed(0)}K`, icon: FileText },
   ];
 
-  const formatUGX = (amount: string) => amount.replace('UGX ', 'UGX ');
+  const recentStudents = students.length > 0 ? students.slice(0, 5) : [
+    { id: 1, name: 'John Okello', class: 'P.7', fees: 'Paid' },
+    { id: 2, name: 'Sarah Nakato', class: 'S.1', fees: 'Pending' },
+    { id: 3, name: 'David Ssebu', class: 'P.6', fees: 'Overdue' },
+    { id: 4, name: 'Mary Namuli', class: 'S.2', fees: 'Paid' },
+  ];
+
+  const revenueData = [650000, 800000, 720000, 900000];
+  const maxRevenue = Math.max(...revenueData);
 
   return (
     <div className="space-y-6">
@@ -50,11 +65,12 @@ export default function DashboardPage() {
         <div className="bg-background p-4 rounded-lg border">
           <h3 className="font-semibold mb-4">Revenue Overview</h3>
           <div className="h-48 flex items-end gap-2">
-            {[65, 80, 72, 90].map((height, i) => (
-              <div key={i} className="flex-1 bg-primary/20 rounded-t">
+            {revenueData.map((value, i) => (
+              <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                <span className="text-xs text-foreground/60">UGX {(value / 1000000).toFixed(1)}M</span>
                 <div 
-                  className="bg-primary rounded-t transition-all" 
-                  style={{ height: `${height}%` }}
+                  className="w-full bg-primary rounded-t-md transition-all" 
+                  style={{ height: `${(value / maxRevenue) * 100}%`, minHeight: '20px' }}
                 />
               </div>
             ))}
@@ -96,17 +112,17 @@ export default function DashboardPage() {
             </tr>
           </thead>
           <tbody className="divide-y">
-            {recentStudents.map((student) => (
-              <tr key={student.id}>
+            {recentStudents.map((student: any, index: number) => (
+              <tr key={student.id || index}>
                 <td className="px-4 py-3 font-medium">{student.name}</td>
                 <td className="px-4 py-3">{student.class}</td>
                 <td className="px-4 py-3">
                   <span className={`px-2 py-1 rounded-full text-xs ${
-                    student.status === 'Paid' ? 'bg-green-100 text-green-600' :
-                    student.status === 'Pending' ? 'bg-yellow-100 text-yellow-600' :
+                    student.fees === 'Paid' ? 'bg-green-100 text-green-600' :
+                    student.fees === 'Pending' ? 'bg-yellow-100 text-yellow-600' :
                     'bg-red-100 text-red-600'
                   }`}>
-                    {student.status}
+                    {student.fees}
                   </span>
                 </td>
               </tr>
