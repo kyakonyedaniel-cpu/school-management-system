@@ -21,9 +21,10 @@ export function Navbar() {
 
   const navLinks = [
     { href: '#features', label: 'Features' },
+    { href: '#how-it-works', label: 'How It Works' },
     { href: '#pricing', label: 'Pricing' },
     { href: '#testimonials', label: 'Testimonials' },
-    { href: '#contact', label: 'Contact' },
+    { href: '/contact', label: 'Contact' },
   ];
 
   return (
@@ -72,7 +73,7 @@ export function Navbar() {
               Start Free Trial
             </Link>
             <Link href="/sign-in" className="px-4 py-2 bg-primary text-white font-medium text-sm rounded-lg hover:bg-primary/90 transition-colors">
-              Book Demo
+              Sign In
             </Link>
           </div>
 
@@ -107,8 +108,8 @@ export function Navbar() {
               <Link href="/sign-up" className="block w-full px-4 py-2 text-primary font-medium text-sm hover:bg-primary/10 rounded-lg transition-colors text-center">
                 Start Free Trial
               </Link>
-              <Link href="/sign-in" className="block w-full px-4 py-2 bg-primary text-white font-medium text-sm rounded-lg hover:bg-primary/90 transition-colors text-center">
-                Book Demo
+<Link href="/sign-in" className="block w-full px-4 py-2 bg-primary text-white font-medium text-sm rounded-lg hover:bg-primary/90 transition-colors text-center">
+                Sign In
               </Link>
             </div>
           </motion.div>

@@ -1,6 +1,7 @@
 import { Navbar } from '@/components/sections/navbar';
 import { HeroSection } from '@/components/sections/hero';
 import { FeaturesSection } from '@/components/sections/features';
+import { HowItWorksSection } from '@/components/sections/how-it-works/section';
 import { AfricanAdvantageSection } from '@/components/sections/african-advantage';
 import { TrustSection } from '@/components/sections/trust';
 import { TestimonialsCarousel } from '@/components/sections/testimonials';
@@ -35,6 +36,7 @@ export default function Home() {
       <Navbar />
       <HeroSection />
       <FeaturesSection />
+      <HowItWorksSection />
       <AfricanAdvantageSection />
       <TrustSection />
       <TestimonialsCarousel />
