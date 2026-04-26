@@ -4,21 +4,20 @@ import { useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { Users, DollarSign, Calendar, BookOpen, FileText, AlertTriangle, GraduationCap } from 'lucide-react';
 import Link from 'next/link';
+import { use } from 'react';
 
 export default function ParentDashboard() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession() as any;
   const [studentData, setStudentData] = useState<any>(null);
 
   useEffect(() => {
-    // Load student's data from localStorage (in real app, this comes from database)
     const students = JSON.parse(localStorage.getItem('school_students') || '[]');
-    // For demo, show first student
     if (students.length > 0) {
       setStudentData(students[0]);
     }
   }, []);
 
-  if (!session) return null;
+  if (status === 'loading' || !session) return null;
 
   return (
     <div className="space-y-6">
