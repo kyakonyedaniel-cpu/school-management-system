@@ -3,9 +3,10 @@
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useTheme } from 'next-themes';
 import {
   Home, Users, GraduationCap, UserCheck, Calendar, BookOpen, DollarSign,
-  Library, FileText, ClipboardList, Bus, Settings, LogOut, Menu, X,
+  Library, FileText, ClipboardList, Bus, Settings, LogOut, Menu, X, Moon, Sun,
   BarChart3, Trophy, Heart, Clock, AlertTriangle, UsersRound, Building,
   Bed, Stethoscope, CalendarDays, Calculator, FileBarChart, User, Award
 } from 'lucide-react';
@@ -23,6 +24,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { resolvedTheme, setTheme } = useTheme();
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -117,6 +119,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </span>
             </div>
             <button
+              onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+              className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg hover:bg-muted mb-2"
+            >
+              {resolvedTheme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+              {resolvedTheme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            </button>
+            <button
               onClick={() => signOut({ callbackUrl: '/login' })}
               className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50"
             >
@@ -134,7 +143,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Mobile menu dropdown */}
       {mobileMenuOpen && (
-        <div className="lg:hidden fixed top-16 right-4 z-40 bg-background rounded-lg shadow-lg border p-4 min-w-48">
+        <div className="lg:hidden fixed top-16 right-4 z-40 bg-background rounded-lg shadow-lg border p-4 min-w-48 space-y-2">
+          <button
+            onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+            className="flex items-center gap-3 w-full px-3 py-2 rounded-lg hover:bg-muted"
+          >
+            {resolvedTheme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            {resolvedTheme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+          </button>
           <button
             onClick={() => signOut({ callbackUrl: '/login' })}
             className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-red-600 hover:bg-red-50"
