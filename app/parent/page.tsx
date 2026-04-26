@@ -1,29 +1,44 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
-import { useState, useEffect } from 'react';
+import { SessionProvider } from 'next-auth/react';
+import { useState, useEffect, ReactNode } from 'react';
 import { Users, DollarSign, Calendar, BookOpen, FileText, AlertTriangle, GraduationCap } from 'lucide-react';
 import Link from 'next/link';
-import { use } from 'react';
 
-export default function ParentDashboard() {
-  const { data: session, status } = useSession() as any;
+function ParentContent() {
+  const [session, setSession] = useState<any>(null);
+  const [status, setStatus] = useState<string>('loading');
   const [studentData, setStudentData] = useState<any>(null);
 
   useEffect(() => {
+    import('next-auth/react').then(({ useSession }) => {
+      const { data } = useSession() as any;
+      setSession(data);
+      setStatus('authenticated');
+    });
+    
     const students = JSON.parse(localStorage.getItem('school_students') || '[]');
     if (students.length > 0) {
       setStudentData(students[0]);
     }
   }, []);
 
-  if (status === 'loading' || !session) return null;
+  if (status === 'loading' || !session) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-foreground/60">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Welcome, {session.user?.name}</h1>
-        <p className="text-foreground/60">Parent Dashboard - View your child&apos;s progress</p>
+        <h1 className="text-2xl font-bold">Welcome, Parent</h1>
+        <p className="text-foreground/60">View your child&apos;s progress</p>
       </div>
 
       {studentData && (
@@ -151,4 +166,8 @@ export default function ParentDashboard() {
       </div>
     </div>
   );
+}
+
+export default function ParentDashboard() {
+  return <ParentContent />;
 }
