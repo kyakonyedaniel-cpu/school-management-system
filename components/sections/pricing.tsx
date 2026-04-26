@@ -10,14 +10,17 @@ const plans = [
     name: 'Starter',
     price: '250,000',
     period: '/month',
-    description: 'Perfect for small schools',
+    description: 'Perfect for small to mid-sized schools',
     features: [
-      'Up to 200 students',
-      'Basic fee management',
+      'Up to 500 students',
+      'Student management',
+      'Basic fee collection',
       'Attendance tracking',
       'Email support',
       'Termly reports',
       'Mobile app access',
+      'WhatsApp integration',
+      'Custom branding',
     ],
     cta: 'Get Started',
     highlighted: false,
@@ -26,37 +29,23 @@ const plans = [
     name: 'Professional',
     price: '450,000',
     period: '/month',
-    description: 'Most popular choice',
+    description: 'Complete solution for growing and large institutions',
     features: [
-      'Up to 1,000 students',
-      'Advanced fee management',
-      'Mobile money payments',
+      'Unlimited students',
+      'Student management',
+      'Advanced fee collection',
+      'Attendance tracking',
       'WhatsApp integration',
       'Real-time analytics',
       'Weekly reports',
       'Priority support',
       'Custom branding',
-    ],
-    cta: 'Start Free Trial',
-    highlighted: true,
-  },
-  {
-    name: 'Enterprise',
-    price: 'Custom',
-    period: 'pricing',
-    description: 'For large institutions',
-    features: [
-      'Unlimited students',
-      'Multi-campus support',
-      'Custom integrations',
-      'Dedicated account manager',
-      'Custom reports',
+      'Mobile money payments',
       'API access',
-      '24/7 phone support',
-      'On-premise option',
+      'Multi-campus support',
     ],
-    cta: 'Contact Sales',
-    highlighted: false,
+    cta: 'Scale Your School',
+    highlighted: true,
   },
 ];
 
@@ -113,7 +102,7 @@ export function PricingSection() {
           initial="hidden"
           animate={inView ? 'visible' : 'hidden'}
           variants={containerVariants}
-          className="grid md:grid-cols-3 gap-8"
+          className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto"
         >
           {plans.map((plan, index) => (
             <motion.div
@@ -121,7 +110,7 @@ export function PricingSection() {
               variants={itemVariants}
               className={`relative rounded-2xl transition-all duration-300 overflow-hidden group ${
                 plan.highlighted
-                  ? 'bg-gradient-to-br from-primary via-primary to-primary/90 text-white scale-105 md:scale-110 shadow-2xl hover:shadow-3xl'
+                  ? 'bg-gradient-to-br from-primary via-primary to-primary/90 text-white shadow-2xl hover:shadow-3xl'
                   : 'bg-background border border-border hover:border-primary/50 hover:shadow-xl'
               }`}
             >
@@ -131,7 +120,7 @@ export function PricingSection() {
               )}
 
               {plan.highlighted && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-background text-primary px-4 py-1 rounded-full text-xs font-bold whitespace-nowrap shadow-lg">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-white text-primary px-4 py-1 rounded-full text-xs font-bold whitespace-nowrap shadow-lg">
                   MOST POPULAR
                 </div>
               )}
@@ -182,7 +171,7 @@ export function PricingSection() {
 
                 {/* CTA Button */}
                 <Link
-                  href={plan.highlighted ? '/sign-up' : '#'}
+                  href={plan.highlighted ? '/sign-up' : '/sign-up'}
                   className={`block w-full text-center py-3 px-4 rounded-lg font-semibold transition-all duration-300 mb-8 transform hover:scale-105 active:scale-95 ${
                     plan.highlighted
                       ? 'bg-white text-primary hover:bg-white/95 shadow-lg'
@@ -242,9 +231,9 @@ export function PricingSection() {
         >
           <p className="text-foreground/70 mb-4">
             Need help choosing? Check our{' '}
-            <button className="text-primary font-semibold hover:underline">
+            <Link href="/subscription" className="text-primary font-semibold hover:underline">
               detailed comparison
-            </button>
+            </Link>
           </p>
         </motion.div>
       </div>
