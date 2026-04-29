@@ -779,7 +779,23 @@ export function useTransport() {
     return newRoute;
   }, []);
 
-  return { routes, loading, addRoute };
+  const updateRoute = useCallback((id: string, updates: Partial<TransportRoute>) => {
+    setRoutes(prev => {
+      const updated = prev.map(r => r.id === id ? { ...r, ...updates } : r);
+      saveToStorage('school_transport', updated);
+      return updated;
+    });
+  }, []);
+
+  const deleteRoute = useCallback((id: string) => {
+    setRoutes(prev => {
+      const updated = prev.filter(r => r.id !== id);
+      saveToStorage('school_transport', updated);
+      return updated;
+    });
+  }, []);
+
+  return { routes, loading, addRoute, updateRoute, deleteRoute };
 }
 
 // Hook for Budget Requests

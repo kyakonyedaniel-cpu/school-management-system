@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from 'react';
-import { Plus, MapPin, Bus, Users, X } from 'lucide-react';
+import { Plus, MapPin, Bus, Users, X, Edit, Trash2 } from 'lucide-react';
 import { useTransport, formatUGX } from '@/lib/data';
 
 export default function TransportPage() {
-  const { routes, addRoute } = useTransport();
+  const { routes, addRoute, updateRoute, deleteRoute } = useTransport();
   const [showNew, setShowNew] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: '', area: '', fee: 100000, students: 0
   });
@@ -16,9 +17,20 @@ export default function TransportPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    addRoute(form);
+    if (editingId) {
+      updateRoute(editingId, form);
+      setEditingId(null);
+    } else {
+      addRoute(form);
+    }
     setShowNew(false);
     setForm({ name: '', area: '', fee: 100000, students: 0 });
+  };
+
+  const handleEdit = (route: typeof routes[0]) => {
+    setForm({ name: route.name, area: route.area, fee: route.fee, students: route.students });
+    setEditingId(route.id);
+    setShowNew(true);
   };
 
   return (
@@ -85,6 +97,7 @@ export default function TransportPage() {
               <th className="text-right px-4 py-3">Monthly Fee</th>
               <th className="text-right px-4 py-3">Students</th>
               <th className="text-right px-4 py-3">Revenue</th>
+              <th className="text-right px-4 py-3">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y">
@@ -95,11 +108,21 @@ export default function TransportPage() {
                 <td className="px-4 py-3 text-right">{formatUGX(r.fee)}</td>
                 <td className="px-4 py-3 text-right">{r.students}</td>
                 <td className="px-4 py-3 text-right font-semibold">{formatUGX(r.fee * r.students)}</td>
+                <td className="px-4 py-3 text-right">
+                  <div className="flex items-center justify-end gap-2">
+                    <button onClick={() => handleEdit(r)} className="p-1.5 hover:bg-blue-100 rounded">
+                      <Edit className="w-4 h-4 text-blue-600" />
+                    </button>
+                    <button onClick={() => deleteRoute(r.id)} className="p-1.5 hover:bg-red-100 rounded">
+                      <Trash2 className="w-4 h-4 text-red-600" />
+                    </button>
+                  </div>
+                </td>
               </tr>
             ))}
             {routes.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-foreground/60">No routes yet. Add one!</td>
+                <td colSpan={6} className="px-4 py-8 text-center text-foreground/60">No routes yet. Add one!</td>
               </tr>
             )}
           </tbody>
@@ -110,8 +133,8 @@ export default function TransportPage() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-background rounded-xl border border-border w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Add Transport Route</h2>
-              <button onClick={() => setShowNew(false)}><X size={20} /></button>
+              <h2 className="text-lg font-semibold">{editingId ? 'Edit Route' : 'Add Transport Route'}</h2>
+              <button onClick={() => { setShowNew(false); setEditingId(null); }}><X size={20} /></button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -139,8 +162,8 @@ export default function TransportPage() {
                 </div>
               </div>
               <div className="flex gap-4 pt-4">
-                <button type="button" onClick={() => setShowNew(false)} className="flex-1 px-4 py-2 border border-border rounded-lg">Cancel</button>
-                <button type="submit" className="flex-1 px-4 py-2 bg-primary text-white rounded-lg">Add Route</button>
+                <button type="button" onClick={() => { setShowNew(false); setEditingId(null); }} className="flex-1 px-4 py-2 border border-border rounded-lg">Cancel</button>
+                <button type="submit" className="flex-1 px-4 py-2 bg-primary text-white rounded-lg">{editingId ? 'Update' : 'Add Route'}</button>
               </div>
             </form>
           </div>
