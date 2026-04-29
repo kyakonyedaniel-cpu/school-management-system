@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CalendarDays, Search, Plus, Download, CheckCircle, XCircle, Clock, User, X } from "lucide-react";
 import { useLeaveRequests, useStaff } from "@/lib/data";
+import { useMemo } from "react";
 
 const leaveTypes = [
   { id: "annual", name: "Annual Leave", color: "bg-blue-100 text-blue-700", days: 21 },
@@ -20,6 +21,7 @@ export default function LeavePage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [showNewRequest, setShowNewRequest] = useState(false);
+  const [balanceSearch, setBalanceSearch] = useState("");
   const [requestForm, setRequestForm] = useState({
     staffId: '',
     type: 'Annual Leave',
@@ -27,6 +29,34 @@ export default function LeavePage() {
     endDate: '',
     reason: ''
   });
+
+  const leaveBalances = useMemo(() => {
+    return staff.map(member => {
+      const memberRequests = requests.filter(
+        r => r.staffId === member.id && r.status === 'approved'
+      );
+      const usedByType: Record<string, number> = {};
+      memberRequests.forEach(r => {
+        const normalizedType = leaveTypes.find(
+          lt => lt.name === r.type
+        )?.id || r.type.toLowerCase();
+        usedByType[normalizedType] = (usedByType[normalizedType] || 0) + r.days;
+      });
+      const balances = leaveTypes.map(lt => ({
+        ...lt,
+        used: usedByType[lt.id] || 0,
+      }));
+      const totalEntitled = leaveTypes.reduce((sum, lt) => sum + lt.days, 0);
+      const totalUsed = leaveTypes.reduce((sum, lt) => sum + (usedByType[lt.id] || 0), 0);
+      return {
+        staff: member,
+        balances,
+        totalEntitled,
+        totalUsed,
+        totalRemaining: totalEntitled - totalUsed,
+      };
+    });
+  }, [staff, requests]);
 
   const filteredRequests = requests.filter(request => {
     const matchesSearch = request.staffName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -253,10 +283,98 @@ export default function LeavePage() {
         )}
 
         {activeTab === "balance" && (
-          <div className="p-4">
-            <div className="text-center text-foreground/60 py-8">
-              Leave balance tracking coming soon. Staff can submit requests and managers can approve/reject them.
+          <div className="overflow-x-auto">
+            <div className="p-4 border-b">
+              <div className="relative max-w-md">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" />
+                <input
+                  type="text"
+                  placeholder="Search staff member..."
+                  value={balanceSearch}
+                  onChange={(e) => setBalanceSearch(e.target.value)}
+                  className="pl-10 pr-4 py-2 border border-border rounded-lg w-full"
+                />
+              </div>
             </div>
+            <table className="w-full">
+              <thead className="bg-muted/30">
+                <tr>
+                  <th className="text-left px-6 py-3 text-xs font-medium uppercase">Staff Name</th>
+                  <th className="text-left px-6 py-3 text-xs font-medium uppercase">Department</th>
+                  <th className="text-left px-6 py-3 text-xs font-medium uppercase">Total Entitled</th>
+                  <th className="text-left px-6 py-3 text-xs font-medium uppercase">Total Used</th>
+                  <th className="text-left px-6 py-3 text-xs font-medium uppercase">Total Remaining</th>
+                  <th className="text-left px-6 py-3 text-xs font-medium uppercase">Details</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {leaveBalances
+                  .filter(b =>
+                    b.staff.name.toLowerCase().includes(balanceSearch.toLowerCase()) ||
+                    b.staff.department.toLowerCase().includes(balanceSearch.toLowerCase())
+                  )
+                  .map(({ staff, balances, totalEntitled, totalUsed, totalRemaining }) => (
+                    <tr key={staff.id} className="hover:bg-muted/30">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          {staff.photo ? (
+                            <img src={staff.photo} alt={staff.name} className="w-8 h-8 rounded-full object-cover" />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                              <span className="text-xs font-semibold text-primary">{staff.name.charAt(0)}</span>
+                            </div>
+                          )}
+                          <span className="text-sm font-medium">{staff.name}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-foreground/60">{staff.department}</td>
+                      <td className="px-6 py-4 text-sm font-semibold">{totalEntitled} days</td>
+                      <td className="px-6 py-4 text-sm text-orange-600 font-medium">{totalUsed} days</td>
+                      <td className="px-6 py-4">
+                        <span className={`text-sm font-semibold ${totalRemaining < 10 ? 'text-red-600' : 'text-green-600'}`}>
+                          {totalRemaining} days
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <details className="group">
+                          <summary className="cursor-pointer text-sm text-primary hover:text-primary/80 list-none">
+                            <span className="group-open:hidden">Show breakdown</span>
+                            <span className="hidden group-open:inline">Hide breakdown</span>
+                          </summary>
+                          <div className="mt-2 space-y-2">
+                            {balances.map(b => (
+                              <div key={b.id} className="bg-muted/20 rounded p-2">
+                                <div className="flex justify-between text-xs mb-1">
+                                  <span className="font-medium">{b.name}</span>
+                                  <span className="text-foreground/60">{b.used}/{b.days} days</span>
+                                </div>
+                                <div className="w-full bg-muted rounded-full h-1.5">
+                                  <div
+                                    className={`h-1.5 rounded-full ${
+                                      b.used / b.days > 0.8 ? 'bg-red-500' :
+                                      b.used / b.days > 0.5 ? 'bg-yellow-500' :
+                                      'bg-green-500'
+                                    }`}
+                                    style={{ width: `${Math.min((b.used / b.days) * 100, 100)}%` }}
+                                  />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </details>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+            {leaveBalances.filter(b =>
+              b.staff.name.toLowerCase().includes(balanceSearch.toLowerCase()) ||
+              b.staff.department.toLowerCase().includes(balanceSearch.toLowerCase())
+            ).length === 0 && (
+              <div className="p-8 text-center text-foreground/60">
+                No staff members found matching "{balanceSearch}"
+              </div>
+            )}
           </div>
         )}
       </div>
