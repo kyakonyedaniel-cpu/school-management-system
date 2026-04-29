@@ -645,6 +645,62 @@ export function useAdmissions() {
   return { admissions, loading, addAdmission, updateStatus, updateAdmission };
 }
 
+export interface BoardingStudent {
+  id: string;
+  name: string;
+  class: string;
+  dorm: string;
+  room: string;
+  meals: number;
+  status: 'active' | 'checked_out' | 'on_leave';
+}
+
+export function useBoarding() {
+  const initialBoarders: BoardingStudent[] = [
+    { id: '1', name: 'John Okello', class: 'S.2', dorm: 'Nile House', room: 'Room 12', meals: 3, status: 'active' },
+    { id: '2', name: 'Sarah Nakato', class: 'S.3', dorm: 'Victoria House', room: 'Room 8', meals: 3, status: 'active' },
+    { id: '3', name: 'David Ssebu', class: 'S.1', dorm: 'Albert House', room: 'Room 5', meals: 3, status: 'active' },
+    { id: '4', name: 'Mary Namuli', class: 'S.4', dorm: 'Victoria House', room: 'Room 15', meals: 3, status: 'active' },
+    { id: '5', name: 'Peter Wasswa', class: 'P.7', dorm: 'Baker House', room: 'Room 3', meals: 3, status: 'active' },
+  ];
+
+  const [boarders, setBoarders] = useState<BoardingStudent[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setBoarders(getFromStorage('school_boarding', initialBoarders));
+    setLoading(false);
+  }, []);
+
+  const addBoarder = useCallback((boarder: Omit<BoardingStudent, 'id'>) => {
+    const newBoarder = { ...boarder, id: generateId() };
+    setBoarders(prev => {
+      const updated = [...prev, newBoarder];
+      saveToStorage('school_boarding', updated);
+      return updated;
+    });
+    return newBoarder;
+  }, []);
+
+  const updateBoarder = useCallback((id: string, updates: Partial<BoardingStudent>) => {
+    setBoarders(prev => {
+      const updated = prev.map(b => b.id === id ? { ...b, ...updates } : b);
+      saveToStorage('school_boarding', updated);
+      return updated;
+    });
+  }, []);
+
+  const deleteBoarder = useCallback((id: string) => {
+    setBoarders(prev => {
+      const updated = prev.filter(b => b.id !== id);
+      saveToStorage('school_boarding', updated);
+      return updated;
+    });
+  }, []);
+
+  return { boarders, loading, addBoarder, updateBoarder, deleteBoarder };
+}
+
 export interface TransportRoute {
   id: string;
   name: string;
