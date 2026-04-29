@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Users, Search, Plus, Download, Award, FileText, CheckCircle, XCircle, X } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Users, Search, Plus, Download, Award, FileText, CheckCircle, XCircle, X, Upload, Camera } from 'lucide-react';
 import { useAdmissions, useStudents, formatUGX, classes } from '@/lib/data';
 
 export default function AdmissionsPage() {
@@ -9,9 +9,25 @@ export default function AdmissionsPage() {
   const { students } = useStudents();
   const [searchTerm, setSearchTerm] = useState('');
   const [showNew, setShowNew] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: '', class: 'P.1', parent: '', phone: '', email: '', dob: '', gender: 'Male'
   });
+  const [photoPreview, setPhotoPreview] = useState('');
+  const [parentPhotoPreview, setParentPhotoPreview] = useState('');
+  const studentPhotoRef = useRef<HTMLInputElement>(null);
+  const parentPhotoRef = useRef<HTMLInputElement>(null);
+
+  const handlePhotoUpload = (file: File, type: 'student' | 'parent') => {
+    if (file.size > 2 * 1024 * 1024) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result as string;
+      if (type === 'student') setPhotoPreview(result);
+      else setParentPhotoPreview(result);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const filteredAdmissions = admissions.filter(a => 
     a.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -29,16 +45,56 @@ export default function AdmissionsPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    addAdmission({
-      ...form,
-      status: 'pending',
-      date: new Date().toISOString().split('T')[0]
-    });
+    if (editingId) {
+      updateStatus(editingId, 'pending');
+      setEditingId(null);
+    } else {
+      addAdmission({
+        ...form,
+        status: 'pending',
+        date: new Date().toISOString().split('T')[0],
+        photo: photoPreview || undefined,
+        parentPhoto: parentPhotoPreview || undefined,
+      });
+    }
     setShowNew(false);
     setForm({ name: '', class: 'P.1', parent: '', phone: '', email: '', dob: '', gender: 'Male' });
+    setPhotoPreview('');
+    setParentPhotoPreview('');
+  };
+
+  const handleEdit = (app: typeof admissions[0]) => {
+    setForm({
+      name: app.name,
+      class: app.class,
+      parent: app.parent,
+      phone: app.phone,
+      email: app.email,
+      dob: app.dob,
+      gender: app.gender,
+    });
+    setPhotoPreview(app.photo || '');
+    setParentPhotoPreview(app.parentPhoto || '');
+    setEditingId(app.id);
+    setShowNew(true);
   };
 
   const classesList = classes.filter(c => c !== 'All Classes');
+
+  const exportAdmissions = () => {
+    const headers = ['Admission No.', 'Student Name', 'Class', 'Gender', 'DOB', 'Parent/Guardian', 'Phone', 'Email', 'Date', 'Status'];
+    const rows = filteredAdmissions.map(a => [
+      generateAdmNo(a.name), a.name, a.class, a.gender, a.dob, a.parent, a.phone, a.email, a.date, a.status
+    ]);
+    const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `admissions-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="space-y-6">
@@ -100,7 +156,7 @@ export default function AdmissionsPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" size={18} />
               <input type="text" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10 pr-4 py-2 rounded-lg border border-border w-64" />
             </div>
-            <button className="flex items-center gap-2 px-3 py-2 border border-border rounded-lg hover:bg-muted"><Download size={18} /> Export</button>
+            <button onClick={exportAdmissions} className="flex items-center gap-2 px-3 py-2 border border-border rounded-lg hover:bg-muted"><Download size={18} /> Export</button>
           </div>
         </div>
         <div className="overflow-x-auto">
@@ -120,9 +176,31 @@ export default function AdmissionsPage() {
               {filteredAdmissions.map((app) => (
                 <tr key={app.id} className="border-t border-border">
                   <td className="px-4 py-3 font-mono text-sm">{generateAdmNo(app.name)}</td>
-                  <td className="px-4 py-3 font-medium">{app.name}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      {app.photo ? (
+                        <img src={app.photo} alt={app.name} className="w-8 h-8 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                          <span className="text-xs font-semibold text-blue-600">{app.name.charAt(0)}</span>
+                        </div>
+                      )}
+                      <span className="font-medium">{app.name}</span>
+                    </div>
+                  </td>
                   <td className="px-4 py-3 text-sm">{app.class}</td>
-                  <td className="px-4 py-3 text-sm">{app.parent}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      {app.parentPhoto ? (
+                        <img src={app.parentPhoto} alt={app.parent} className="w-8 h-8 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
+                          <span className="text-xs font-semibold text-purple-600">{app.parent.charAt(0)}</span>
+                        </div>
+                      )}
+                      <span className="text-sm">{app.parent}</span>
+                    </div>
+                  </td>
                   <td className="px-4 py-3 text-sm">{app.date}</td>
                   <td className="px-4 py-3">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 w-fit ${
@@ -134,12 +212,15 @@ export default function AdmissionsPage() {
                       {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
+                   <td className="px-4 py-3">
                     {app.status === 'pending' && (
                       <div className="flex gap-2">
                         <button onClick={() => updateStatus(app.id, 'approved')} className="text-green-600 hover:underline text-sm">Approve</button>
                         <button onClick={() => updateStatus(app.id, 'rejected')} className="text-red-600 hover:underline text-sm">Reject</button>
                       </div>
+                    )}
+                    {app.status !== 'pending' && (
+                      <button onClick={() => handleEdit(app)} className="text-blue-600 hover:underline text-sm">Edit</button>
                     )}
                   </td>
                 </tr>
@@ -156,12 +237,42 @@ export default function AdmissionsPage() {
 
       {showNew && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-background rounded-xl border border-border w-full max-w-md p-6">
+          <div className="bg-background rounded-xl border border-border w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">New Application</h2>
-              <button onClick={() => setShowNew(false)}><X size={20} /></button>
+              <h2 className="text-lg font-semibold">{editingId ? 'Edit Application' : 'New Application'}</h2>
+              <button onClick={() => { setShowNew(false); setEditingId(null); setPhotoPreview(''); setParentPhotoPreview(''); }}><X size={20} /></button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Student Photo</label>
+                  <input type="file" ref={studentPhotoRef} accept="image/*" onChange={(e) => e.target.files?.[0] && handlePhotoUpload(e.target.files[0], 'student')} className="hidden" />
+                  <div onClick={() => studentPhotoRef.current?.click()} className="cursor-pointer border-2 border-dashed border-border rounded-lg p-4 text-center hover:bg-muted/30">
+                    {photoPreview ? (
+                      <img src={photoPreview} alt="Student" className="w-16 h-16 rounded-full mx-auto object-cover mb-2" />
+                    ) : (
+                      <div className="w-16 h-16 rounded-full bg-blue-100 mx-auto flex items-center justify-center mb-2">
+                        <Camera className="w-6 h-6 text-blue-600" />
+                      </div>
+                    )}
+                    <span className="text-xs text-foreground/60">{photoPreview ? 'Change' : 'Upload'} photo</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Parent Photo</label>
+                  <input type="file" ref={parentPhotoRef} accept="image/*" onChange={(e) => e.target.files?.[0] && handlePhotoUpload(e.target.files[0], 'parent')} className="hidden" />
+                  <div onClick={() => parentPhotoRef.current?.click()} className="cursor-pointer border-2 border-dashed border-border rounded-lg p-4 text-center hover:bg-muted/30">
+                    {parentPhotoPreview ? (
+                      <img src={parentPhotoPreview} alt="Parent" className="w-16 h-16 rounded-full mx-auto object-cover mb-2" />
+                    ) : (
+                      <div className="w-16 h-16 rounded-full bg-purple-100 mx-auto flex items-center justify-center mb-2">
+                        <Camera className="w-6 h-6 text-purple-600" />
+                      </div>
+                    )}
+                    <span className="text-xs text-foreground/60">{parentPhotoPreview ? 'Change' : 'Upload'} photo</span>
+                  </div>
+                </div>
+              </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Student Name</label>
                 <input type="text" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -207,8 +318,8 @@ export default function AdmissionsPage() {
                 </div>
               </div>
               <div className="flex gap-4 pt-4">
-                <button type="button" onClick={() => setShowNew(false)} className="flex-1 px-4 py-2 border border-border rounded-lg">Cancel</button>
-                <button type="submit" className="flex-1 px-4 py-2 bg-primary text-white rounded-lg">Submit</button>
+                <button type="button" onClick={() => { setShowNew(false); setEditingId(null); setPhotoPreview(''); setParentPhotoPreview(''); }} className="flex-1 px-4 py-2 border border-border rounded-lg">Cancel</button>
+                <button type="submit" className="flex-1 px-4 py-2 bg-primary text-white rounded-lg">{editingId ? 'Update' : 'Submit'}</button>
               </div>
             </form>
           </div>

@@ -588,6 +588,8 @@ export interface Admission {
   date: string;
   dob: string;
   gender: string;
+  photo?: string;
+  parentPhoto?: string;
 }
 
 export function useAdmissions() {
