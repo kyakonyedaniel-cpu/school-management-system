@@ -4,7 +4,9 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
+import { motion } from 'framer-motion';
 import { initializeSampleData } from '@/lib/data';
+import { Logo } from '@/components/logo';
 import { 
   School, Menu, X, Bell, Search, Settings, LogOut, ChevronDown, Moon, Sun,
   FileText, Users, TrendingUp, CheckCircle, Calendar as CalendarIcon, BookOpen, 
@@ -143,7 +145,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <nav className="p-4 space-y-1 overflow-y-auto h-full">
           <div className="pb-4 mb-4 border-b border-border">
             <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary font-medium">
-              <School size={20} />Dashboard
+              <Logo size={24} />
+              <motion.span
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                Dashboard
+              </motion.span>
             </Link>
           </div>
 
@@ -331,7 +340,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         <main className="flex-1 p-6">
-          {children}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {children}
+          </motion.div>
         </main>
       </div>
 

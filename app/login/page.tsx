@@ -3,7 +3,9 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { School, Lock, Mail, Eye, EyeOff } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
+import { Logo } from '@/components/logo';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -46,12 +48,17 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8"
+      >
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <School className="w-8 h-8 text-white" />
+          <div className="mx-auto mb-4 w-16 h-16 flex items-center justify-center">
+            <Logo size={64} />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">School Management</h1>
+          <h1 className="text-2xl font-bold text-foreground">SmartSchool Pro</h1>
           <p className="text-foreground/60 mt-1">Sign in to your account</p>
         </div>
 
@@ -120,7 +127,7 @@ export default function LoginPage() {
             ))}
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

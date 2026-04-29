@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Menu, X, Moon, Sun } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTheme } from 'next-themes';
+import { Logo } from '@/components/logo';
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -40,12 +41,23 @@ export function Navbar() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold">
-              S
-            </div>
-            <span className="font-bold text-lg text-foreground hidden sm:inline">
-              SmartSchool Pro
-            </span>
+            <Logo size={32} />
+            <motion.span
+              className="font-bold text-lg text-foreground hidden sm:inline"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              SmartSchool
+            </motion.span>
+            <motion.span
+              className="font-bold text-lg text-primary hidden sm:inline"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              Pro
+            </motion.span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -108,7 +120,7 @@ export function Navbar() {
               <Link href="/sign-up" className="block w-full px-4 py-2 text-primary font-medium text-sm hover:bg-primary/10 rounded-lg transition-colors text-center">
                 Start Free Trial
               </Link>
-<Link href="/sign-in" className="block w-full px-4 py-2 bg-primary text-white font-medium text-sm rounded-lg hover:bg-primary/90 transition-colors text-center">
+              <Link href="/sign-in" className="block w-full px-4 py-2 bg-primary text-white font-medium text-sm rounded-lg hover:bg-primary/90 transition-colors text-center">
                 Sign In
               </Link>
             </div>
