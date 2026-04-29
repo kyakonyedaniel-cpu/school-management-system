@@ -112,7 +112,7 @@ export default function StudentsPage() {
 
   const bulkPrintIdCards = () => {
     const selected = students.filter(s => selectedStudents.includes(s.id));
-    selected.forEach(s => generateStudentIdCard(s, 'SmartSchool Pro'));
+    selected.forEach(s => generateStudentIdCard(s));
   };
 
   const classesList = classes.filter(c => c !== 'All Classes');
@@ -215,7 +215,7 @@ export default function StudentsPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1">
-                      <button onClick={() => generateStudentIdCard(student, 'SmartSchool Pro')} className="p-2 hover:bg-muted rounded" title="Print ID Card">
+                      <button onClick={() => generateStudentIdCard(student)} className="p-2 hover:bg-muted rounded" title="Print ID Card">
                         <Printer size={16} />
                       </button>
                       <button onClick={() => sendFeeReminder(student, student.fees)} className="p-2 hover:bg-muted rounded" title="Send WhatsApp Reminder">
