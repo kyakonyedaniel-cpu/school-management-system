@@ -17,8 +17,11 @@ export default function BoardingPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState({
-    name: '', class: 'S.1', dorm: 'Nile House', room: '', meals: 3, status: 'active' as const
+  interface BoardingForm {
+    name: string; class: string; dorm: string; room: string; meals: number; status: 'active' | 'checked_out' | 'on_leave'
+  }
+  const [form, setForm] = useState<BoardingForm>({
+    name: '', class: 'S.1', dorm: 'Nile House', room: '', meals: 3, status: 'active'
   });
 
   const filteredBoarders = boarders.filter(b => {

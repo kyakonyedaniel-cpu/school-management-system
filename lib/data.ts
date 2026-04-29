@@ -1041,7 +1041,41 @@ export function useHouses() {
     });
   }, []);
 
-  return { houses, loading, updateHousePoints };
+  const addHouse = useCallback((house: Omit<House, 'id'>) => {
+    const newHouse = { ...house, id: generateId() };
+    setHouses(prev => {
+      const updated = [...prev, newHouse];
+      saveToStorage('school_houses', updated);
+      return updated;
+    });
+    return newHouse;
+  }, []);
+
+  const updateHouse = useCallback((id: string, updates: Partial<House>) => {
+    setHouses(prev => {
+      const updated = prev.map(h => h.id === id ? { ...h, ...updates } : h);
+      saveToStorage('school_houses', updated);
+      return updated;
+    });
+  }, []);
+
+  const deleteHouse = useCallback((id: string) => {
+    setHouses(prev => {
+      const updated = prev.filter(h => h.id !== id);
+      saveToStorage('school_houses', updated);
+      return updated;
+    });
+  }, []);
+
+  const resetPoints = useCallback((id: string) => {
+    setHouses(prev => {
+      const updated = prev.map(h => h.id === id ? { ...h, points: 0 } : h);
+      saveToStorage('school_houses', updated);
+      return updated;
+    });
+  }, []);
+
+  return { houses, loading, updateHousePoints, addHouse, updateHouse, deleteHouse, resetPoints };
 }
 
 // Classes
