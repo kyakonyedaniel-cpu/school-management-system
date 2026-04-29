@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Users, Bed, Utensils, Home, Edit, Trash2, Plus, Search, X } from 'lucide-react';
-import { useBoarding } from '@/lib/data';
+import { Users, Bed, Utensils, Home, Edit, Trash2, Plus, Search, X, Download, Upload } from 'lucide-react';
+import { useBoarding, parseCSV } from '@/lib/data';
 
 const dormitories = [
   { name: 'Nile House', capacity: 40, gender: 'Boys' },
@@ -62,6 +62,42 @@ export default function BoardingPage() {
     else updateBoarder(b.id, { status: 'active' });
   };
 
+  const exportBoarding = () => {
+    const headers = ['Name', 'Class', 'Dorm', 'Room', 'Meals', 'Status'];
+    const rows = filteredBoarders.map(b => [b.name, b.class, b.dorm, b.room, b.meals.toString(), b.status]);
+    const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `boarding-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importBoarding = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      const rows = parseCSV(text);
+      rows.forEach(row => {
+        if (row.name && row.dorm) {
+          addBoarder({
+            name: row.name,
+            class: row.class || 'S.1',
+            dorm: row.dorm,
+            room: row.room || '',
+            meals: parseInt(row.meals) || 3,
+            status: (row.status as 'active' | 'checked_out' | 'on_leave') || 'active',
+          });
+        }
+      });
+    };
+    reader.readAsText(file);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -69,10 +105,21 @@ export default function BoardingPage() {
           <h1 className="text-2xl font-bold">Boarding Management</h1>
           <p className="text-foreground/60">Manage dormitory assignments and boarder status</p>
         </div>
-        <button onClick={() => { setEditingId(null); setShowModal(true); }}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
-          <Plus size={18} />Add Boarder
-        </button>
+        <div className="flex items-center gap-2">
+          <label className="flex items-center gap-2 px-3 py-2 border border-border rounded-lg hover:bg-muted cursor-pointer">
+            <Upload size={18} />
+            <span className="hidden sm:inline">Import</span>
+            <input type="file" accept=".csv" onChange={importBoarding} className="hidden" />
+          </label>
+          <button onClick={exportBoarding} className="flex items-center gap-2 px-3 py-2 border border-border rounded-lg hover:bg-muted">
+            <Download size={18} />
+            <span className="hidden sm:inline">Export</span>
+          </button>
+          <button onClick={() => { setEditingId(null); setShowModal(true); }}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
+            <Plus size={18} />Add Boarder
+          </button>
+        </div>
       </div>
 
       <div className="grid sm:grid-cols-4 gap-4">

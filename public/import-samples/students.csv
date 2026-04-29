@@ -1,0 +1,13 @@
+name,class,gender,parent,phone,email,fees,status,admissionNo
+John Okello,P.7,Male,Michael Okello,+256 701 234 567,m.ok@email.com,Paid,Active,KPS/2024/001
+Sarah Nakato,S.1,Female,Grace Nakato,+256 702 345 678,g.nak@email.com,Pending,Active,KPS/2024/002
+David Ssebu,P.6,Male,Robert Ssebu,+256 703 456 789,r.sse@email.com,Overdue,Active,KPS/2024/003
+Mary Namuli,S.2,Female,Joseph Namuli,+256 704 567 890,j.nam@email.com,Paid,Active,KPS/2024/004
+Peter Mugisha,P.4,Male,Alice Mugisha,+256 705 678 901,a.mug@email.com,Paid,Active,KPS/2024/005
+Patricia Achieng,S.4,Female,Daniel Achieng,+256 706 789 012,d.ach@email.com,Pending,Active,KPS/2024/006
+James Kamya,P.1,Male,Susan Kamya,+256 707 890 123,s.kam@email.com,Paid,Active,KPS/2024/007
+Rebecca Nalwanga,S.5,Female,Edward Nalwanga,+256 708 901 234,e.nal@email.com,Paid,Active,KPS/2024/008
+Isaac Tumusiime,P.3,Male,Betty Tumusiime,+256 709 012 345,b.tum@email.com,Pending,Active,KPS/2024/009
+Christine Auma,S.6,Female,Frank Auma,+256 710 123 456,f.aum@email.com,Paid,Active,KPS/2024/010
+Samuel Lwanga,P.5,Male,Rose Lwanga,+256 711 234 567,r.lwa@email.com,Paid,Active,KPS/2024/011
+Faith Nantume,S.3,Female,George Nantume,+256 712 345 678,g.nan@email.com,Overdue,Active,KPS/2024/012

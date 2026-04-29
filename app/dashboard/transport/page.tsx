@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from 'react';
-import { Plus, MapPin, Bus, Users, X, Edit, Trash2 } from 'lucide-react';
-import { useTransport, formatUGX } from '@/lib/data';
+import { Plus, MapPin, Bus, Users, X, Edit, Trash2, Download, Upload } from 'lucide-react';
+import { useTransport, formatUGX, parseCSV } from '@/lib/data';
 
 export default function TransportPage() {
   const { routes, addRoute, updateRoute, deleteRoute } = useTransport();
@@ -33,6 +33,40 @@ export default function TransportPage() {
     setShowNew(true);
   };
 
+  const exportRoutes = () => {
+    const headers = ['Name', 'Area', 'Fee', 'Students'];
+    const rows = routes.map(r => [r.name, r.area, r.fee.toString(), r.students.toString()]);
+    const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `transport-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importRoutes = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      const rows = parseCSV(text);
+      rows.forEach(row => {
+        if (row.name && row.area) {
+          addRoute({
+            name: row.name,
+            area: row.area,
+            fee: parseInt(row.fee) || 100000,
+            students: parseInt(row.students) || 0,
+          });
+        }
+      });
+    };
+    reader.readAsText(file);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -40,10 +74,21 @@ export default function TransportPage() {
           <h1 className="text-2xl font-bold">Transport</h1>
           <p className="text-foreground/60">Manage transport routes and fees</p>
         </div>
-        <button onClick={() => setShowNew(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
-          <Plus size={18} />Add Route
-        </button>
+        <div className="flex items-center gap-2">
+          <label className="flex items-center gap-2 px-3 py-2 border border-border rounded-lg hover:bg-muted cursor-pointer">
+            <Upload size={18} />
+            <span className="hidden sm:inline">Import</span>
+            <input type="file" accept=".csv" onChange={importRoutes} className="hidden" />
+          </label>
+          <button onClick={exportRoutes} className="flex items-center gap-2 px-3 py-2 border border-border rounded-lg hover:bg-muted">
+            <Download size={18} />
+            <span className="hidden sm:inline">Export</span>
+          </button>
+          <button onClick={() => setShowNew(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
+            <Plus size={18} />Add Route
+          </button>
+        </div>
       </div>
 
       <div className="grid sm:grid-cols-4 gap-4">

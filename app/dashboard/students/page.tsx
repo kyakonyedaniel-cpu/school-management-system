@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Plus, Search, Edit, Trash2, X, MessageSquare, Printer, Download, Upload, CheckSquare, Square, RefreshCw, Camera } from 'lucide-react';
-import { useStudents, classes, generateId } from '@/lib/data';
+import { useStudents, classes, generateId, parseCSV } from '@/lib/data';
 import { generateStudentIdCard } from '@/lib/print';
 import { sendWhatsApp, sendFeeReminder } from '@/lib/whatsapp';
 
@@ -107,17 +107,23 @@ export default function StudentsPage() {
   const importStudents = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
     const reader = new FileReader();
     reader.onload = (event) => {
       const text = event.target?.result as string;
-      const lines = text.split('\n').slice(1);
-      
-      lines.forEach(line => {
-        if (!line.trim()) return;
-        const [name, cls, admissionNo, gender, parent, phone, email, fees, status] = line.split(',');
-        if (name && cls) {
-          addStudent({ name, class: cls, admissionNo, gender, parent, phone, email: email || '', fees: fees || 'Pending', status: status || 'Active' });
+      const rows = parseCSV(text);
+      rows.forEach(row => {
+        if (row.name && row.class) {
+          addStudent({
+            name: row.name,
+            class: row.class,
+            admissionNo: row.admissionNo || `ST/2026/${String(students.length + 1).padStart(3, '0')}`,
+            gender: row.gender || 'Male',
+            parent: row.parent || '',
+            phone: row.phone || '',
+            email: row.email || '',
+            fees: row.fees || 'Pending',
+            status: row.status || 'Active',
+          });
         }
       });
     };

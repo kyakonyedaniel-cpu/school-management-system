@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from 'react';
-import { Plus, Edit, Search, Trash2, X, Camera } from 'lucide-react';
-import { useStaff } from '@/lib/data';
+import { Plus, Edit, Search, Trash2, X, Camera, Download, Upload } from 'lucide-react';
+import { useStaff, parseCSV } from '@/lib/data';
 
 const departments = ['Administration', 'Science', 'Languages', 'Mathematics', 'Social Studies', 'ICT', 'Physical Education'];
 
@@ -63,6 +63,42 @@ export default function StaffPage() {
     }
   };
 
+  const exportStaff = () => {
+    const headers = ['Name', 'Role', 'Department', 'Phone', 'Email', 'Status'];
+    const rows = filteredStaff.map(s => [s.name, s.role, s.department, s.phone, s.email, s.status]);
+    const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `staff-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importStaff = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      const rows = parseCSV(text);
+      rows.forEach(row => {
+        if (row.name && row.role) {
+          addStaff({
+            name: row.name,
+            role: row.role,
+            department: row.department || 'Administration',
+            phone: row.phone || '',
+            email: row.email || '',
+            status: row.status || 'Active',
+          });
+        }
+      });
+    };
+    reader.readAsText(file);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -70,10 +106,21 @@ export default function StaffPage() {
           <h1 className="text-2xl font-bold">Staff</h1>
           <p className="text-foreground/60">{staff.length} staff members</p>
         </div>
-        <button onClick={() => { setEditingStaff(null); setPhotoPreview(''); setFormData({ name: '', role: '', department: 'Administration', phone: '', email: '', status: 'Active', photo: '' }); setShowModal(true); }}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
-          <Plus size={18} />Add Staff
-        </button>
+        <div className="flex items-center gap-2">
+          <label className="flex items-center gap-2 px-3 py-2 border border-border rounded-lg hover:bg-muted cursor-pointer">
+            <Upload size={18} />
+            <span className="hidden sm:inline">Import</span>
+            <input type="file" accept=".csv" onChange={importStaff} className="hidden" />
+          </label>
+          <button onClick={exportStaff} className="flex items-center gap-2 px-3 py-2 border border-border rounded-lg hover:bg-muted">
+            <Download size={18} />
+            <span className="hidden sm:inline">Export</span>
+          </button>
+          <button onClick={() => { setEditingStaff(null); setPhotoPreview(''); setFormData({ name: '', role: '', department: 'Administration', phone: '', email: '', status: 'Active', photo: '' }); setShowModal(true); }}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
+            <Plus size={18} />Add Staff
+          </button>
+        </div>
       </div>
 
       <div className="bg-background rounded-lg border">

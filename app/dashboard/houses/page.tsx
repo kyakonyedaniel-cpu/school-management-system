@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Trophy, Plus, Download, Edit, Trash2, RotateCcw, Minus, Search, X } from 'lucide-react';
-import { useHouses, generateId } from '@/lib/data';
+import { useHouses, generateId, parseCSV } from '@/lib/data';
 
 const colorOptions = [
   { label: 'Blue', value: 'bg-blue-500' },
@@ -124,6 +124,28 @@ export default function HousesPage() {
     URL.revokeObjectURL(url);
   };
 
+  const importHouses = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      const rows = parseCSV(text);
+      rows.forEach(row => {
+        if (row.name) {
+          addHouse({
+            name: row.name,
+            color: row.color || 'bg-blue-500',
+            students: parseInt(row.students) || 0,
+            points: parseInt(row.points) || 0,
+            captain: row.captain || '',
+          });
+        }
+      });
+    };
+    reader.readAsText(file);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -132,6 +154,10 @@ export default function HousesPage() {
           <p className="text-foreground/60">Manage school houses and inter-house competitions</p>
         </div>
         <div className="flex items-center gap-2">
+          <label className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted cursor-pointer">
+            <Download size={18} className="rotate-180" /> Import
+            <input type="file" accept=".csv" onChange={importHouses} className="hidden" />
+          </label>
           <button onClick={exportHouses} className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted">
             <Download size={18} /> Export
           </button>
