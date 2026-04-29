@@ -953,3 +953,97 @@ export function useHouses() {
 
 // Classes
 export const classes = ['All Classes', 'P.1', 'P.2', 'P.3', 'P.4', 'P.5', 'P.6', 'P.7', 'S.1', 'S.2', 'S.3', 'S.4', 'S.5', 'S.6'];
+
+// Sample data initialization
+export function initializeSampleData() {
+  const existing = localStorage.getItem('school_students');
+  if (existing && JSON.parse(existing).length > 0) return false;
+
+  const sampleStudents = [
+    { id: '1', name: 'John Okello', class: 'P.7', admissionNo: 'KPS/2024/001', gender: 'Male', parent: 'Michael Okello', phone: '+256 701 234 567', email: 'm.ok@email.com', fees: 'Paid', status: 'Active', createdAt: '2024-01-15' },
+    { id: '2', name: 'Sarah Nakato', class: 'S.1', admissionNo: 'KPS/2024/002', gender: 'Female', parent: 'Grace Nakato', phone: '+256 702 345 678', email: 'g.nak@email.com', fees: 'Pending', status: 'Active', createdAt: '2024-02-10' },
+    { id: '3', name: 'David Ssebu', class: 'P.6', admissionNo: 'KPS/2024/003', gender: 'Male', parent: 'Robert Ssebu', phone: '+256 703 456 789', email: 'r.sse@email.com', fees: 'Overdue', status: 'Active', createdAt: '2024-03-05' },
+    { id: '4', name: 'Mary Namuli', class: 'S.2', admissionNo: 'KPS/2024/004', gender: 'Female', parent: 'Joseph Namuli', phone: '+256 704 567 890', email: 'j.nam@email.com', fees: 'Paid', status: 'Active', createdAt: '2024-04-12' },
+    { id: '5', name: 'Peter Mugisha', class: 'P.4', admissionNo: 'KPS/2024/005', gender: 'Male', parent: 'Alice Mugisha', phone: '+256 705 678 901', email: 'a.mug@email.com', fees: 'Paid', status: 'Active', createdAt: '2024-05-20' },
+    { id: '6', name: 'Patricia Achieng', class: 'S.4', admissionNo: 'KPS/2024/006', gender: 'Female', parent: 'Daniel Achieng', phone: '+256 706 789 012', email: 'd.ach@email.com', fees: 'Pending', status: 'Active', createdAt: '2024-06-08' },
+    { id: '7', name: 'James Kamya', class: 'P.1', admissionNo: 'KPS/2024/007', gender: 'Male', parent: 'Susan Kamya', phone: '+256 707 890 123', email: 's.kam@email.com', fees: 'Paid', status: 'Active', createdAt: '2024-07-15' },
+    { id: '8', name: 'Rebecca Nalwanga', class: 'S.5', admissionNo: 'KPS/2024/008', gender: 'Female', parent: 'Edward Nalwanga', phone: '+256 708 901 234', email: 'e.nal@email.com', fees: 'Paid', status: 'Active', createdAt: '2024-08-22' },
+    { id: '9', name: 'Isaac Tumusiime', class: 'P.3', admissionNo: 'KPS/2024/009', gender: 'Male', parent: 'Betty Tumusiime', phone: '+256 709 012 345', email: 'b.tum@email.com', fees: 'Pending', status: 'Active', createdAt: '2024-09-10' },
+    { id: '10', name: 'Christine Auma', class: 'S.6', admissionNo: 'KPS/2024/010', gender: 'Female', parent: 'Frank Auma', phone: '+256 710 123 456', email: 'f.aum@email.com', fees: 'Paid', status: 'Active', createdAt: '2024-10-05' },
+    { id: '11', name: 'Samuel Lwanga', class: 'P.5', admissionNo: 'KPS/2024/011', gender: 'Male', parent: 'Rose Lwanga', phone: '+256 711 234 567', email: 'r.lwa@email.com', fees: 'Paid', status: 'Active', createdAt: '2024-11-12' },
+    { id: '12', name: 'Faith Nantume', class: 'S.3', admissionNo: 'KPS/2024/012', gender: 'Female', parent: 'George Nantume', phone: '+256 712 345 678', email: 'g.nan@email.com', fees: 'Overdue', status: 'Active', createdAt: '2024-12-01' },
+  ];
+
+  const sampleStaff = [
+    { id: '1', name: 'Mr. Patrick Ochieng', role: 'Head Teacher', department: 'Administration', phone: '+256 771 111 222', email: 'p.ochieng@school.ug', status: 'Active', createdAt: '2023-01-15' },
+    { id: '2', name: 'Mrs. Sarah Kintu', role: 'Deputy Head Teacher', department: 'Administration', phone: '+256 772 222 333', email: 's.kintu@school.ug', status: 'Active', createdAt: '2023-02-10' },
+    { id: '3', name: 'Mr. David Mukasa', role: 'Teacher', department: 'Mathematics', phone: '+256 773 333 444', email: 'd.mukasa@school.ug', status: 'Active', createdAt: '2023-03-05' },
+    { id: '4', name: 'Mrs. Grace Namugga', role: 'Teacher', department: 'English', phone: '+256 774 444 555', email: 'g.namugga@school.ug', status: 'Active', createdAt: '2023-04-12' },
+    { id: '5', name: 'Mr. Joseph Okello', role: 'Teacher', department: 'Science', phone: '+256 775 555 666', email: 'j.okello@school.ug', status: 'Active', createdAt: '2023-05-20' },
+    { id: '6', name: 'Ms. Mary Atim', role: 'Teacher', department: 'Social Studies', phone: '+256 776 666 777', email: 'm.atim@school.ug', status: 'Active', createdAt: '2023-06-08' },
+    { id: '7', name: 'Mrs. Rose Nalubega', role: 'Accountant', department: 'Finance', phone: '+256 777 777 888', email: 'r.nalubega@school.ug', status: 'Active', createdAt: '2023-07-15' },
+  ];
+
+  const sampleFees = [
+    { id: '1', studentId: '1', studentName: 'John Okello', class: 'P.7', amount: '800000', date: '2024-01-20', method: 'Bank', status: 'Paid', description: 'Term 1 fees' },
+    { id: '2', studentId: '2', studentName: 'Sarah Nakato', class: 'S.1', amount: '950000', date: '2024-02-15', method: 'MoMo', status: 'Pending', description: 'Term 1 fees' },
+    { id: '3', studentId: '4', studentName: 'Mary Namuli', class: 'S.2', amount: '950000', date: '2024-04-15', method: 'Bank', status: 'Paid', description: 'Term 2 fees' },
+    { id: '4', studentId: '5', studentName: 'Peter Mugisha', class: 'P.4', amount: '700000', date: '2024-05-25', method: 'MoMo', status: 'Paid', description: 'Term 2 fees' },
+    { id: '5', studentId: '7', studentName: 'James Kamya', class: 'P.1', amount: '650000', date: '2024-07-20', method: 'Bank', status: 'Paid', description: 'Term 3 fees' },
+    { id: '6', studentId: '8', studentName: 'Rebecca Nalwanga', class: 'S.5', amount: '1000000', date: '2024-08-25', method: 'MoMo', status: 'Paid', description: 'Term 3 fees' },
+    { id: '7', studentId: '3', studentName: 'David Ssebu', class: 'P.6', amount: '750000', date: '2024-03-10', method: '', status: 'Overdue', description: 'Term 1 fees' },
+    { id: '8', studentId: '12', studentName: 'Faith Nantume', class: 'S.3', amount: '900000', date: '2024-12-05', method: '', status: 'Overdue', description: 'Term 1 fees' },
+  ];
+
+  const today = new Date();
+  const sampleAttendance: Attendance[] = [];
+  for (let i = 0; i < 10; i++) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    sampleStudents.forEach(student => {
+      const rand = Math.random();
+      sampleAttendance.push({
+        id: generateId(),
+        studentId: student.id,
+        studentName: student.name,
+        class: student.class,
+        date: date.toISOString().split('T')[0],
+        status: rand > 0.1 ? 'present' : rand > 0.05 ? 'late' : 'absent',
+      });
+    });
+  }
+
+  const sampleExams = [
+    { id: '1', name: 'Mid-Term Exams', class: 'All', date: '2024-06-10', duration: '2 hours', status: 'Completed', subject: 'All Subjects' },
+    { id: '2', name: 'End of Term 3', class: 'All', date: '2024-11-15', duration: '2 hours', status: 'Scheduled', subject: 'All Subjects' },
+  ];
+
+  const sampleResults = sampleStudents.slice(0, 6).map((student, i) => ({
+    id: generateId(),
+    studentId: student.id,
+    studentName: student.name,
+    class: student.class,
+    examId: '1',
+    examName: 'Mid-Term Exams',
+    score: [78, 85, 65, 92, 73, 88][i],
+    maxScore: 100,
+    grade: ['B+', 'A-', 'C+', 'A', 'B', 'A-'][i],
+  }));
+
+  const sampleBooks = [
+    { id: '1', title: 'New Primary Mathematics P.7', author: 'John Ochieng', class: 'P.7', copies: 50, available: 42, shelf: 'A-1', isbn: '978-9970-001' },
+    { id: '2', title: 'English for Secondary Schools', author: 'Grace Namugga', class: 'S.1', copies: 60, available: 35, shelf: 'B-2', isbn: '978-9970-002' },
+    { id: '3', title: 'Biology for East Africa', author: 'David Mukasa', class: 'S.3', copies: 40, available: 28, shelf: 'C-1', isbn: '978-9970-003' },
+    { id: '4', title: 'Kampala History Textbook', author: 'Mary Atim', class: 'S.2', copies: 45, available: 38, shelf: 'D-3', isbn: '978-9970-004' },
+  ];
+
+  localStorage.setItem('school_students', JSON.stringify(sampleStudents));
+  localStorage.setItem('school_staff', JSON.stringify(sampleStaff));
+  localStorage.setItem('school_fees', JSON.stringify(sampleFees));
+  localStorage.setItem('school_attendance', JSON.stringify(sampleAttendance));
+  localStorage.setItem('school_exams', JSON.stringify(sampleExams));
+  localStorage.setItem('school_results', JSON.stringify(sampleResults));
+  localStorage.setItem('school_books', JSON.stringify(sampleBooks));
+
+  return true;
+}

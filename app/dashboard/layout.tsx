@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
+import { initializeSampleData } from '@/lib/data';
 import { 
   School, Menu, X, Bell, Search, Settings, LogOut, ChevronDown, Moon, Sun,
   FileText, Users, TrendingUp, CheckCircle, Calendar as CalendarIcon, BookOpen, 
-  Calendar, Shield, Heart, MapPin, Trophy, DollarSign, Package, CalendarDays, Award, Bed 
+  Calendar, Shield, Heart, MapPin, Trophy, DollarSign, Package, CalendarDays, Award, Bed,
+  MessageSquare, Printer, Download, ExternalLink, UserPlus
 } from "lucide-react";
 
 const navItems = [
@@ -57,9 +59,77 @@ const settingsItems = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [pendingFees, setPendingFees] = useState(0);
+  const [recentNotifications, setRecentNotifications] = useState<any[]>([]);
   const pathname = usePathname();
+  const router = useRouter();
   const { resolvedTheme, setTheme } = useTheme();
   const schoolName = "Your School";
+
+  useEffect(() => {
+    initializeSampleData();
+    
+    const students = JSON.parse(localStorage.getItem('school_students') || '[]');
+    const fees = JSON.parse(localStorage.getItem('school_fees') || '[]');
+    const pending = fees.filter((f: any) => f.status === 'Pending' || f.status === 'Overdue').length;
+    setPendingFees(pending);
+
+    const notifications = [
+      ...(fees.filter((f: any) => f.status === 'Overdue').map((f: any, i: number) => ({
+        id: i, type: 'fee', message: `Overdue fees: ${f.studentName}`, time: 'Today'
+      }))),
+      { id: 10, type: 'attendance', message: 'Low attendance detected in S.3 today', time: '1 hour ago' },
+      { id: 11, type: 'exam', message: 'Mid-Term exams scheduled for next week', time: '2 days ago' },
+      { id: 12, type: 'system', message: 'Backup completed successfully', time: '3 days ago' },
+    ].slice(0, 10);
+
+    setRecentNotifications(notifications);
+  }, []);
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    if (!query) { setSearchResults([]); return; }
+    
+    const students = JSON.parse(localStorage.getItem('school_students') || '[]');
+    const staff = JSON.parse(localStorage.getItem('school_staff') || '[]');
+    
+    const q = query.toLowerCase();
+    const results = [
+      ...students.map((s: any) => ({ type: 'Student', name: s.name, href: '/dashboard/students', detail: s.class })),
+      ...staff.map((s: any) => ({ type: 'Staff', name: s.name, href: '/dashboard/staff', detail: s.role })),
+    ].filter((item: any) => item.name.toLowerCase().includes(q) || item.detail.toLowerCase().includes(q));
+    
+    setSearchResults(results.slice(0, 10));
+  };
+
+  const sendWhatsAppReminder = (phone: string, name: string, amount: string) => {
+    const message = `Dear parent of ${name}, this is a reminder that school fees of UGX ${amount} are due. Please pay at your earliest convenience.`;
+    window.open(`https://wa.me/${phone.replace(/\s+/g, '')}?text=${encodeURIComponent(message)}`, '_blank');
+  };
+
+  const printReceipt = (studentName: string, amount: string) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+    printWindow.document.write(`
+      <html><head><title>Fee Receipt</title>
+      <style>body{font-family:Arial;padding:40px}h1{text-align:center}table{width:100%;border-collapse:collapse;margin:20px 0}td,th{border:1px solid #333;padding:10px;text-align:left}</style>
+      </head><body>
+      <h1>SmartSchool Pro - Fee Receipt</h1>
+      <p><strong>School:</strong> ${schoolName}</p>
+      <table><tr><td>Student</td><td>${studentName}</td></tr>
+      <tr><td>Amount</td><td>UGX ${amount}</td></tr>
+      <tr><td>Date</td><td>${new Date().toLocaleDateString()}</td></tr>
+      <tr><td>Status</td><td>Received</td></tr></table>
+      <p style="text-align:center;margin-top:40px">Thank you for your payment!</p>
+      </body></html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+  };
 
   return (
     <div className="min-h-screen bg-muted/30 flex">
@@ -148,10 +218,40 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <header className="bg-background border-b border-border px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button onClick={() => setSidebarOpen(true)} className="lg:hidden"><Menu size={24} /></button>
-            <div className="relative hidden sm:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" size={20} />
-              <input type="text" placeholder="Search students, fees..."
-                className="pl-10 pr-4 py-2 rounded-lg border border-border w-64 lg:w-80 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none" />
+            
+            {/* Global Search */}
+            <div className="relative">
+              <div className="relative hidden sm:block">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" size={20} />
+                <input 
+                  type="text" 
+                  placeholder="Search students, staff, fees..." 
+                  value={searchQuery}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  className="pl-10 pr-4 py-2 rounded-lg border border-border w-64 lg:w-80 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                />
+              </div>
+              {/* Search Results Dropdown */}
+              {searchResults.length > 0 && (
+                <div className="absolute top-full left-0 mt-2 w-80 bg-background rounded-lg shadow-xl border border-border z-50 max-h-80 overflow-y-auto">
+                  <div className="p-2 border-b border-border">
+                    <span className="text-xs font-medium text-foreground/60">Results</span>
+                  </div>
+                  {searchResults.map((result, i) => (
+                    <button
+                      key={i}
+                      onClick={() => { router.push(result.href); setSearchQuery(''); setSearchResults([]); }}
+                      className="w-full px-4 py-3 hover:bg-muted text-left flex items-center gap-3"
+                    >
+                      <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded font-medium">{result.type}</span>
+                      <div>
+                        <p className="font-medium text-sm">{result.name}</p>
+                        <p className="text-xs text-foreground/60">{result.detail}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -162,10 +262,41 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             >
               {resolvedTheme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
             </button>
-            <button className="relative p-2 rounded-lg hover:bg-muted">
-              <Bell size={20} /><span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+
+            {/* Notifications */}
+            <div className="relative">
+              <button onClick={() => setNotificationsOpen(!notificationsOpen)} className="relative p-2 rounded-lg hover:bg-muted">
+                <Bell size={20} />
+                {pendingFees > 0 && <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />}
+              </button>
+              {notificationsOpen && (
+                <div className="absolute right-0 mt-2 w-80 bg-background rounded-lg shadow-xl border border-border z-50 max-h-96 overflow-y-auto">
+                  <div className="p-3 border-b border-border">
+                    <h3 className="font-semibold text-sm">Notifications</h3>
+                  </div>
+                  {recentNotifications.map((notif) => (
+                    <div key={notif.id} className="px-4 py-3 hover:bg-muted border-b border-border/50 flex items-start gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                        notif.type === 'fee' ? 'bg-red-100' : notif.type === 'attendance' ? 'bg-blue-100' : 'bg-green-100'
+                      }`}>
+                        {notif.type === 'fee' ? <DollarSign size={14} className="text-red-600" /> :
+                         notif.type === 'attendance' ? <Users size={14} className="text-blue-600" /> :
+                         <Bell size={14} className="text-green-600" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm truncate">{notif.message}</p>
+                        <p className="text-xs text-foreground/50">{notif.time}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Quick Actions */}
+            <button onClick={() => router.push('/dashboard/students')} className="p-2 rounded-lg hover:bg-muted">
+              <UserPlus size={20} />
             </button>
-            <button className="p-2 rounded-lg hover:bg-muted"><Settings size={20} /></button>
 
             <div className="relative">
               <button onClick={() => setProfileOpen(!profileOpen)} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted">
@@ -181,9 +312,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <p className="font-medium">{schoolName}</p>
                     <p className="text-sm text-foreground/60">Administrator</p>
                   </div>
-                  <Link href="/dashboard/profile" className="block px-4 py-2 hover:bg-muted">Profile Settings</Link>
-                  <button className="w-full text-left px-4 py-2 hover:bg-muted flex items-center gap-2">
-                    <LogOut size={16} />Sign Out
+                  <Link href="/dashboard/profile" className="flex items-center gap-2 px-4 py-2 hover:bg-muted text-sm">
+                    <Settings size={14} />Profile Settings
+                  </Link>
+                  <Link href="/subscription" className="flex items-center gap-2 px-4 py-2 hover:bg-muted text-sm">
+                    <Award size={14} />Subscription
+                  </Link>
+                  <Link href="/contact" className="flex items-center gap-2 px-4 py-2 hover:bg-muted text-sm">
+                    <MessageSquare size={14} />Contact Support
+                  </Link>
+                  <button className="w-full text-left px-4 py-2 hover:bg-muted text-red-600 flex items-center gap-2 text-sm">
+                    <LogOut size={14} />Sign Out
                   </button>
                 </div>
               )}
@@ -197,6 +336,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </div>
 
       {sidebarOpen && <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />}
+      {(searchResults.length > 0 || notificationsOpen || profileOpen) && 
+        <div className="fixed inset-0 z-30" onClick={() => { setSearchResults([]); setNotificationsOpen(false); setProfileOpen(false); }} />
+      }
     </div>
   );
 }
