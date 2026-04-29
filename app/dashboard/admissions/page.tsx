@@ -22,9 +22,23 @@ export default function AdmissionsPage() {
     if (file.size > 2 * 1024 * 1024) return;
     const reader = new FileReader();
     reader.onloadend = () => {
-      const result = reader.result as string;
-      if (type === 'student') setPhotoPreview(result);
-      else setParentPhotoPreview(result);
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const size = 100;
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        const minDim = Math.min(img.width, img.height);
+        const sx = (img.width - minDim) / 2;
+        const sy = (img.height - minDim) / 2;
+        ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, size, size);
+        const compressed = canvas.toDataURL('image/jpeg', 0.6);
+        if (type === 'student') setPhotoPreview(compressed);
+        else setParentPhotoPreview(compressed);
+      };
+      img.src = reader.result as string;
     };
     reader.readAsDataURL(file);
   };
@@ -45,21 +59,39 @@ export default function AdmissionsPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingId) {
-      updateAdmission(editingId, {
-        ...form,
-        photo: photoPreview || undefined,
-        parentPhoto: parentPhotoPreview || undefined,
-      });
-      setEditingId(null);
-    } else {
-      addAdmission({
-        ...form,
-        status: 'pending',
-        date: new Date().toISOString().split('T')[0],
-        photo: photoPreview || undefined,
-        parentPhoto: parentPhotoPreview || undefined,
-      });
+    try {
+      if (editingId) {
+        updateAdmission(editingId, {
+          name: form.name,
+          class: form.class,
+          parent: form.parent,
+          phone: form.phone,
+          email: form.email,
+          dob: form.dob,
+          gender: form.gender,
+          photo: photoPreview || undefined,
+          parentPhoto: parentPhotoPreview || undefined,
+        });
+        setEditingId(null);
+      } else {
+        addAdmission({
+          name: form.name,
+          class: form.class,
+          parent: form.parent,
+          phone: form.phone,
+          email: form.email,
+          dob: form.dob,
+          gender: form.gender,
+          status: 'pending',
+          date: new Date().toISOString().split('T')[0],
+          photo: photoPreview || undefined,
+          parentPhoto: parentPhotoPreview || undefined,
+        });
+      }
+    } catch (err) {
+      console.error('Failed to save admission:', err);
+      alert('Failed to save. Photo might be too large. Try a smaller image.');
+      return;
     }
     setShowNew(false);
     setForm({ name: '', class: 'P.1', parent: '', phone: '', email: '', dob: '', gender: 'Male' });

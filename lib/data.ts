@@ -168,13 +168,22 @@ const initialLeaveRequests: LeaveRequest[] = [
 // LocalStorage helpers
 const getFromStorage = <T>(key: string, initial: T): T => {
   if (typeof window === 'undefined') return initial;
-  const stored = localStorage.getItem(key);
-  return stored ? JSON.parse(stored) : initial;
+  try {
+    const stored = localStorage.getItem(key);
+    return stored ? JSON.parse(stored) : initial;
+  } catch (e) {
+    console.error(`Failed to read from localStorage (${key}):`, e);
+    return initial;
+  }
 };
 
 const saveToStorage = <T>(key: string, data: T) => {
   if (typeof window === 'undefined') return;
-  localStorage.setItem(key, JSON.stringify(data));
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch (e) {
+    console.error(`Failed to save to localStorage (${key}):`, e);
+  }
 };
 
 // Hook for Students
