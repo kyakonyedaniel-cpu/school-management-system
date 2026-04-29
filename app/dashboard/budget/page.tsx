@@ -55,6 +55,21 @@ export default function BudgetPage() {
     setForm({ department: '', description: '', amount: 0 });
   };
 
+  const exportRequests = () => {
+    const headers = ['Request ID', 'Department', 'Description', 'Amount', 'Status', 'Date'];
+    const rows = filteredRequests.map(r => [
+      r.id, r.department, r.description, r.amount.toString(), r.status, r.date
+    ]);
+    const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `budget-requests-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -185,7 +200,7 @@ export default function BudgetPage() {
                   className="pl-10 pr-4 py-2 border border-border rounded-lg"
                 />
               </div>
-              <button className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted">
+              <button onClick={exportRequests} className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted">
                 <Download className="w-4 h-4" /> Export
               </button>
             </div>
@@ -201,6 +216,7 @@ export default function BudgetPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase">Amount</th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase">Status</th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase">Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -220,6 +236,28 @@ export default function BudgetPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm text-foreground/60">{request.date}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                      {request.status === "pending" && (
+                        <>
+                          <button onClick={() => updateStatus(request.id, 'approved')}
+                            className="p-1.5 hover:bg-green-100 rounded" title="Approve">
+                            <CheckCircle className="w-4 h-4 text-green-600" />
+                          </button>
+                          <button onClick={() => updateStatus(request.id, 'rejected')}
+                            className="p-1.5 hover:bg-red-100 rounded" title="Reject">
+                            <XCircle className="w-4 h-4 text-red-600" />
+                          </button>
+                        </>
+                      )}
+                      {request.status === "approved" && (
+                        <span className="text-green-600 text-xs font-medium">Approved</span>
+                      )}
+                      {request.status === "rejected" && (
+                        <span className="text-red-600 text-xs font-medium">Rejected</span>
+                      )}
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
