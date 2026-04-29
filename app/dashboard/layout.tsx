@@ -69,13 +69,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [pendingFees, setPendingFees] = useState(0);
   const [recentNotifications, setRecentNotifications] = useState<any[]>([]);
-  const [schoolProfile, setSchoolProfile] = useState<SchoolProfile>(getSchoolProfile());
+  const [schoolProfile, setSchoolProfile] = useState({ name: 'Your School', motto: 'Excellence in Education', logo: '', email: '', phone: '', address: '', established: '', headTeacher: '' });
   const pathname = usePathname();
   const router = useRouter();
   const { resolvedTheme, setTheme } = useTheme();
   const schoolName = "Your School";
 
   useEffect(() => {
+    const profile = getSchoolProfile();
+    setSchoolProfile(profile);
     initializeSampleData();
     
     const students = JSON.parse(localStorage.getItem('school_students') || '[]');
