@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { School, Users, TrendingUp, Users as UsersIcon, FileText, Calendar } from 'lucide-react';
+import { School, Users, TrendingUp, Users as UsersIcon, FileText, Calendar, ImagePlus, Sparkles } from 'lucide-react';
+import Link from 'next/link';
 import { getSchoolProfile, SchoolProfile } from '@/lib/school';
 
 export default function DashboardPage() {
@@ -43,6 +44,31 @@ export default function DashboardPage() {
       <div>
         <h1 className="text-2xl font-bold">Dashboard</h1>
         <p className="text-foreground/60">Welcome back! Here's what's happening at {schoolProfile.name}.</p>
+      </div>
+
+      {/* School Branding Card */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          {schoolProfile.logo ? (
+            <img src={schoolProfile.logo} alt="School Logo" className="w-16 h-16 object-contain rounded-lg bg-white p-2" />
+          ) : (
+            <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center">
+              <ImagePlus className="w-8 h-8 text-primary" />
+            </div>
+          )}
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <h3 className="font-semibold">Customize Your School Branding</h3>
+            </div>
+            <p className="text-sm text-foreground/60">
+              Upload your school logo and set your motto. They will appear on ID cards, receipts, and throughout the dashboard.
+            </p>
+          </div>
+          <Link href="/dashboard/school-profile" className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium text-sm">
+            Set Up Branding →
+          </Link>
+        </div>
       </div>
 
       {/* Stats */}
