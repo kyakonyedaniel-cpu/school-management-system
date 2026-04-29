@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { School, Users, TrendingUp, Users as UsersIcon, FileText, Calendar } from 'lucide-react';
+import { getSchoolProfile, SchoolProfile } from '@/lib/school';
 
 export default function DashboardPage() {
-  const [schoolName] = useState('Your School');
+  const [schoolProfile, setSchoolProfile] = useState<SchoolProfile>(getSchoolProfile());
   const [students, setStudents] = useState<any[]>([]);
   const [fees, setFees] = useState<any[]>([]);
 
@@ -41,7 +42,7 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-foreground/60">Welcome back! Here's what's happening at {schoolName}.</p>
+        <p className="text-foreground/60">Welcome back! Here's what's happening at {schoolProfile.name}.</p>
       </div>
 
       {/* Stats */}

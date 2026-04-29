@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import { motion } from 'framer-motion';
+import { getSchoolProfile, SchoolProfile } from '@/lib/school';
 import { initializeSampleData } from '@/lib/data';
 import { Logo } from '@/components/logo';
 import { 
@@ -54,6 +55,7 @@ const adminItems = [
 ];
 
 const settingsItems = [
+  { name: "School Branding", href: "/dashboard/school-profile", icon: School },
   { name: "Subscription", href: "/subscription", icon: Award },
   { name: "Profile", href: "/dashboard/profile", icon: Users },
 ];
@@ -67,6 +69,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [pendingFees, setPendingFees] = useState(0);
   const [recentNotifications, setRecentNotifications] = useState<any[]>([]);
+  const [schoolProfile, setSchoolProfile] = useState<SchoolProfile>(getSchoolProfile());
   const pathname = usePathname();
   const router = useRouter();
   const { resolvedTheme, setTheme } = useTheme();
@@ -145,7 +148,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <nav className="p-4 space-y-1 overflow-y-auto h-full">
           <div className="pb-4 mb-4 border-b border-border">
             <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary font-medium">
-              <Logo size={24} />
+              {schoolProfile.logo ? (
+                <img src={schoolProfile.logo} alt="School Logo" className="w-6 h-6 object-contain" />
+              ) : (
+                <Logo size={24} />
+              )}
               <motion.span
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -316,13 +323,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </button>
 
               {profileOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-background rounded-lg shadow-lg border border-border py-2 z-50">
-                  <div className="px-4 py-2 border-b border-border">
-                    <p className="font-medium">{schoolName}</p>
-                    <p className="text-sm text-foreground/60">Administrator</p>
+                <div className="absolute right-0 mt-2 w-56 bg-background rounded-lg shadow-lg border border-border py-2 z-50">
+                  <div className="px-4 py-3 border-b border-border">
+                    <div className="flex items-center gap-3 mb-2">
+                      {schoolProfile.logo ? (
+                        <img src={schoolProfile.logo} alt="Logo" className="w-8 h-8 object-contain" />
+                      ) : (
+                        <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-medium">
+                          {schoolProfile.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="font-medium text-sm truncate">{schoolProfile.name}</p>
+                        <p className="text-xs text-foreground/60 italic truncate">&quot;{schoolProfile.motto}&quot;</p>
+                      </div>
+                    </div>
                   </div>
                   <Link href="/dashboard/profile" className="flex items-center gap-2 px-4 py-2 hover:bg-muted text-sm">
                     <Settings size={14} />Profile Settings
+                  </Link>
+                  <Link href="/dashboard/school-profile" className="flex items-center gap-2 px-4 py-2 hover:bg-muted text-sm">
+                    <School size={14} />School Branding
                   </Link>
                   <Link href="/subscription" className="flex items-center gap-2 px-4 py-2 hover:bg-muted text-sm">
                     <Award size={14} />Subscription
