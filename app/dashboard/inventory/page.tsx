@@ -54,6 +54,29 @@ export default function InventoryPage() {
     setShowNew(true);
   };
 
+  const exportItems = () => {
+    const headers = ['Item ID', 'Name', 'Category', 'Quantity', 'Min Stock', 'Condition', 'Location', 'Last Updated', 'Stock Status'];
+    const rows = filteredItems.map(item => [
+      item.id,
+      item.name,
+      item.category,
+      item.quantity.toString(),
+      item.minStock.toString(),
+      item.condition,
+      item.location,
+      item.lastUpdated,
+      item.quantity < item.minStock ? 'Low Stock' : 'In Stock'
+    ]);
+    const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `inventory-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -162,7 +185,7 @@ export default function InventoryPage() {
                   <option key={cat} value={cat}>{cat}</option>
                 ))}
               </select>
-              <button className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted">
+              <button onClick={exportItems} className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted">
                 <Download className="w-4 h-4" /> Export
               </button>
             </div>
