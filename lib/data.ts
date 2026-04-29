@@ -625,7 +625,15 @@ export function useAdmissions() {
     });
   }, []);
 
-  return { admissions, loading, addAdmission, updateStatus };
+  const updateAdmission = useCallback((id: string, updates: Partial<Admission>) => {
+    setAdmissions(prev => {
+      const updated = prev.map(a => a.id === id ? { ...a, ...updates } : a);
+      saveToStorage('school_admissions', updated);
+      return updated;
+    });
+  }, []);
+
+  return { admissions, loading, addAdmission, updateStatus, updateAdmission };
 }
 
 export interface TransportRoute {

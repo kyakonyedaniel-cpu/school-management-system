@@ -5,7 +5,7 @@ import { Users, Search, Plus, Download, Award, FileText, CheckCircle, XCircle, X
 import { useAdmissions, useStudents, formatUGX, classes } from '@/lib/data';
 
 export default function AdmissionsPage() {
-  const { admissions, addAdmission, updateStatus } = useAdmissions();
+  const { admissions, addAdmission, updateStatus, updateAdmission } = useAdmissions();
   const { students } = useStudents();
   const [searchTerm, setSearchTerm] = useState('');
   const [showNew, setShowNew] = useState(false);
@@ -46,7 +46,11 @@ export default function AdmissionsPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingId) {
-      updateStatus(editingId, 'pending');
+      updateAdmission(editingId, {
+        ...form,
+        photo: photoPreview || undefined,
+        parentPhoto: parentPhotoPreview || undefined,
+      });
       setEditingId(null);
     } else {
       addAdmission({
@@ -213,15 +217,15 @@ export default function AdmissionsPage() {
                     </span>
                   </td>
                    <td className="px-4 py-3">
-                    {app.status === 'pending' && (
-                      <div className="flex gap-2">
-                        <button onClick={() => updateStatus(app.id, 'approved')} className="text-green-600 hover:underline text-sm">Approve</button>
-                        <button onClick={() => updateStatus(app.id, 'rejected')} className="text-red-600 hover:underline text-sm">Reject</button>
-                      </div>
-                    )}
-                    {app.status !== 'pending' && (
+                    <div className="flex gap-2">
+                      {app.status === 'pending' && (
+                        <>
+                          <button onClick={() => updateStatus(app.id, 'approved')} className="text-green-600 hover:underline text-sm">Approve</button>
+                          <button onClick={() => updateStatus(app.id, 'rejected')} className="text-red-600 hover:underline text-sm">Reject</button>
+                        </>
+                      )}
                       <button onClick={() => handleEdit(app)} className="text-blue-600 hover:underline text-sm">Edit</button>
-                    )}
+                    </div>
                   </td>
                 </tr>
               ))}
