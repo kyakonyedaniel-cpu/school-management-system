@@ -27,13 +27,13 @@ export default function ContactPage() {
     {
       icon: Phone,
       title: 'Phone',
-      content: '+256 414 123 456',
+      content: '+256 700 737 512',
       description: 'Mon-Fri 8am-6pm EAT',
     },
     {
       icon: Mail,
       title: 'Email',
-      content: 'hello@smartschool.ug',
+      content: 'kyakonyedaniel@gmail.com',
       description: 'We respond within 24 hours',
     },
     {
