@@ -91,6 +91,42 @@ export default function LeavePage() {
     }
   };
 
+  const exportRequests = () => {
+    const headers = ['Request ID', 'Staff Name', 'Department', 'Leave Type', 'Start Date', 'End Date', 'Days', 'Status', 'Reason'];
+    const rows = filteredRequests.map(r => [r.id, r.staffName, r.department, r.type, r.startDate, r.endDate, r.days.toString(), r.status, r.reason]);
+    const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `leave-requests-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportBalances = () => {
+    const filteredBalances = leaveBalances.filter(b =>
+      b.staff.name.toLowerCase().includes(balanceSearch.toLowerCase()) ||
+      b.staff.department.toLowerCase().includes(balanceSearch.toLowerCase())
+    );
+    const headers = ['Staff Name', 'Department', 'Leave Type', 'Entitled', 'Used', 'Remaining'];
+    const rows: string[][] = [];
+    filteredBalances.forEach(({ staff: s, balances, totalEntitled, totalUsed, totalRemaining }) => {
+      rows.push([s.name, s.department, 'TOTAL', totalEntitled.toString(), totalUsed.toString(), totalRemaining.toString()]);
+      balances.forEach(b => {
+        rows.push([s.name, s.department, b.name, b.days.toString(), b.used.toString(), (b.days - b.used).toString()]);
+      });
+    });
+    const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `leave-balances-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -216,7 +252,7 @@ export default function LeavePage() {
                   <option value="approved">Approved</option>
                   <option value="rejected">Rejected</option>
                 </select>
-                <button className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted">
+                <button onClick={exportRequests} className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted">
                   <Download className="w-4 h-4" /> Export
                 </button>
               </div>
@@ -284,7 +320,7 @@ export default function LeavePage() {
 
         {activeTab === "balance" && (
           <div className="overflow-x-auto">
-            <div className="p-4 border-b">
+            <div className="flex items-center justify-between p-4 border-b">
               <div className="relative max-w-md">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" />
                 <input
@@ -295,6 +331,9 @@ export default function LeavePage() {
                   className="pl-10 pr-4 py-2 border border-border rounded-lg w-full"
                 />
               </div>
+              <button onClick={exportBalances} className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted">
+                <Download className="w-4 h-4" /> Export Balances
+              </button>
             </div>
             <table className="w-full">
               <thead className="bg-muted/30">
