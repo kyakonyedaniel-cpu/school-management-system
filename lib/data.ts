@@ -13,6 +13,7 @@ export interface Student {
   email?: string;
   fees: string;
   status: string;
+  photo?: string;
   createdAt: string;
 }
 
@@ -24,6 +25,7 @@ export interface Staff {
   phone: string;
   email: string;
   status: string;
+  photo?: string;
   createdAt: string;
 }
 

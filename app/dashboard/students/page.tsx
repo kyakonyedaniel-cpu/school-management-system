@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { Plus, Search, Edit, Trash2, X, MessageSquare, Printer, Download, Upload, CheckSquare, Square, RefreshCw } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, X, MessageSquare, Printer, Download, Upload, CheckSquare, Square, RefreshCw, Camera } from 'lucide-react';
 import { useStudents, classes, generateId } from '@/lib/data';
 import { generateStudentIdCard } from '@/lib/print';
 import { sendWhatsApp, sendFeeReminder } from '@/lib/whatsapp';
@@ -13,8 +13,9 @@ export default function StudentsPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingStudent, setEditingStudent] = useState<any>(null);
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
+  const [photoPreview, setPhotoPreview] = useState<string>('');
   const [formData, setFormData] = useState({
-    name: '', class: 'P.1', gender: 'Male', parent: '', phone: '', admissionNo: '', fees: 'Pending'
+    name: '', class: 'P.1', gender: 'Male', parent: '', phone: '', admissionNo: '', fees: 'Pending', photo: ''
   });
 
   const filteredStudents = students.filter(student => {
@@ -33,6 +34,22 @@ export default function StudentsPage() {
     }
   };
 
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2000000) {
+      alert('Photo must be less than 2MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      setPhotoPreview(result);
+      setFormData(prev => ({ ...prev, photo: result }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingStudent) {
@@ -42,11 +59,13 @@ export default function StudentsPage() {
     }
     setShowAddModal(false);
     setEditingStudent(null);
-    setFormData({ name: '', class: 'P.1', gender: 'Male', parent: '', phone: '', admissionNo: '', fees: 'Pending' });
+    setPhotoPreview('');
+    setFormData({ name: '', class: 'P.1', gender: 'Male', parent: '', phone: '', admissionNo: '', fees: 'Pending', photo: '' });
   };
 
   const handleEdit = (student: any) => {
     setFormData(student);
+    setPhotoPreview(student.photo || '');
     setEditingStudent(student);
     setShowAddModal(true);
   };
@@ -134,7 +153,7 @@ export default function StudentsPage() {
             <Download size={18} />
             <span className="hidden sm:inline">Export</span>
           </button>
-          <button onClick={() => { setEditingStudent(null); setFormData({ name: '', class: 'P.1', gender: 'Male', parent: '', phone: '', admissionNo: `ST/2024/${String(students.length + 1).padStart(3, '0')}`, fees: 'Pending' }); setShowAddModal(true); }}
+          <button onClick={() => { setEditingStudent(null); setPhotoPreview(''); setFormData({ name: '', class: 'P.1', gender: 'Male', parent: '', phone: '', admissionNo: `ST/2024/${String(students.length + 1).padStart(3, '0')}`, fees: 'Pending', photo: '' }); setShowAddModal(true); }}
             className="flex items-center gap-2 px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90">
             <Plus size={18} />Add Student
           </button>
@@ -200,9 +219,13 @@ export default function StudentsPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-medium">
-                        {student.name.charAt(0).toUpperCase()}
-                      </div>
+                      {student.photo ? (
+                        <img src={student.photo} alt={student.name} className="w-8 h-8 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-medium">
+                          {student.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
                       <span className="font-medium">{student.name}</span>
                     </div>
                   </td>
@@ -245,6 +268,22 @@ export default function StudentsPage() {
               <button onClick={() => setShowAddModal(false)} className="p-1 hover:bg-muted rounded"><X size={20} /></button>
             </div>
             <form onSubmit={handleSubmit} className="p-4 space-y-4">
+              {/* Photo Upload */}
+              <div className="flex flex-col items-center gap-3 mb-4">
+                <div className="w-24 h-24 rounded-full border-2 border-dashed border-border flex items-center justify-center overflow-hidden bg-muted/30">
+                  {photoPreview ? (
+                    <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <Camera className="w-8 h-8 text-foreground/30" />
+                  )}
+                </div>
+                <label className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-lg cursor-pointer text-sm hover:bg-primary/20">
+                  <Camera size={14} />
+                  {photoPreview ? 'Change Photo' : 'Add Photo'}
+                  <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+                </label>
+              </div>
+
               <input type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})}
                 className="w-full px-3 py-2 rounded-lg border border-border" placeholder="Student Name" required />
               <div className="grid grid-cols-2 gap-4">

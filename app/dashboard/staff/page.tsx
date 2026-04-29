@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { Plus, Edit, Search, Trash2, X } from 'lucide-react';
+import { Plus, Edit, Search, Trash2, X, Camera } from 'lucide-react';
 import { useStaff } from '@/lib/data';
 
 const departments = ['Administration', 'Science', 'Languages', 'Mathematics', 'Social Studies', 'ICT', 'Physical Education'];
@@ -11,9 +11,26 @@ export default function StaffPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingStaff, setEditingStaff] = useState<any>(null);
+  const [photoPreview, setPhotoPreview] = useState<string>('');
   const [formData, setFormData] = useState({
-    name: '', role: '', department: 'Administration', phone: '', email: '', status: 'Active'
+    name: '', role: '', department: 'Administration', phone: '', email: '', status: 'Active', photo: ''
   });
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2000000) {
+      alert('Photo must be less than 2MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      setPhotoPreview(result);
+      setFormData(prev => ({ ...prev, photo: result }));
+    };
+    reader.readAsDataURL(file);
+  };
 
   const filteredStaff = staff.filter(member => 
     member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -29,11 +46,13 @@ export default function StaffPage() {
     }
     setShowModal(false);
     setEditingStaff(null);
-    setFormData({ name: '', role: '', department: 'Administration', phone: '', email: '', status: 'Active' });
+    setPhotoPreview('');
+    setFormData({ name: '', role: '', department: 'Administration', phone: '', email: '', status: 'Active', photo: '' });
   };
 
   const handleEdit = (member: any) => {
     setFormData(member);
+    setPhotoPreview(member.photo || '');
     setEditingStaff(member);
     setShowModal(true);
   };
@@ -51,7 +70,7 @@ export default function StaffPage() {
           <h1 className="text-2xl font-bold">Staff</h1>
           <p className="text-foreground/60">{staff.length} staff members</p>
         </div>
-        <button onClick={() => { setEditingStaff(null); setFormData({ name: '', role: '', department: 'Administration', phone: '', email: '', status: 'Active' }); setShowModal(true); }}
+        <button onClick={() => { setEditingStaff(null); setPhotoPreview(''); setFormData({ name: '', role: '', department: 'Administration', phone: '', email: '', status: 'Active', photo: '' }); setShowModal(true); }}
           className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
           <Plus size={18} />Add Staff
         </button>
@@ -78,32 +97,42 @@ export default function StaffPage() {
               <th className="text-right px-4 py-3 text-sm font-medium">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y">
+          <tbody className="divide-y divide-border">
             {filteredStaff.map((member) => (
               <tr key={member.id} className="hover:bg-muted/30">
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-primary font-medium">
-                      {member.name.split(' ').map(n => n[0]).join('')}
-                    </div>
+                    {member.photo ? (
+                      <img src={member.photo} alt={member.name} className="w-8 h-8 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-medium">
+                        {member.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
                     <span className="font-medium">{member.name}</span>
                   </div>
                 </td>
-                <td className="px-4 py-3">{member.role}</td>
-                <td className="px-4 py-3">{member.department}</td>
-                <td className="px-4 py-3">
-                  <p className="text-sm">{member.phone}</p>
-                  <p className="text-xs text-foreground/60">{member.email}</p>
+                <td className="px-4 py-3 text-sm">{member.role}</td>
+                <td className="px-4 py-3 text-sm">{member.department}</td>
+                <td className="px-4 py-3 text-sm">
+                  <div>
+                    <p className="text-sm">{member.phone}</p>
+                    <p className="text-xs text-foreground/60">{member.email}</p>
+                  </div>
                 </td>
                 <td className="px-4 py-3">
-                  <span className={`px-2 py-1 rounded-full text-xs ${member.status === 'Active' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                  <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-600">
                     {member.status}
                   </span>
                 </td>
                 <td className="px-4 py-3 text-right">
-                  <div className="flex items-center gap-2 justify-end">
-                    <button onClick={() => handleEdit(member)} className="p-2 rounded-lg hover:bg-muted"><Edit size={16} /></button>
-                    <button onClick={() => handleDelete(member.id)} className="p-2 rounded-lg hover:bg-muted text-red-600"><Trash2 size={16} /></button>
+                  <div className="flex items-center justify-end gap-1">
+                    <button onClick={() => handleEdit(member)} className="p-2 hover:bg-muted rounded">
+                      <Edit size={16} />
+                    </button>
+                    <button onClick={() => handleDelete(member.id)} className="p-2 hover:bg-red-50 text-red-600 rounded">
+                      <Trash2 size={16} />
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -112,46 +141,46 @@ export default function StaffPage() {
         </table>
       </div>
 
+      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-background rounded-xl border border-border w-full max-w-md p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">{editingStaff ? 'Edit Staff' : 'Add New Staff'}</h2>
-              <button onClick={() => setShowModal(false)}><X size={20} /></button>
+          <div className="bg-background rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <h2 className="font-semibold">{editingStaff ? 'Edit Staff' : 'Add Staff Member'}</h2>
+              <button onClick={() => setShowModal(false)} className="p-1 hover:bg-muted rounded"><X size={20} /></button>
             </div>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Full Name</label>
-                <input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-2 rounded-lg border border-border focus:border-primary outline-none" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Role/Position</label>
-                <input type="text" required value={formData.role} onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  placeholder="e.g. Mathematics Teacher"
-                  className="w-full px-4 py-2 rounded-lg border border-border focus:border-primary outline-none" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Department</label>
-                <select value={formData.department} onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                  className="w-full px-4 py-2 rounded-lg border border-border focus:border-primary outline-none">
-                  {departments.map(dept => <option key={dept} value={dept}>{dept}</option>)}
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Phone</label>
-                  <input type="tel" required value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-4 py-2 rounded-lg border border-border focus:border-primary outline-none" />
+            <form onSubmit={handleSubmit} className="p-4 space-y-4">
+              {/* Photo Upload */}
+              <div className="flex flex-col items-center gap-3 mb-4">
+                <div className="w-24 h-24 rounded-full border-2 border-dashed border-border flex items-center justify-center overflow-hidden bg-muted/30">
+                  {photoPreview ? (
+                    <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <Camera className="w-8 h-8 text-foreground/30" />
+                  )}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Email</label>
-                  <input type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-2 rounded-lg border border-border focus:border-primary outline-none" />
-                </div>
+                <label className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-lg cursor-pointer text-sm hover:bg-primary/20">
+                  <Camera size={14} />
+                  {photoPreview ? 'Change Photo' : 'Add Photo'}
+                  <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+                </label>
               </div>
-              <div className="flex gap-4 pt-4">
-                <button type="button" onClick={() => setShowModal(false)} className="flex-1 px-4 py-2 border border-border rounded-lg hover:bg-muted">Cancel</button>
+
+              <input type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})}
+                className="w-full px-3 py-2 rounded-lg border border-border" placeholder="Full Name" required />
+              <input type="text" value={formData.role} onChange={(e) => setFormData({...formData, role: e.target.value})}
+                className="w-full px-3 py-2 rounded-lg border border-border" placeholder="Role (e.g. Teacher)" required />
+              <select value={formData.department} onChange={(e) => setFormData({...formData, department: e.target.value})}
+                className="w-full px-3 py-2 rounded-lg border border-border">
+                {departments.map(dept => <option key={dept} value={dept}>{dept}</option>)}
+              </select>
+              <input type="tel" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                className="w-full px-3 py-2 rounded-lg border border-border" placeholder="Phone Number" />
+              <input type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})}
+                className="w-full px-3 py-2 rounded-lg border border-border" placeholder="Email Address" />
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setShowModal(false)}
+                  className="flex-1 px-4 py-2 border border-border rounded-lg hover:bg-muted">Cancel</button>
                 <button type="submit" className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
                   {editingStaff ? 'Update' : 'Add Staff'}
                 </button>
