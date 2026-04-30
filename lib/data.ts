@@ -26,6 +26,8 @@ export interface Staff {
   email: string;
   status: string;
   photo?: string;
+  subject?: string;
+  joinDate?: string;
   createdAt: string;
 }
 
