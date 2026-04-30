@@ -1107,6 +1107,110 @@ export function useSports() {
   return { teams, loading, addTeam, updateTeam, deleteTeam };
 }
 
+export interface Parent {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  photo?: string;
+  children: string[];
+  address: string;
+  emergencyContact: string;
+  occupation: string;
+  status: 'Active' | 'Inactive';
+  createdAt: string;
+}
+
+export interface PTAMeeting {
+  id: string;
+  title: string;
+  date: string;
+  venue: string;
+  agenda: string;
+  attendees: number;
+  minutes?: string;
+  status: 'upcoming' | 'completed' | 'cancelled';
+}
+
+export function useParents() {
+  const initialParents: Parent[] = [
+    { id: '1', name: 'Michael Okello', email: 'm.ok@email.com', phone: '+256 701 234 567', photo: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%231e40af%22/%3E%3Ctext x=%2250%22 y=%2265%22 font-size=%2240%22 text-anchor=%22middle%22 fill=%22white%22%3EMO%3C/text%3E%3C/svg%3E', children: ['John Okello'], address: 'Kampala Central', emergencyContact: '+256 772 111 222', occupation: 'Businessman', status: 'Active', createdAt: '2024-01-15' },
+    { id: '2', name: 'Grace Nakato', email: 'g.nak@email.com', phone: '+256 702 345 678', photo: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23ec4899%22/%3E%3Ctext x=%2250%22 y=%2265%22 font-size=%2240%22 text-anchor=%22middle%22 fill=%22white%22%3EGN%3C/text%3E%3C/svg%3E', children: ['Sarah Nakato'], address: 'Entebbe Road', emergencyContact: '+256 773 222 333', occupation: 'Teacher', status: 'Active', createdAt: '2024-02-10' },
+    { id: '3', name: 'Robert Ssebu', email: 'r.sse@email.com', phone: '+256 703 456 789', photo: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%2310b981%22/%3E%3Ctext x=%2250%22 y=%2265%22 font-size=%2240%22 text-anchor=%22middle%22 fill=%22white%22%3ERS%3C/text%3E%3C/svg%3E', children: ['David Ssebu'], address: 'Mukono Town', emergencyContact: '+256 774 333 444', occupation: 'Farmer', status: 'Active', createdAt: '2024-03-05' },
+    { id: '4', name: 'Joseph Namuli', email: 'j.nam@email.com', phone: '+256 704 567 890', photo: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%238b5cf6%22/%3E%3Ctext x=%2250%22 y=%2265%22 font-size=%2240%22 text-anchor=%22middle%22 fill=%22white%22%3EJN%3C/text%3E%3C/svg%3E', children: ['Mary Namuli'], address: 'Wakiso District', emergencyContact: '+256 775 444 555', occupation: 'Engineer', status: 'Active', createdAt: '2024-04-12' },
+    { id: '5', name: 'Alice Mugisha', email: 'a.mug@email.com', phone: '+256 705 678 901', photo: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23f59e0b%22/%3E%3Ctext x=%2250%22 y=%2265%22 font-size=%2240%22 text-anchor=%22middle%22 fill=%22white%22%3EAM%3C/text%3E%3C/svg%3E', children: ['Peter Mugisha'], address: 'Jinja Road', emergencyContact: '+256 776 555 666', occupation: 'Nurse', status: 'Active', createdAt: '2024-05-20' },
+  ];
+
+  const initialMeetings: PTAMeeting[] = [
+    { id: '1', title: 'Term I PTA General Meeting', date: '2026-03-28', venue: 'School Main Hall', agenda: 'Academic performance review, fee structure discussion, infrastructure updates', attendees: 85, status: 'completed', minutes: 'Meeting approved new fee structure for Term II' },
+    { id: '2', title: 'End of Term Review', date: '2026-04-25', venue: 'School Main Hall', agenda: 'Exam results distribution, holiday homework, Term II planning', attendees: 0, status: 'upcoming' },
+  ];
+
+  const [parents, setParents] = useState<Parent[]>([]);
+  const [meetings, setMeetings] = useState<PTAMeeting[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setParents(getFromStorage('school_parents', initialParents));
+    setMeetings(getFromStorage('school_pta_meetings', initialMeetings));
+    setLoading(false);
+  }, []);
+
+  const addParent = useCallback((parent: Omit<Parent, 'id' | 'createdAt'>) => {
+    const newParent = { ...parent, id: generateId(), createdAt: new Date().toISOString() };
+    setParents(prev => {
+      const updated = [...prev, newParent];
+      saveToStorage('school_parents', updated);
+      return updated;
+    });
+    return newParent;
+  }, []);
+
+  const updateParent = useCallback((id: string, updates: Partial<Parent>) => {
+    setParents(prev => {
+      const updated = prev.map(p => p.id === id ? { ...p, ...updates } : p);
+      saveToStorage('school_parents', updated);
+      return updated;
+    });
+  }, []);
+
+  const deleteParent = useCallback((id: string) => {
+    setParents(prev => {
+      const updated = prev.filter(p => p.id !== id);
+      saveToStorage('school_parents', updated);
+      return updated;
+    });
+  }, []);
+
+  const addMeeting = useCallback((meeting: Omit<PTAMeeting, 'id'>) => {
+    const newMeeting = { ...meeting, id: generateId() };
+    setMeetings(prev => {
+      const updated = [...prev, newMeeting];
+      saveToStorage('school_pta_meetings', updated);
+      return updated;
+    });
+    return newMeeting;
+  }, []);
+
+  const updateMeeting = useCallback((id: string, updates: Partial<PTAMeeting>) => {
+    setMeetings(prev => {
+      const updated = prev.map(m => m.id === id ? { ...m, ...updates } : m);
+      saveToStorage('school_pta_meetings', updated);
+      return updated;
+    });
+  }, []);
+
+  const deleteMeeting = useCallback((id: string) => {
+    setMeetings(prev => {
+      const updated = prev.filter(m => m.id !== id);
+      saveToStorage('school_pta_meetings', updated);
+      return updated;
+    });
+  }, []);
+
+  return { parents, meetings, loading, addParent, updateParent, deleteParent, addMeeting, updateMeeting, deleteMeeting };
+}
+
 // Hook for Houses
 export function useHouses() {
   const initialHouses: House[] = [
