@@ -13,11 +13,15 @@ export default function ParentsPage() {
   const [showMeetingModal, setShowMeetingModal] = useState(false);
   const [editingParentId, setEditingParentId] = useState<string | null>(null);
   const [editingMeetingId, setEditingMeetingId] = useState<string | null>(null);
-  const [parentForm, setParentForm] = useState({
-    name: '', email: '', phone: '', photo: '', children: [] as string[], address: '', emergencyContact: '', occupation: '', status: 'Active' as const
+  const [parentForm, setParentForm] = useState<{
+    name: string; email: string; phone: string; photo: string; children: string[]; address: string; emergencyContact: string; occupation: string; status: 'Active' | 'Inactive'
+  }>({
+    name: '', email: '', phone: '', photo: '', children: [], address: '', emergencyContact: '', occupation: '', status: 'Active'
   });
-  const [meetingForm, setMeetingForm] = useState({
-    title: '', date: '', venue: '', agenda: '', minutes: '', status: 'upcoming' as const
+  const [meetingForm, setMeetingForm] = useState<{
+    title: string; date: string; venue: string; agenda: string; minutes: string; status: 'upcoming' | 'completed' | 'cancelled'
+  }>({
+    title: '', date: '', venue: '', agenda: '', minutes: '', status: 'upcoming'
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [photoPreview, setPhotoPreview] = useState('');
@@ -156,7 +160,7 @@ export default function ParentsPage() {
             address: row.address || '',
             emergencyContact: row.emergencyContact || row['Emergency Contact'] || '',
             occupation: row.occupation || '',
-            status: row.status || 'Active',
+            status: (row.status || 'Active') as 'Active' | 'Inactive',
           });
         }
       });
