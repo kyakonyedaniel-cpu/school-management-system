@@ -19,7 +19,7 @@ export default function SportsPage() {
     name: '', sport: 'Football', coach: '', members: 0, wins: 0, losses: 0, draws: 0, status: 'Active'
   });
   const [eventForm, setEventForm] = useState({
-    name: '', sport: 'Football', date: '', location: '', status: 'upcoming' as const, participants: 0, result: ''
+    name: '', sport: 'Football', date: '', location: '', status: 'upcoming' as 'upcoming' | 'ongoing' | 'completed', participants: 0, result: ''
   });
 
   const filteredTeams = teams.filter(t =>
@@ -62,7 +62,7 @@ export default function SportsPage() {
   };
 
   const handleEditTeam = (team: typeof teams[0]) => {
-    setTeamForm({ name: team.name, sport: 'Football', coach: team.coach, members: team.members, wins: team.wins, losses: team.losses, draws: 0, status: team.status });
+    setTeamForm({ name: team.name, sport: team.sport, coach: team.coach, members: team.members, wins: team.wins, losses: team.losses, draws: team.draws, status: team.status });
     setEditingTeamId(team.id);
     setShowTeamModal(true);
   };
@@ -77,9 +77,9 @@ export default function SportsPage() {
     if (activeTab === 'teams') {
       const headers = ['Name', 'Sport', 'Coach', 'Members', 'Wins', 'Losses', 'Draws', 'Win Rate', 'Status'];
       const rows = filteredTeams.map(t => [
-        t.name, 'Football', t.coach, t.members.toString(), t.wins.toString(),
+        t.name, t.sport, t.coach, t.members.toString(), t.wins.toString(),
         t.losses.toString(), t.draws.toString(),
-        (t.wins + t.losses > 0) ? ((t.wins / (t.wins + t.losses)) * 100).toFixed(1) + '%' : 'N/A',
+        (t.wins + t.losses + t.draws > 0) ? ((t.wins / (t.wins + t.losses + t.draws)) * 100).toFixed(1) + '%' : 'N/A',
         t.status
       ]);
       const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
@@ -113,10 +113,12 @@ export default function SportsPage() {
         if (row.name && row.coach) {
           addTeam({
             name: row.name,
+            sport: row.sport || 'Football',
             coach: row.coach,
             members: parseInt(row.members) || 0,
             wins: parseInt(row.wins) || 0,
             losses: parseInt(row.losses) || 0,
+            draws: parseInt(row.draws) || 0,
             status: row.status || 'Active',
           });
         }

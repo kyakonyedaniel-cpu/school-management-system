@@ -764,10 +764,12 @@ export interface HealthRecord {
 export interface Team {
   id: string;
   name: string;
+  sport: string;
   coach: string;
   members: number;
   wins: number;
   losses: number;
+  draws: number;
   status: string;
 }
 
@@ -1056,10 +1058,10 @@ export function useHealth() {
 // Hook for Sports Teams
 export function useSports() {
   const initialTeams: Team[] = [
-    { id: '1', name: 'Football - Senior', coach: 'Mr. Kato', members: 18, wins: 5, losses: 2, status: 'Active' },
-    { id: '2', name: 'Football - Junior', coach: 'Mr. Ssebu', members: 15, wins: 4, losses: 1, status: 'Active' },
-    { id: '3', name: 'Netball', coach: 'Ms. Nakanwagi', members: 12, wins: 6, losses: 0, status: 'Active' },
-    { id: '4', name: 'Volleyball', coach: 'Mr. Muwonge', members: 10, wins: 3, losses: 3, status: 'Active' },
+    { id: '1', name: 'Football - Senior', sport: 'Football', coach: 'Mr. Kato', members: 18, wins: 5, losses: 2, draws: 1, status: 'Active' },
+    { id: '2', name: 'Football - Junior', sport: 'Football', coach: 'Mr. Ssebu', members: 15, wins: 4, losses: 1, draws: 0, status: 'Active' },
+    { id: '3', name: 'Netball', sport: 'Netball', coach: 'Ms. Nakanwagi', members: 12, wins: 6, losses: 0, draws: 0, status: 'Active' },
+    { id: '4', name: 'Volleyball', sport: 'Volleyball', coach: 'Mr. Muwonge', members: 10, wins: 3, losses: 3, draws: 2, status: 'Active' },
   ];
 
   const [teams, setTeams] = useState<Team[]>([]);
