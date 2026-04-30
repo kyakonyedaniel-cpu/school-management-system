@@ -76,30 +76,40 @@ export default function SportsPage() {
   const exportData = () => {
     if (activeTab === 'teams') {
       const headers = ['Name', 'Sport', 'Coach', 'Members', 'Wins', 'Losses', 'Draws', 'Win Rate', 'Status'];
-      const rows = filteredTeams.map(t => [
-        t.name, t.sport, t.coach, t.members.toString(), t.wins.toString(),
-        t.losses.toString(), t.draws.toString(),
-        (t.wins + t.losses + t.draws > 0) ? ((t.wins / (t.wins + t.losses + t.draws)) * 100).toFixed(1) + '%' : 'N/A',
-        t.status
-      ]);
-      const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
-      downloadCSV(csv, 'teams');
+      const rows = filteredTeams.map(t => {
+        const wins = t.wins || 0;
+        const losses = t.losses || 0;
+        const draws = t.draws || 0;
+        const total = wins + losses + draws;
+        const winRate = total > 0 ? ((wins / total) * 100).toFixed(1) + '%' : 'N/A';
+        return [t.name, t.sport || 'Football', t.coach, t.members.toString(), wins.toString(), losses.toString(), draws.toString(), winRate, t.status];
+      });
+      const csvContent = [headers.join(','), ...rows.map(row => row.map(cell => `"${cell}"`).join(','))].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `sports-teams-${new Date().toISOString().split('T')[0]}.csv`;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     } else {
       const headers = ['Event', 'Sport', 'Date', 'Location', 'Status', 'Participants', 'Result'];
       const rows = filteredEvents.map(e => [e.name, e.sport, e.date, e.location, e.status, e.participants.toString(), e.result]);
-      const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
-      downloadCSV(csv, 'events');
+      const csvContent = [headers.join(','), ...rows.map(row => row.map(cell => `"${cell}"`).join(','))].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `sports-events-${new Date().toISOString().split('T')[0]}.csv`;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     }
-  };
-
-  const downloadCSV = (csv: string, name: string) => {
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `sports-${name}-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
   };
 
   const importTeams = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -1068,7 +1068,13 @@ export function useSports() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setTeams(getFromStorage('school_teams', initialTeams));
+    const stored = getFromStorage('school_teams', initialTeams) as Team[];
+    const normalized = stored.map(t => ({
+      ...t,
+      sport: t.sport || 'Football',
+      draws: t.draws ?? 0,
+    }));
+    setTeams(normalized);
     setLoading(false);
   }, []);
 
