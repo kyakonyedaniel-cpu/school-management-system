@@ -771,6 +771,61 @@ export interface Team {
   status: string;
 }
 
+export interface SportEvent {
+  id: string;
+  name: string;
+  sport: string;
+  date: string;
+  location: string;
+  status: 'upcoming' | 'ongoing' | 'completed';
+  participants: number;
+  result: string;
+}
+
+export function useSportEvents() {
+  const initialEvents: SportEvent[] = [
+    { id: '1', name: 'East African Games 2026', sport: 'Multi-sport', date: 'Jul 15-25, 2026', location: 'Nairobi, Kenya', status: 'upcoming', participants: 12, result: '' },
+    { id: '2', name: 'National Schools Cup', sport: 'Football', date: 'May 20, 2026', location: 'Kampala', status: 'upcoming', participants: 8, result: '' },
+    { id: '3', name: 'District Athletics', sport: 'Athletics', date: 'Apr 30, 2026', location: 'Mukono', status: 'completed', participants: 15, result: '2nd Place' },
+  ];
+
+  const [events, setEvents] = useState<SportEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setEvents(getFromStorage('school_sport_events', initialEvents));
+    setLoading(false);
+  }, []);
+
+  const addEvent = useCallback((event: Omit<SportEvent, 'id'>) => {
+    const newEvent = { ...event, id: generateId() };
+    setEvents(prev => {
+      const updated = [...prev, newEvent];
+      saveToStorage('school_sport_events', updated);
+      return updated;
+    });
+    return newEvent;
+  }, []);
+
+  const updateEvent = useCallback((id: string, updates: Partial<SportEvent>) => {
+    setEvents(prev => {
+      const updated = prev.map(e => e.id === id ? { ...e, ...updates } : e);
+      saveToStorage('school_sport_events', updated);
+      return updated;
+    });
+  }, []);
+
+  const deleteEvent = useCallback((id: string) => {
+    setEvents(prev => {
+      const updated = prev.filter(e => e.id !== id);
+      saveToStorage('school_sport_events', updated);
+      return updated;
+    });
+  }, []);
+
+  return { events, loading, addEvent, updateEvent, deleteEvent };
+}
+
 export interface House {
   id: string;
   name: string;
@@ -1033,7 +1088,15 @@ export function useSports() {
     });
   }, []);
 
-  return { teams, loading, addTeam, updateTeam };
+  const deleteTeam = useCallback((id: string) => {
+    setTeams(prev => {
+      const updated = prev.filter(t => t.id !== id);
+      saveToStorage('school_teams', updated);
+      return updated;
+    });
+  }, []);
+
+  return { teams, loading, addTeam, updateTeam, deleteTeam };
 }
 
 // Hook for Houses
