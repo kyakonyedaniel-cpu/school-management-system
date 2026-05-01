@@ -49,6 +49,8 @@ export default function TimetablePage() {
   const [showAddScheduleModal, setShowAddScheduleModal] = useState(false);
   const [showCopyModal, setShowCopyModal] = useState(false);
   const [copyTargetClass, setCopyTargetClass] = useState('');
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editSlots, setEditSlots] = useState<typeof classTimetable>([]);
   const [slotForm, setSlotForm] = useState({ time: '', mon: '', tue: '', wed: '', thu: '', fri: '' });
   const [scheduleForm, setScheduleForm] = useState({ name: '', class: 'All', date: '', duration: 'Week' });
   const [searchTerm, setSearchTerm] = useState('');
@@ -109,6 +111,54 @@ export default function TimetablePage() {
   const handleDeleteSlot = (time: string) => {
     if (!confirm(`Delete the ${time} period?`)) return;
     const updated = { ...timetable, [selectedClass]: classTimetable.filter(r => r.time !== time) };
+    updateTimetable(updated);
+  };
+
+  const openEditTimetable = () => {
+    setEditSlots(JSON.parse(JSON.stringify(classTimetable)));
+    setShowEditModal(true);
+  };
+
+  const handleEditSlotChange = (index: number, field: string, value: string) => {
+    setEditSlots(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  };
+
+  const handleSaveEditTimetable = () => {
+    const updated = { ...timetable, [selectedClass]: editSlots };
+    updateTimetable(updated);
+    setShowEditModal(false);
+    setEditSlots([]);
+  };
+
+  const handleAddSlotInEdit = () => {
+    setEditSlots(prev => [...prev, {
+      id: Math.random().toString(36).substring(2, 15),
+      class: selectedClass,
+      time: '', mon: '', tue: '', wed: '', thu: '', fri: ''
+    }]);
+  };
+
+  const handleRemoveSlotInEdit = (index: number) => {
+    setEditSlots(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleMoveSlotInEdit = (index: number, direction: 'up' | 'down') => {
+    setEditSlots(prev => {
+      const updated = [...prev];
+      const newIndex = direction === 'up' ? index - 1 : index + 1;
+      if (newIndex < 0 || newIndex >= updated.length) return prev;
+      [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+      return updated;
+    });
+  };
+
+  const handleClearTimetable = () => {
+    if (!confirm(`Clear entire timetable for ${selectedClass}? This cannot be undone.`)) return;
+    const updated = { ...timetable, [selectedClass]: [] };
     updateTimetable(updated);
   };
 
@@ -286,6 +336,12 @@ ${classTimetable.map(row => `<tr><td class="time">${row.time}</td>${days.map(d =
             <button onClick={() => navigateClass('next')} className="p-1.5 hover:bg-muted rounded"><ChevronRight size={16} /></button>
             <button onClick={() => setShowCopyModal(true)} className="flex items-center gap-1 px-2 py-1.5 text-sm border border-border rounded-lg hover:bg-muted">
               <Copy size={14} />Copy to...
+            </button>
+            <button onClick={openEditTimetable} className="flex items-center gap-1 px-2 py-1.5 text-sm border border-border rounded-lg hover:bg-muted">
+              <Edit size={14} />Edit Timetable
+            </button>
+            <button onClick={handleClearTimetable} className="flex items-center gap-1 px-2 py-1.5 text-sm border border-red-200 text-red-600 rounded-lg hover:bg-red-50">
+              <Trash2 size={14} />Clear
             </button>
             <button onClick={() => setShowAddSlotModal(true)} className="flex items-center gap-1 px-2 py-1.5 text-sm bg-primary text-white rounded-lg hover:bg-primary/90">
               <Plus size={14} />Add Period
@@ -506,6 +562,96 @@ ${classTimetable.map(row => `<tr><td class="time">${row.time}</td>${days.map(d =
                 <button type="submit" className="flex-1 px-4 py-2 bg-primary text-white rounded-lg">Add Schedule</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-xl border border-border w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <div>
+                <h2 className="text-lg font-semibold">Edit Timetable — {selectedClass}</h2>
+                <p className="text-sm text-foreground/60">Edit all periods, reorder rows, then save</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button onClick={handleAddSlotInEdit} className="flex items-center gap-1 px-3 py-1.5 text-sm border border-border rounded-lg hover:bg-muted">
+                  <Plus size={14} />Add Row
+                </button>
+                <button onClick={() => setShowEditModal(false)}><X size={20} /></button>
+              </div>
+            </div>
+            <div className="overflow-y-auto flex-1 p-4">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-muted/50 sticky top-0">
+                    <tr>
+                      <th className="text-left px-3 py-2 text-xs font-medium text-foreground/70 w-8">#</th>
+                      <th className="text-left px-3 py-2 text-xs font-medium text-foreground/70 w-32">Time</th>
+                      <th className="text-center px-3 py-2 text-xs font-medium text-foreground/70">Monday</th>
+                      <th className="text-center px-3 py-2 text-xs font-medium text-foreground/70">Tuesday</th>
+                      <th className="text-center px-3 py-2 text-xs font-medium text-foreground/70">Wednesday</th>
+                      <th className="text-center px-3 py-2 text-xs font-medium text-foreground/70">Thursday</th>
+                      <th className="text-center px-3 py-2 text-xs font-medium text-foreground/70">Friday</th>
+                      <th className="w-20 text-center text-xs font-medium text-foreground/70">Order</th>
+                      <th className="w-10"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {editSlots.map((row, index) => (
+                      <tr key={row.id || index} className="border-t border-border">
+                        <td className="px-3 py-2 text-sm text-foreground/40 font-medium">{index + 1}</td>
+                        <td className="px-3 py-2">
+                          <input type="text" value={row.time} onChange={(e) => handleEditSlotChange(index, 'time', e.target.value)}
+                            placeholder="e.g. 7:30 - 8:30"
+                            className="w-full px-2 py-1 text-sm rounded border border-border focus:border-primary outline-none" />
+                        </td>
+                        {days.map(day => (
+                          <td key={day} className="px-2 py-2 text-center">
+                            <select value={row[day] || ''} onChange={(e) => handleEditSlotChange(index, day, e.target.value)}
+                              className={`w-full text-sm px-2 py-1 rounded border outline-none focus:border-primary ${row[day] === 'Break' || row[day] === 'Lunch' ? 'bg-yellow-50 border-yellow-200' : 'border-border'}`}>
+                              <option value="">-- Empty --</option>
+                              <option value="Break">Break</option>
+                              <option value="Lunch">Lunch</option>
+                              <option value="Assembly">Assembly</option>
+                              {subjects.map(s => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                          </td>
+                        ))}
+                        <td className="px-2 py-2 text-center">
+                          <div className="flex items-center justify-center gap-1">
+                            <button onClick={() => handleMoveSlotInEdit(index, 'up')} disabled={index === 0}
+                              className="p-1 rounded hover:bg-muted disabled:opacity-30"><ChevronLeft size={14} className="rotate-90" /></button>
+                            <button onClick={() => handleMoveSlotInEdit(index, 'down')} disabled={index === editSlots.length - 1}
+                              className="p-1 rounded hover:bg-muted disabled:opacity-30"><ChevronRight size={14} className="rotate-90" /></button>
+                          </div>
+                        </td>
+                        <td className="px-2 py-2 text-center">
+                          <button onClick={() => handleRemoveSlotInEdit(index)} className="p-1 rounded hover:bg-red-50">
+                            <Trash2 size={14} className="text-red-400" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {editSlots.length === 0 && (
+                  <div className="p-8 text-center text-foreground/60">
+                    <p className="font-medium">No periods yet</p>
+                    <p className="text-sm">Click "Add Row" to start building the timetable</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center justify-between p-4 border-t border-border bg-muted/20">
+              <p className="text-sm text-foreground/60">{editSlots.length} period{editSlots.length !== 1 ? 's' : ''} &bull; {editSlots.reduce((sum, row) => sum + days.filter(d => row[d] && row[d] !== 'Break' && row[d] !== 'Lunch').length, 0)} subject periods</p>
+              <div className="flex gap-3">
+                <button onClick={() => setShowEditModal(false)} className="px-4 py-2 border border-border rounded-lg hover:bg-muted">Cancel</button>
+                <button onClick={handleSaveEditTimetable} className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
+                  <Save size={14} />Save All Changes
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
