@@ -212,6 +212,7 @@ export default function ResultsPage() {
     printWindow.document.write(`<!DOCTYPE html><html><head><title>Report Card - ${student.name}</title>
 <style>body{font-family:'Times New Roman',serif;padding:40px;max-width:800px;margin:0 auto}
 .header{text-align:center;border-bottom:3px double #1a365d;padding-bottom:15px;margin-bottom:20px}
+.header img{height:60px;margin-bottom:5px}
 .header h1{margin:0;color:#1a365d;font-size:22px;text-transform:uppercase;letter-spacing:2px}
 .header .motto{margin:5px 0 0;color:#666;font-style:italic;font-size:13px}
 .header .contact{margin:8px 0 0;color:#888;font-size:12px}
@@ -230,6 +231,7 @@ tr:nth-child(even){background:#f0f4f8}
 .footer{text-align:center;font-size:10px;color:#999;margin-top:30px;border-top:1px solid #eee;padding-top:10px}
 @media print{body{padding:20px}}</style></head><body>
 <div class="header">
+${school.logo ? `<img src="${school.logo}" alt="Logo"/>` : `<div style="width:60px;height:60px;border-radius:50%;background:#1a365d;color:white;display:inline-flex;align-items:center;justify-content:center;font-size:24px;font-weight:bold;margin-bottom:5px">${school.name.charAt(0)}</div>`}
 <h1>${school.name}</h1>
 <p class="motto">"${school.motto}"</p>
 <p class="contact">${school.address} &bull; ${school.phone} &bull; ${school.email}</p>
