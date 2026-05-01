@@ -316,7 +316,15 @@ export function useExams() {
     });
   }, []);
 
-  return { exams, loading, addExam, deleteExam };
+  const updateExam = useCallback((id: string, updates: Partial<Exam>) => {
+    setExams(prev => {
+      const updated = prev.map(e => e.id === id ? { ...e, ...updates } : e);
+      saveToStorage('school_exams', updated);
+      return updated;
+    });
+  }, []);
+
+  return { exams, loading, addExam, updateExam, deleteExam };
 }
 
 export function useExamResults() {
