@@ -130,6 +130,8 @@ export default function FeesPage() {
   }, 0);
   const totalOverdue = studentBalances.reduce((sum, s) => Math.max(0, s.balance), 0);
 
+  const [activeTab, setActiveTab] = useState<'structure' | 'balances' | 'payments'>('structure');
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -225,130 +227,167 @@ export default function FeesPage() {
         </div>
       </div>
 
+      {/* Tabs Navigation */}
       <div className="bg-background rounded-lg border">
-        <div className="p-4 border-b">
-          <h3 className="font-semibold">Fee Structure by Class</h3>
+        <div className="border-b flex">
+          <button
+            onClick={() => setActiveTab('structure')}
+            className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${
+              activeTab === 'structure' ? 'border-primary text-primary' : 'border-transparent hover:text-foreground/80'
+            }`}
+          >
+            Fee Structure
+          </button>
+          <button
+            onClick={() => setActiveTab('balances')}
+            className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${
+              activeTab === 'balances' ? 'border-primary text-primary' : 'border-transparent hover:text-foreground/80'
+            }`}
+          >
+            Student Balances
+          </button>
+          <button
+            onClick={() => setActiveTab('payments')}
+            className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${
+              activeTab === 'payments' ? 'border-primary text-primary' : 'border-transparent hover:text-foreground/80'
+            }`}
+          >
+            Recent Payments
+          </button>
         </div>
-        <table className="w-full">
-          <thead className="bg-muted/30">
-            <tr>
-              <th className="text-left px-4 py-3 text-sm font-medium">Class</th>
-              <th className="text-right px-4 py-3 text-sm font-medium">Tuition</th>
-              <th className="text-right px-4 py-3 text-sm font-medium">Development</th>
-              <th className="text-right px-4 py-3 text-sm font-medium">Uniforms</th>
-              <th className="text-right px-4 py-3 text-sm font-medium">Books</th>
-              <th className="text-right px-4 py-3 text-sm font-medium">Total</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {feeStructure.map((fee) => (
-              <tr key={fee.id}>
-                <td className="px-4 py-3 font-medium">{fee.class}</td>
-                <td className="px-4 py-3 text-right">{formatUGX(fee.tuition)}</td>
-                <td className="px-4 py-3 text-right">{formatUGX(fee.development)}</td>
-                <td className="px-4 py-3 text-right">{formatUGX(fee.uniforms)}</td>
-                <td className="px-4 py-3 text-right">{formatUGX(fee.books)}</td>
-                <td className="px-4 py-3 text-right font-semibold">{formatUGX(fee.total)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
 
-      {/* Student Balances */}
-      <div className="bg-background rounded-lg border">
-        <div className="p-4 border-b flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-          <h3 className="font-semibold">Student Fee Balances</h3>
-          <div className="flex gap-2 items-center">
-            <select value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)}
-              className="px-3 py-2 rounded-lg border text-sm">
-              {classes.map(cls => <option key={cls} value={cls}>{cls}</option>)}
-            </select>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" size={14} />
-              <input type="text" placeholder="Search..."
-                value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 pr-3 py-2 rounded-lg border text-sm w-48" />
+        {/* Fee Structure Tab */}
+        {activeTab === 'structure' && (
+          <div>
+            <div className="p-4 border-b">
+              <h3 className="font-semibold">Fee Structure by Class</h3>
             </div>
+            <table className="w-full">
+              <thead className="bg-muted/30">
+                <tr>
+                  <th className="text-left px-4 py-3 text-sm font-medium">Class</th>
+                  <th className="text-right px-4 py-3 text-sm font-medium">Tuition</th>
+                  <th className="text-right px-4 py-3 text-sm font-medium">Development</th>
+                  <th className="text-right px-4 py-3 text-sm font-medium">Uniforms</th>
+                  <th className="text-right px-4 py-3 text-sm font-medium">Books</th>
+                  <th className="text-right px-4 py-3 text-sm font-medium">Total</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {feeStructure.map((fee) => (
+                  <tr key={fee.id}>
+                    <td className="px-4 py-3 font-medium">{fee.class}</td>
+                    <td className="px-4 py-3 text-right">{formatUGX(fee.tuition)}</td>
+                    <td className="px-4 py-3 text-right">{formatUGX(fee.development)}</td>
+                    <td className="px-4 py-3 text-right">{formatUGX(fee.uniforms)}</td>
+                    <td className="px-4 py-3 text-right">{formatUGX(fee.books)}</td>
+                    <td className="px-4 py-3 text-right font-semibold">{formatUGX(fee.total)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </div>
-        <table className="w-full">
-          <thead className="bg-muted/30">
-            <tr>
-              <th className="text-left px-4 py-3 text-sm font-medium">Student</th>
-              <th className="text-left px-4 py-3 text-sm font-medium">Class</th>
-              <th className="text-right px-4 py-3 text-sm font-medium">Paid</th>
-              <th className="text-right px-4 py-3 text-sm font-medium">Expected</th>
-              <th className="text-right px-4 py-3 text-sm font-medium">Balance</th>
-              <th className="text-center px-4 py-3 text-sm font-medium">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {studentBalances
-              .filter(s => s.name.toLowerCase().includes(searchTerm.toLowerCase()))
-              .slice(0, 20)
-              .map((student) => (
-              <tr key={student.id} className="hover:bg-muted/30">
-                <td className="px-4 py-3 font-medium">{student.name}</td>
-                <td className="px-4 py-3">{student.class}</td>
-                <td className="px-4 py-3 text-right">{formatUGX(student.totalPaid)}</td>
-                <td className="px-4 py-3 text-right">{formatUGX(student.classFee)}</td>
-                <td className={`px-4 py-3 text-right font-semibold ${student.balance > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                  {formatUGX(Math.max(0, student.balance))}
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center justify-center gap-2">
-                    <button onClick={() => setShowStatement(student.id)}
-                      className="p-1.5 rounded hover:bg-muted" title="View Statement">
-                      <FileText size={14} />
-                    </button>
-                    <button onClick={() => { setShowReminder(true); setShowStatement(student.id); }}
-                      className="p-1.5 rounded hover:bg-muted text-yellow-600" title="Send Reminder">
-                      <Send size={14} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+        )}
 
-      {/* Recent Payments */}
-      <div className="bg-background rounded-lg border">
-        <div className="p-4 border-b flex items-center gap-4">
-          <h3 className="font-semibold">Recent Payments</h3>
-        </div>
-        <table className="w-full">
-          <thead className="bg-muted/30">
-            <tr>
-              <th className="text-left px-4 py-3 text-sm font-medium">Student</th>
-              <th className="text-left px-4 py-3 text-sm font-medium">Class</th>
-              <th className="text-right px-4 py-3 text-sm font-medium">Amount</th>
-              <th className="text-left px-4 py-3 text-sm font-medium">Date</th>
-              <th className="text-left px-4 py-3 text-sm font-medium">Method</th>
-              <th className="text-left px-4 py-3 text-sm font-medium">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {filteredPayments.slice(0, 10).map((payment) => (
-              <tr key={payment.id}>
-                <td className="px-4 py-3 font-medium">{payment.studentName}</td>
-                <td className="px-4 py-3">{payment.class}</td>
-                <td className="px-4 py-3 text-right">{formatUGX(payment.amount)}</td>
-                <td className="px-4 py-3">{payment.date}</td>
-                <td className="px-4 py-3">{payment.method}</td>
-                <td className="px-4 py-3">
-                  <select value={payment.status} onChange={(e) => updatePaymentStatus(payment.id, e.target.value)}
-                    className={`px-2 py-1 rounded-full text-xs ${payment.status === 'Confirmed' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
-                    <option value="Pending">Pending</option>
-                    <option value="Confirmed">Confirmed</option>
-                  </select>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {/* Student Balances Tab */}
+        {activeTab === 'balances' && (
+          <div>
+            <div className="p-4 border-b flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+              <h3 className="font-semibold">Student Fee Balances</h3>
+              <div className="flex gap-2 items-center">
+                <select value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)}
+                  className="px-3 py-2 rounded-lg border text-sm">
+                  {classes.map(cls => <option key={cls} value={cls}>{cls}</option>)}
+                </select>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" size={14} />
+                  <input type="text" placeholder="Search..."
+                    value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-8 pr-3 py-2 rounded-lg border text-sm w-48" />
+                </div>
+              </div>
+            </div>
+            <table className="w-full">
+              <thead className="bg-muted/30">
+                <tr>
+                  <th className="text-left px-4 py-3 text-sm font-medium">Student</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium">Class</th>
+                  <th className="text-right px-4 py-3 text-sm font-medium">Paid</th>
+                  <th className="text-right px-4 py-3 text-sm font-medium">Expected</th>
+                  <th className="text-right px-4 py-3 text-sm font-medium">Balance</th>
+                  <th className="text-center px-4 py-3 text-sm font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {studentBalances
+                  .filter(s => s.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                  .slice(0, 20)
+                  .map((student) => (
+                  <tr key={student.id} className="hover:bg-muted/30">
+                    <td className="px-4 py-3 font-medium">{student.name}</td>
+                    <td className="px-4 py-3">{student.class}</td>
+                    <td className="px-4 py-3 text-right">{formatUGX(student.totalPaid)}</td>
+                    <td className="px-4 py-3 text-right">{formatUGX(student.classFee)}</td>
+                    <td className={`px-4 py-3 text-right font-semibold ${student.balance > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                      {formatUGX(Math.max(0, student.balance))}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-center gap-2">
+                        <button onClick={() => setShowStatement(student.id)}
+                          className="p-1.5 rounded hover:bg-muted" title="View Statement">
+                          <FileText size={14} />
+                        </button>
+                        <button onClick={() => { setShowReminder(true); setShowStatement(student.id); }}
+                          className="p-1.5 rounded hover:bg-muted text-yellow-600" title="Send Reminder">
+                          <Send size={14} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Recent Payments Tab */}
+        {activeTab === 'payments' && (
+          <div>
+            <div className="p-4 border-b flex items-center gap-4">
+              <h3 className="font-semibold">Recent Payments</h3>
+            </div>
+            <table className="w-full">
+              <thead className="bg-muted/30">
+                <tr>
+                  <th className="text-left px-4 py-3 text-sm font-medium">Student</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium">Class</th>
+                  <th className="text-right px-4 py-3 text-sm font-medium">Amount</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium">Date</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium">Method</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {filteredPayments.slice(0, 10).map((payment) => (
+                  <tr key={payment.id}>
+                    <td className="px-4 py-3 font-medium">{payment.studentName}</td>
+                    <td className="px-4 py-3">{payment.class}</td>
+                    <td className="px-4 py-3 text-right">{formatUGX(payment.amount)}</td>
+                    <td className="px-4 py-3">{payment.date}</td>
+                    <td className="px-4 py-3">{payment.method}</td>
+                    <td className="px-4 py-3">
+                      <select value={payment.status} onChange={(e) => updatePaymentStatus(payment.id, e.target.value)}
+                        className={`px-2 py-1 rounded-full text-xs ${payment.status === 'Confirmed' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'}`}>
+                        <option value="Pending">Pending</option>
+                        <option value="Confirmed">Confirmed</option>
+                      </select>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Collect Fee Modal */}
