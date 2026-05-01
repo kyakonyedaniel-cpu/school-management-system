@@ -48,6 +48,8 @@ export interface Exam {
   duration: string;
   status: string;
   subject?: string;
+  term?: string;
+  year?: string;
 }
 
 export interface ExamResult {
@@ -55,7 +57,7 @@ export interface ExamResult {
   studentId: string;
   studentName: string;
   class: string;
-  examId: string;
+  examId?: string;
   examName: string;
   score: number;
   maxScore: number;
@@ -315,6 +317,63 @@ export function useExams() {
   }, []);
 
   return { exams, loading, addExam, deleteExam };
+}
+
+export function useExamResults() {
+  const initialResults: ExamResult[] = [
+    { id: '1', studentId: '1', studentName: 'John Okello', class: 'P.7', examId: '1', examName: 'UNEB PLE Mock', score: 85, maxScore: 100, grade: 'D2' },
+    { id: '2', studentId: '2', studentName: 'Sarah Nakato', class: 'S.1', examId: '2', examName: 'UCE Mid-Term', score: 72, maxScore: 100, grade: 'C3' },
+    { id: '3', studentId: '3', studentName: 'David Ssebu', class: 'P.6', examId: '3', examName: 'CA2 - Mathematics', score: 45, maxScore: 100, grade: 'F9' },
+    { id: '4', studentId: '4', studentName: 'Mary Namuli', class: 'S.2', examId: '2', examName: 'UCE Mid-Term', score: 91, maxScore: 100, grade: 'D1' },
+    { id: '5', studentId: '5', studentName: 'Peter Wasswa', class: 'P.5', examId: '3', examName: 'CA2 - Mathematics', score: 68, maxScore: 100, grade: 'C4' },
+    { id: '6', studentId: '1', studentName: 'John Okello', class: 'P.7', examId: '4', examName: 'Physics Quiz', score: 78, maxScore: 100, grade: 'C3' },
+  ];
+
+  const [results, setResults] = useState<ExamResult[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setResults(getFromStorage('school_exam_results', initialResults));
+    setLoading(false);
+  }, []);
+
+  const addResult = useCallback((result: Omit<ExamResult, 'id'>) => {
+    const newResult = { ...result, id: generateId() };
+    setResults(prev => {
+      const updated = [...prev, newResult];
+      saveToStorage('school_exam_results', updated);
+      return updated;
+    });
+    return newResult;
+  }, []);
+
+  const updateResult = useCallback((id: string, updates: Partial<ExamResult>) => {
+    setResults(prev => {
+      const updated = prev.map(r => r.id === id ? { ...r, ...updates } : r);
+      saveToStorage('school_exam_results', updated);
+      return updated;
+    });
+  }, []);
+
+  const deleteResult = useCallback((id: string) => {
+    setResults(prev => {
+      const updated = prev.filter(r => r.id !== id);
+      saveToStorage('school_exam_results', updated);
+      return updated;
+    });
+  }, []);
+
+  const addResultsBulk = useCallback((results: Omit<ExamResult, 'id'>[]) => {
+    const newResults = results.map(r => ({ ...r, id: generateId() }));
+    setResults(prev => {
+      const updated = [...prev, ...newResults];
+      saveToStorage('school_exam_results', updated);
+      return updated;
+    });
+    return newResults;
+  }, []);
+
+  return { results, loading, addResult, updateResult, deleteResult, addResultsBulk };
 }
 
 // Hook for Attendance
