@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from 'react';
-import { Plus, DollarSign, AlertTriangle, Clock, TrendingUp, X, Search } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Plus, DollarSign, AlertTriangle, Clock, TrendingUp, X, Search, Send, FileText, Download, Phone, Wallet } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { usePayments, useStudents, formatUGX, classes } from '@/lib/data';
 
@@ -19,12 +19,17 @@ export default function FeesPage() {
   const { payments, addPayment, updatePaymentStatus } = usePayments();
   const { students } = useStudents();
   const [showCollect, setShowCollect] = useState(false);
+  const [showStatement, setShowStatement] = useState<string | null>(null);
+  const [showReminder, setShowReminder] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedClass, setSelectedClass] = useState('All Classes');
   const [paymentForm, setPaymentForm] = useState({
     studentId: '',
     amount: 0,
     method: 'Mobile Money',
-    description: ''
+    description: '',
+    phone: '',
+    sendSMS: true
   });
 
   const collectionData = [
@@ -37,13 +42,37 @@ export default function FeesPage() {
   const statusData = [
     { name: 'Paid', value: payments.filter(p => p.status === 'Confirmed').length },
     { name: 'Pending', value: payments.filter(p => p.status === 'Pending').length },
-    { name: 'Overdue', value: 17 },
+    { name: 'Overdue', value: students.filter(s => {
+      const studentPayments = payments.filter(p => p.studentId === s.id && p.status === 'Confirmed');
+      const totalPaid = studentPayments.reduce((sum, p) => sum + p.amount, 0);
+      const classFee = feeStructure.find(f => f.class.includes(s.class.split(' ')[0]))?.total || 0;
+      return totalPaid < classFee;
+    }).length },
   ];
 
-  const filteredPayments = payments.filter(p => 
-    p.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.studentId.includes(searchTerm)
-  );
+  const studentBalances = useMemo(() => {
+    return students.map(student => {
+      const studentPayments = payments.filter(p => p.studentId === student.id && p.status === 'Confirmed');
+      const totalPaid = studentPayments.reduce((sum, p) => sum + p.amount, 0);
+      const classFee = feeStructure.find(f => f.class.includes(student.class.split(' ')[0]))?.total || 0;
+      const balance = classFee - totalPaid;
+      return {
+        ...student,
+        totalPaid,
+        classFee,
+        balance,
+        lastPayment: studentPayments.length > 0 ? studentPayments[studentPayments.length - 1].date : null
+      };
+    }).filter(s => selectedClass === 'All Classes' || s.class === selectedClass);
+  }, [students, payments, selectedClass]);
+
+  const filteredPayments = payments.filter(p => {
+    const matchesSearch = p.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.studentId.includes(searchTerm);
+    const student = students.find(s => s.id === p.studentId);
+    const matchesClass = selectedClass === 'All Classes' || student?.class === selectedClass;
+    return matchesSearch && matchesClass;
+  });
 
   const handleCollect = (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,16 +85,50 @@ export default function FeesPage() {
         amount: paymentForm.amount,
         date: new Date().toISOString().split('T')[0],
         method: paymentForm.method,
-        status: 'Confirmed',
+        status: paymentForm.method === 'Mobile Money' ? 'Pending' : 'Confirmed',
         description: paymentForm.description
       });
+      if (paymentForm.sendSMS) {
+        alert(`SMS notification sent to parent of ${student.name}`);
+      }
       setShowCollect(false);
-      setPaymentForm({ studentId: '', amount: 0, method: 'Mobile Money', description: '' });
+      setPaymentForm({ studentId: '', amount: 0, method: 'Mobile Money', description: '', phone: '', sendSMS: true });
     }
   };
 
+  const sendReminder = (studentId: string) => {
+    const student = students.find(s => s.id === studentId);
+    const balance = studentBalances.find(b => b.id === studentId);
+    if (student && balance) {
+      alert(`Reminder sent to ${student.name}'s parent: Balance of ${formatUGX(balance.balance)}`);
+      setShowReminder(false);
+    }
+  };
+
+  const exportBalances = () => {
+    const data = studentBalances.map(s => ({
+      name: s.name,
+      class: s.class,
+      totalPaid: s.totalPaid,
+      classFee: s.classFee,
+      balance: s.balance
+    }));
+    const csv = 'Name,Class,Total Paid,Expected,Balance\n' +
+      data.map(d => `${d.name},${d.class},${d.totalPaid},${d.classFee},${d.balance}`).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `fee-balances-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+  };
+
   const totalCollected = payments.filter(p => p.status === 'Confirmed').reduce((sum, p) => sum + p.amount, 0);
-  const classesList = classes.filter(c => c !== 'All Classes');
+  const totalExpected = students.reduce((sum, s) => {
+    const classFee = feeStructure.find(f => f.class.includes(s.class.split(' ')[0]))?.total || 0;
+    return sum + classFee;
+  }, 0);
+  const totalOverdue = studentBalances.reduce((sum, s) => Math.max(0, s.balance), 0);
 
   return (
     <div className="space-y-6">
@@ -74,10 +137,16 @@ export default function FeesPage() {
           <h1 className="text-2xl font-bold">Fees Management</h1>
           <p className="text-foreground/60">Track and manage school fees</p>
         </div>
-        <button onClick={() => setShowCollect(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
-          <Plus size={18} />Collect Fee
-        </button>
+        <div className="flex gap-2">
+          <button onClick={exportBalances}
+            className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-muted">
+            <Download size={18} />Export
+          </button>
+          <button onClick={() => setShowCollect(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
+            <Plus size={18} />Collect Fee
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -99,7 +168,7 @@ export default function FeesPage() {
             </div>
             <div>
               <p className="text-sm text-foreground/60">Expected</p>
-              <p className="text-xl font-bold">{formatUGX(12800000)}</p>
+              <p className="text-xl font-bold">{formatUGX(totalExpected)}</p>
             </div>
           </div>
         </div>
@@ -121,7 +190,7 @@ export default function FeesPage() {
             </div>
             <div>
               <p className="text-sm text-foreground/60">Overdue</p>
-              <p className="text-xl font-bold">17</p>
+              <p className="text-xl font-bold">{formatUGX(totalOverdue)}</p>
             </div>
           </div>
         </div>
@@ -186,15 +255,69 @@ export default function FeesPage() {
         </table>
       </div>
 
+      {/* Student Balances */}
+      <div className="bg-background rounded-lg border">
+        <div className="p-4 border-b flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+          <h3 className="font-semibold">Student Fee Balances</h3>
+          <div className="flex gap-2 items-center">
+            <select value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)}
+              className="px-3 py-2 rounded-lg border text-sm">
+              {classes.map(cls => <option key={cls} value={cls}>{cls}</option>)}
+            </select>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" size={14} />
+              <input type="text" placeholder="Search..."
+                value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-8 pr-3 py-2 rounded-lg border text-sm w-48" />
+            </div>
+          </div>
+        </div>
+        <table className="w-full">
+          <thead className="bg-muted/30">
+            <tr>
+              <th className="text-left px-4 py-3 text-sm font-medium">Student</th>
+              <th className="text-left px-4 py-3 text-sm font-medium">Class</th>
+              <th className="text-right px-4 py-3 text-sm font-medium">Paid</th>
+              <th className="text-right px-4 py-3 text-sm font-medium">Expected</th>
+              <th className="text-right px-4 py-3 text-sm font-medium">Balance</th>
+              <th className="text-center px-4 py-3 text-sm font-medium">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            {studentBalances
+              .filter(s => s.name.toLowerCase().includes(searchTerm.toLowerCase()))
+              .slice(0, 20)
+              .map((student) => (
+              <tr key={student.id} className="hover:bg-muted/30">
+                <td className="px-4 py-3 font-medium">{student.name}</td>
+                <td className="px-4 py-3">{student.class}</td>
+                <td className="px-4 py-3 text-right">{formatUGX(student.totalPaid)}</td>
+                <td className="px-4 py-3 text-right">{formatUGX(student.classFee)}</td>
+                <td className={`px-4 py-3 text-right font-semibold ${student.balance > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                  {formatUGX(Math.max(0, student.balance))}
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center justify-center gap-2">
+                    <button onClick={() => setShowStatement(student.id)}
+                      className="p-1.5 rounded hover:bg-muted" title="View Statement">
+                      <FileText size={14} />
+                    </button>
+                    <button onClick={() => { setShowReminder(true); setShowStatement(student.id); }}
+                      className="p-1.5 rounded hover:bg-muted text-yellow-600" title="Send Reminder">
+                      <Send size={14} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Recent Payments */}
       <div className="bg-background rounded-lg border">
         <div className="p-4 border-b flex items-center gap-4">
           <h3 className="font-semibold">Recent Payments</h3>
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" size={18} />
-            <input type="text" placeholder="Search payments..."
-              value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-border" />
-          </div>
         </div>
         <table className="w-full">
           <thead className="bg-muted/30">
@@ -208,7 +331,7 @@ export default function FeesPage() {
             </tr>
           </thead>
           <tbody className="divide-y">
-            {filteredPayments.map((payment) => (
+            {filteredPayments.slice(0, 10).map((payment) => (
               <tr key={payment.id}>
                 <td className="px-4 py-3 font-medium">{payment.studentName}</td>
                 <td className="px-4 py-3">{payment.class}</td>
@@ -228,6 +351,7 @@ export default function FeesPage() {
         </table>
       </div>
 
+      {/* Collect Fee Modal */}
       {showCollect && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-background rounded-xl border border-border w-full max-w-md p-6">
@@ -248,29 +372,110 @@ export default function FeesPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Amount (UGX)</label>
-                <input type="number" required min="0" value={paymentForm.amount} onChange={(e) => setPaymentForm({ ...paymentForm, amount: parseInt(e.target.value) })}
+                <input type="number" required min="0" value={paymentForm.amount || ''} onChange={(e) => setPaymentForm({ ...paymentForm, amount: parseInt(e.target.value) || 0 })}
                   className="w-full px-4 py-2 rounded-lg border border-border" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Payment Method</label>
                 <select value={paymentForm.method} onChange={(e) => setPaymentForm({ ...paymentForm, method: e.target.value })}
                   className="w-full px-4 py-2 rounded-lg border border-border">
-                  <option value="Mobile Money">Mobile Money</option>
+                  <option value="Mobile Money">Mobile Money (MTN/Airtel)</option>
                   <option value="Bank Transfer">Bank Transfer</option>
                   <option value="Cash">Cash</option>
                 </select>
               </div>
+              {paymentForm.method === 'Mobile Money' && (
+                <div>
+                  <label className="block text-sm font-medium mb-1">Phone Number</label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40" size={16} />
+                    <input type="tel" value={paymentForm.phone} onChange={(e) => setPaymentForm({ ...paymentForm, phone: e.target.value })}
+                      placeholder="+256..."
+                      className="w-full pl-10 pr-4 py-2 rounded-lg border border-border" />
+                  </div>
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium mb-1">Description (optional)</label>
                 <input type="text" value={paymentForm.description} onChange={(e) => setPaymentForm({ ...paymentForm, description: e.target.value })}
                   placeholder="e.g. Term 1 Tuition"
                   className="w-full px-4 py-2 rounded-lg border border-border" />
               </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" checked={paymentForm.sendSMS} onChange={(e) => setPaymentForm({ ...paymentForm, sendSMS: e.target.checked })}
+                  id="sms-notify" />
+                <label htmlFor="sms-notify" className="text-sm">Send SMS notification to parent</label>
+              </div>
               <div className="flex gap-4 pt-4">
                 <button type="button" onClick={() => setShowCollect(false)} className="flex-1 px-4 py-2 border border-border rounded-lg">Cancel</button>
-                <button type="submit" className="flex-1 px-4 py-2 bg-primary text-white rounded-lg">Collect</button>
+                <button type="submit" className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg">
+                  <Wallet size={16} />Collect
+                </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Fee Statement Modal */}
+      {showStatement && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-xl border border-border w-full max-w-2xl p-6 max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Fee Statement</h2>
+              <button onClick={() => setShowStatement(null)}><X size={20} /></button>
+            </div>
+            {(() => {
+              const student = students.find(s => s.id === showStatement);
+              const studentPayments = payments.filter(p => p.studentId === showStatement && p.status === 'Confirmed');
+              const classFee = feeStructure.find(f => f.class.includes(student?.class.split(' ')[0] || ''))?.total || 0;
+              const totalPaid = studentPayments.reduce((sum, p) => sum + p.amount, 0);
+              return student ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
+                    <div>
+                      <p className="text-sm text-foreground/60">Student</p>
+                      <p className="font-semibold">{student.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-foreground/60">Class</p>
+                      <p className="font-semibold">{student.class}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-foreground/60">Total Expected</p>
+                      <p className="font-semibold">{formatUGX(classFee)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-foreground/60">Balance</p>
+                      <p className={`font-semibold ${classFee - totalPaid > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                        {formatUGX(Math.max(0, classFee - totalPaid))}
+                      </p>
+                    </div>
+                  </div>
+                  <h4 className="font-medium">Payment History</h4>
+                  <table className="w-full">
+                    <thead className="bg-muted/30">
+                      <tr>
+                        <th className="text-left px-3 py-2 text-sm">Date</th>
+                        <th className="text-right px-3 py-2 text-sm">Amount</th>
+                        <th className="text-left px-3 py-2 text-sm">Method</th>
+                        <th className="text-left px-3 py-2 text-sm">Description</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      {studentPayments.map((p, idx) => (
+                        <tr key={idx}>
+                          <td className="px-3 py-2">{p.date}</td>
+                          <td className="px-3 py-2 text-right">{formatUGX(p.amount)}</td>
+                          <td className="px-3 py-2">{p.method}</td>
+                          <td className="px-3 py-2">{p.description}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : null;
+            })()}
           </div>
         </div>
       )}
