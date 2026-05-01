@@ -624,7 +624,38 @@ export function useTimetable() {
     setLoading(false);
   }, []);
 
-  return { timetable, schedules, loading };
+  const updateTimetable = useCallback((updatedTimetable: { [key: string]: TimetableEntry[] }) => {
+    setTimetable(updatedTimetable);
+    saveToStorage('school_timetable', updatedTimetable);
+  }, []);
+
+  const addSchedule = useCallback((schedule: Omit<ExamSchedule, 'id'>) => {
+    const newSchedule = { ...schedule, id: generateId() };
+    setSchedules(prev => {
+      const updated = [...prev, newSchedule];
+      saveToStorage('school_schedules', updated);
+      return updated;
+    });
+    return newSchedule;
+  }, []);
+
+  const updateSchedule = useCallback((id: string, updates: Partial<ExamSchedule>) => {
+    setSchedules(prev => {
+      const updated = prev.map(s => s.id === id ? { ...s, ...updates } : s);
+      saveToStorage('school_schedules', updated);
+      return updated;
+    });
+  }, []);
+
+  const deleteSchedule = useCallback((id: string) => {
+    setSchedules(prev => {
+      const updated = prev.filter(s => s.id !== id);
+      saveToStorage('school_schedules', updated);
+      return updated;
+    });
+  }, []);
+
+  return { timetable, schedules, loading, updateTimetable, addSchedule, updateSchedule, deleteSchedule };
 }
 
 export interface CalendarEvent {
