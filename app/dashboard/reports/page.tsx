@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { FileText, Download, Eye, Star, TrendingUp, Users, Plus, X, BarChart3, PieChart, Calendar, Filter, FileBarChart, Award, ClipboardList, Printer } from 'lucide-react';
 import { useStudents, useStaff, usePayments, useAttendance, useExams, classes, parseCSV } from '@/lib/data';
+import { getSchoolProfile } from '@/lib/school';
 
 const gradingSystem = [
   { grade: 'D1', mark: '90-100', description: 'Distinction 1', color: 'bg-green-600' },
@@ -61,45 +62,67 @@ export default function ReportsPage() {
       }));
       const student = students.find(s => s.name === generateForm.student) || students[0];
       if (student) {
+        const school = getSchoolProfile();
+        const avg = Math.round(mockResults.reduce((s, r) => s + r.score, 0) / mockResults.length);
+        const position = Math.floor(Math.random() * 10) + 1;
         const printWindow = window.open('', '_blank');
         if (!printWindow) return;
         printWindow.document.write(`
 <!DOCTYPE html><html><head><title>Report Card - ${student.name}</title>
-<style>body{font-family:Arial,sans-serif;padding:40px;max-width:800px;margin:0 auto}
-h1{text-align:center;color:#2563eb;margin-bottom:5px}h2{text-align:center;color:#666;font-weight:normal;font-size:14px;margin-top:0}
-.box{border:2px solid #2563eb;padding:15px;margin:20px 0;border-radius:8px}
+<style>
+body{font-family:'Times New Roman',serif;padding:40px;max-width:800px;margin:0 auto}
+.header{text-align:center;border-bottom:3px double #1a365d;padding-bottom:15px;margin-bottom:20px}
+.header img{height:60px;margin-bottom:5px}
+.header h1{margin:0;color:#1a365d;font-size:22px;text-transform:uppercase;letter-spacing:2px}
+.header .motto{margin:5px 0 0;color:#666;font-style:italic;font-size:13px}
+.header .contact{margin:8px 0 0;color:#888;font-size:12px}
+.title{text-align:center;margin:15px 0;font-size:16px;font-weight:bold;color:#2563eb;text-transform:uppercase;letter-spacing:1px}
+.box{border:2px solid #1a365d;padding:12px;margin:15px 0;border-radius:4px}
 .info{display:flex;justify-content:space-between;flex-wrap:wrap}
-.info div{margin:5px 0;font-size:14px}
-table{width:100%;border-collapse:collapse;margin:20px 0}
-th{background:#2563eb;color:white;padding:10px;text-align:left}
-td{padding:8px 10px;border-bottom:1px solid #ddd}
-tr:nth-child(even){background:#f9fafb}
-.summary{display:flex;justify-content:space-between;margin:20px 0;padding:15px;background:#f0f9ff;border-radius:8px}
+.info div{margin:5px 0;font-size:13px}
+table{width:100%;border-collapse:collapse;margin:15px 0}
+th{background:#1a365d;color:white;padding:8px;text-align:center;font-size:13px;border:1px solid #1a365d}
+td{padding:6px 8px;border:1px solid #ddd;text-align:center;font-size:13px}
+tr:nth-child(even){background:#f0f4f8}
+tr:last-child{background:#e0f2fe;font-weight:bold}
+.summary{display:flex;justify-content:space-between;margin:15px 0;padding:12px;background:#f7fafc;border:1px solid #e2e8f0;border-radius:4px}
 .summary div{text-align:center}
-.summary h3{margin:0;color:#2563eb;font-size:24px}
-.summary p{margin:5px 0 0;color:#666;font-size:12px}
-.signatures{display:flex;justify-content:space-between;margin-top:60px}
-.sig{text-align:center;border-top:1px solid #333;padding-top:5px;width:200px}
+.summary h3{margin:0;color:#1a365d;font-size:22px}
+.summary p{margin:4px 0 0;color:#666;font-size:11px}
+.comments{border:1px solid #ddd;padding:10px;margin:15px 0;min-height:40px}
+.comments label{font-size:13px;font-weight:bold;color:#1a365d}
+.signatures{display:flex;justify-content:space-between;margin-top:50px}
+.sig{text-align:center;border-top:1px solid #333;padding-top:5px;width:180px;font-size:13px}
+.footer{text-align:center;font-size:10px;color:#999;margin-top:30px;border-top:1px solid #eee;padding-top:10px}
 @media print{body{padding:20px}}</style></head><body>
-<h1>STUDENT REPORT CARD</h1>
-<h2>SmartSchool Pro</h2>
+<div class="header">
+${school.logo ? `<img src="${school.logo}" alt="Logo"/>` : `<div style="width:60px;height:60px;border-radius:50%;background:#1a365d;color:white;display:inline-flex;align-items:center;justify-content:center;font-size:24px;font-weight:bold;margin-bottom:5px">${school.name.charAt(0)}</div>`}
+<h1>${school.name}</h1>
+<p class="motto">"${school.motto}"</p>
+<p class="contact">${school.address} &bull; ${school.phone} &bull; ${school.email}</p>
+</div>
+<div class="title">Student Report Card — ${generateForm.term} ${selectedYear}</div>
 <div class="box"><div class="info">
-<div><strong>Name:</strong> ${student.name}</div>
+<div><strong>Student Name:</strong> ${student.name}</div>
 <div><strong>Class:</strong> ${student.class}</div>
 <div><strong>Admission No:</strong> ${student.admissionNo}</div>
-<div><strong>Term:</strong> ${generateForm.term} ${selectedYear}</div>
+<div><strong>Gender:</strong> ${student.gender}</div>
 </div></div>
-<table><thead><tr><th>Subject</th><th>Score</th><th>Grade</th></tr></thead><tbody>
-${mockResults.map(r => `<tr><td>${r.subject}</td><td>${r.score}</td><td>${r.grade}</td></tr>`).join('')}
-<tr style="font-weight:bold;background:#e0f2fe"><td><strong>Total</strong></td><td><strong>${mockResults.reduce((s,r)=>s+r.score,0)}</strong></td><td></td></tr>
+<table><thead><tr><th style="text-align:left">Subject</th><th>Score</th><th>Grade</th><th>Remarks</th></tr></thead><tbody>
+${mockResults.map(r => `<tr><td style="text-align:left">${r.subject}</td><td>${r.score}</td><td>${r.grade}</td><td>${r.score >= 70 ? 'Excellent' : r.score >= 50 ? 'Good effort' : 'Needs improvement'}</td></tr>`).join('')}
+<tr><td style="text-align:left"><strong>TOTAL / AVERAGE</strong></td><td><strong>${mockResults.reduce((s,r)=>s+r.score,0)}</strong></td><td><strong>${getGrade(avg)}</strong></td><td></td></tr>
 </tbody></table>
 <div class="summary">
-<div><h3>${Math.round(mockResults.reduce((s,r)=>s+r.score,0)/mockResults.length)}%</h3><p>Average</p></div>
+<div><h3>${avg}%</h3><p>Overall Average</p></div>
 <div><h3>72%</h3><p>Class Average</p></div>
-<div><h3>${Math.floor(Math.random()*10)+1}/${filteredStudents.length}</h3><p>Position</p></div>
+<div><h3>${position}/${filteredStudents.length}</h3><p>Position in Class</p></div>
 </div>
-<div class="signatures"><div class="sig">Class Teacher</div><div class="sig">Headteacher</div></div>
-<p style="text-align:center;font-size:10px;color:#999;margin-top:40px">Generated by SmartSchool Pro</p>
+<div class="comments"><label>Class Teacher's Remarks:</label><br/><br/></div>
+<div class="signatures">
+<div class="sig">Class Teacher<br/><small>Date: ___/___/______</small></div>
+<div class="sig">${school.headTeacher}<br/><small>Date: ___/___/______</small></div>
+</div>
+<div class="footer">Generated by SmartSchool Pro &bull; ${school.name} &bull; ${new Date().toLocaleDateString()}</div>
 </body></html>`);
         printWindow.document.close();
         setTimeout(() => printWindow.print(), 500);
