@@ -862,7 +862,17 @@ export default function FeesPage() {
                       <span className={`px-2 py-1 rounded-full text-xs ${reminder.isActive ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'}`}>
                         {reminder.isActive ? 'Active' : 'Inactive'}
                       </span>
-                      <button onClick={() => { setEditingReminder(reminder); setReminderForm({ type: reminder.type, daysBeforeDue: reminder.daysBeforeDue || 3, daysAfterDue: reminder.daysAfterDue || 3, message: reminder.message, channels: reminder.channels }); setShowReminderModal(true); }} className="p-1.5 rounded hover:bg-muted">
+                      <button onClick={() => { 
+                        setEditingReminder(reminder); 
+                        setReminderForm({ 
+                          type: reminder.type, 
+                          daysBeforeDue: reminder.daysBeforeDue || 3, 
+                          daysAfterDue: reminder.daysAfterDue || 3, 
+                          message: reminder.message, 
+                          channels: reminder.channels 
+                        }); 
+                        setShowReminderModal(true); 
+                      }} className="p-1.5 rounded hover:bg-muted">
                         <Edit size={14} />
                       </button>
                       <button onClick={() => setReminders(prev => prev.filter(r => r.id !== reminder.id))} className="p-1.5 rounded hover:bg-muted text-red-600">
