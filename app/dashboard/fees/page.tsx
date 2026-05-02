@@ -281,6 +281,64 @@ export default function FeesPage() {
     a.click();
   };
 
+  const downloadFeeStructure = (format: 'csv' | 'print') => {
+    const headers = ['Class', 'Term', 'Type', 'Tuition', 'Development', 'Uniforms', 'Books', 'Boarding', 'Transport', 'Meals', 'Total'];
+    const rows = feeStructure.map(f => [
+      f.class, f.term, f.category || 'day', f.tuition, f.development, f.uniforms, f.books,
+      f.boarding || 0, f.transport || 0, f.meals || 0, f.total
+    ]);
+    
+    if (format === 'csv') {
+      const csv = headers.join(',') + '\n' + rows.map(r => r.join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `fee-structure-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+    } else {
+      const printContent = `
+        <html>
+          <head><title>Fee Structure</title>
+            <style>
+              body { font-family: Arial; padding: 20px; }
+              h1 { color: #333; }
+              table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+              th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+              th { background-color: #f5f5f5; font-weight: bold; }
+              .header { display: flex; justify-content: space-between; align-items: center; }
+              .total { font-weight: bold; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1>School Fee Structure</h1>
+              <p>Generated: ${new Date().toLocaleDateString()}</p>
+            </div>
+            <p>Academic Year: 2026 | Term: 1</p>
+            <table>
+              <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+              <tbody>
+                ${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="10" class="total">Total Expected Revenue: ${formatUGX(feeStructure.reduce((sum, f) => sum + f.total, 0))}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </body>
+        </html>
+      `;
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(printContent);
+        printWindow.document.close();
+        setTimeout(() => { printWindow.print(); }, 250);
+      }
+    }
+  };
+
   const generateReceipt = (payment: any) => {
     const receipt = receipts.find(r => r.paymentId === payment.id);
     if (receipt) {
@@ -419,9 +477,17 @@ export default function FeesPage() {
           <div>
             <div className="p-4 border-b flex items-center justify-between">
               <h3 className="font-semibold">Fee Structure by Class</h3>
-              <button onClick={openAddFee} className="flex items-center gap-2 px-3 py-1.5 text-sm bg-primary text-white rounded-lg hover:bg-primary/90">
-                <Plus size={14} />Add Fee Structure
-              </button>
+              <div className="flex items-center gap-2">
+                <button onClick={() => downloadFeeStructure('csv')} className="flex items-center gap-2 px-3 py-1.5 text-sm border rounded-lg hover:bg-muted" title="Download CSV">
+                  <Download size={14} />CSV
+                </button>
+                <button onClick={() => downloadFeeStructure('print')} className="flex items-center gap-2 px-3 py-1.5 text-sm border rounded-lg hover:bg-muted" title="Print Fee Structure">
+                  <Printer size={14} />Print
+                </button>
+                <button onClick={openAddFee} className="flex items-center gap-2 px-3 py-1.5 text-sm bg-primary text-white rounded-lg hover:bg-primary/90">
+                  <Plus size={14} />Add Fee Structure
+                </button>
+              </div>
             </div>
             <table className="w-full">
               <thead className="bg-muted/30">
