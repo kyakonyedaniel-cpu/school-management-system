@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Check, X, School, Users, Building, Calendar, BookOpen, FileText, Heart, Award, Sparkles } from "lucide-react";
+import { Check, X, School, Users, Building, Calendar, BookOpen, FileText, Heart, Award, Sparkles, Calculator, ChevronDown, ChevronUp, Star, Zap, Shield, Headphones, Database, Globe, Menu } from "lucide-react";
 
 const plans = [
   {
@@ -66,6 +66,30 @@ const formatUGX = (amount: number) => {
 
 export default function SubscriptionPage() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
+  const [studentCount, setStudentCount] = useState(300);
+  const [showComparison, setShowComparison] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  const yearlySavings = plans.map(plan => {
+    const monthlyCost = plan.price * 12;
+    const yearlyCost = plan.price * 12 * 0.8;
+    return monthlyCost - yearlyCost;
+  });
+
+  const testimonials = [
+    { name: "Sarah Nakato", school: "Green Hills Academy", rating: 5, text: "The WhatsApp integration saved us hours of manual work!" },
+    { name: "John Okello", school: "Sunrise Primary", rating: 5, text: "Best school management system in Uganda. Highly recommended!" },
+    { name: "Mary Ssebunya", school: "Excel Education Centre", rating: 4, text: "Great analytics help us make data-driven decisions." },
+  ];
+
+  const faqs = [
+    { q: "Can I upgrade or downgrade anytime?", a: "Yes! You can change your plan at any time. Upgrades take effect immediately, downgrades apply at the next billing cycle." },
+    { q: "What payment methods do you accept?", a: "We accept MTN Mobile Money, Airtel Money, bank transfers, and credit/debit cards." },
+    { q: "Is there really a free trial?", a: "Yes! Enjoy a 14-day free trial with full access to all Professional features. No credit card required." },
+    { q: "What happens after the trial ends?", a: "You can subscribe to a paid plan or continue with our limited free tier (up to 100 students)." },
+    { q: "Do you offer discounts for NGOs?", a: "Yes, we offer special pricing for registered NGOs and government schools. Contact us for details." },
+    { q: "Is my data secure?", a: "Absolutely. We use bank-level encryption and comply with Uganda's data protection regulations." },
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -183,25 +207,109 @@ export default function SubscriptionPage() {
           ))}
         </div>
 
+        {/* Savings Calculator */}
+        <div className="mt-12 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 md:p-8 max-w-3xl mx-auto">
+          <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2"><Calculator size={24} />Savings Calculator</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Number of Students</label>
+              <input type="range" min="50" max="2000" value={studentCount} onChange={(e) => setStudentCount(parseInt(e.target.value))}
+                className="w-full" />
+              <div className="flex justify-between text-sm text-gray-600 mt-1">
+                <span>50</span>
+                <span className="font-bold text-primary">{studentCount} students</span>
+                <span>2000</span>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="bg-white rounded-lg p-4 text-center">
+                <p className="text-sm text-gray-600">Starter Yearly</p>
+                <p className="text-2xl font-bold text-gray-900">UGX {(250000 * 12 * 0.8).toLocaleString()}</p>
+                <p className="text-xs text-gray-500">For {studentCount} students</p>
+              </div>
+              <div className="bg-white rounded-lg p-4 text-center border-2 border-primary">
+                <p className="text-sm text-gray-600">Professional Yearly</p>
+                <p className="text-2xl font-bold text-primary">UGX {(450000 * 12 * 0.8).toLocaleString()}</p>
+                <p className="text-xs text-gray-500">Unlimited students</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Testimonials */}
+        <div className="mt-16 max-w-5xl mx-auto">
+          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">What Schools Say About Us</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            {testimonials.map((t, i) => (
+              <div key={i} className="bg-white rounded-xl p-6 shadow-md">
+                <div className="flex gap-1 mb-3">
+                  {[...Array(t.rating)].map((_, j) => <Star key={j} size={16} className="text-yellow-500 fill-yellow-500" />)}
+                </div>
+                <p className="text-gray-600 text-sm mb-4">"{t.text}"</p>
+                <div>
+                  <p className="font-semibold text-gray-900 text-sm">{t.name}</p>
+                  <p className="text-gray-500 text-xs">{t.school}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Feature Comparison Table */}
+        <div className="mt-16 max-w-5xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">Feature Comparison</h2>
+            <button onClick={() => setShowComparison(!showComparison)} className="text-primary hover:underline text-sm flex items-center gap-1">
+              {showComparison ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              {showComparison ? 'Collapse' : 'Expand Full Table'}
+            </button>
+          </div>
+          {showComparison && (
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="text-left p-4">Feature</th>
+                    <th className="text-center p-4">Starter</th>
+                    <th className="text-center p-4 bg-primary/5">Professional</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {plans[0].features.map((feature, i) => (
+                    <tr key={i} className="hover:bg-gray-50">
+                      <td className="p-4">{feature.name}</td>
+                      <td className="text-center p-4">
+                        {feature.included ? <Check size={18} className="text-green-500 mx-auto" /> : <X size={18} className="text-gray-300 mx-auto" />}
+                      </td>
+                      <td className="text-center p-4 bg-primary/5">
+                        {plans[1].features[i]?.included ? <Check size={18} className="text-green-500 mx-auto" /> : <X size={18} className="text-gray-300 mx-auto" />}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* FAQ Accordion */}
         <div className="mt-16 bg-white rounded-2xl shadow-lg p-6 md:p-8 max-w-3xl mx-auto">
           <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">Frequently Asked Questions</h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Can I change plans later?</h3>
-              <p className="text-gray-600 text-sm">Yes! Upgrade or downgrade anytime. Changes apply immediately.</p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2">What payments do you accept?</h3>
-              <p className="text-gray-600 text-sm">MTN MoMo, Airtel Money, and bank transfers.</p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Is there a free trial?</h3>
-              <p className="text-gray-600 text-sm">Yes! 14-day free trial. No credit card required.</p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2">What after the trial?</h3>
-              <p className="text-gray-600 text-sm">Subscribe to continue or use our limited free tier.</p>
-            </div>
+          <div className="space-y-3">
+            {faqs.map((faq, i) => (
+              <div key={i} className="border border-gray-200 rounded-lg overflow-hidden">
+                <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50">
+                  <span className="font-medium text-gray-900 text-sm">{faq.q}</span>
+                  {openFaq === i ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                </button>
+                {openFaq === i && (
+                  <div className="p-4 pt-0 text-sm text-gray-600">
+                    {faq.a}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
 
