@@ -119,8 +119,14 @@ export default function FeesPage() {
   ]);
   const [showReminderModal, setShowReminderModal] = useState(false);
   const [editingReminder, setEditingReminder] = useState<AutomatedReminder | null>(null);
-  const [reminderForm, setReminderForm] = useState({
-    type: 'before_due', daysBeforeDue: 3, daysAfterDue: 3, message: '', channels: ['sms'] as ('sms' | 'whatsapp' | 'email')[]
+  const [reminderForm, setReminderForm] = useState<{
+    type: 'before_due' | 'on_due' | 'after_due' | 'custom';
+    daysBeforeDue: number;
+    daysAfterDue: number;
+    message: string;
+    channels: ('sms' | 'whatsapp' | 'email')[];
+  }>({
+    type: 'before_due', daysBeforeDue: 3, daysAfterDue: 3, message: '', channels: ['sms']
   });
   const [templates, setTemplates] = useState<FeeTemplate[]>([
     { id: 1, name: '2026 Term 1', academicYear: '2026', term: 'Term 1', structure: defaultFeeStructure, isActive: true }
@@ -967,19 +973,167 @@ export default function FeesPage() {
 
         {activeTab === 'reports' && (
           <div>
-            <div className="p-4 border-b">
+            <div className="p-4 border-b flex items-center justify-between">
               <h3 className="font-semibold">Advanced Reports</h3>
+              <button onClick={() => {
+                const reportData = [
+                  ['Report Type', 'Data'],
+                  ['Total Collected', formatUGX(totalCollected)],
+                  ['Total Expected', formatUGX(totalExpected)],
+                  ['Overdue Amount', formatUGX(totalOverdue)],
+                  ['Pending Payments', payments.filter(p => p.status === 'Pending').length],
+                  ['Active Installments', installmentPlans.filter(p => p.totalAmount > 0).length],
+                  ['Total Discounts', formatUGX(discounts.reduce((sum, d) => sum + d.amount, 0))],
+                ];
+                const csv = reportData.map(r => r.join(',')).join('\n');
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `fee-reports-${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+              }} className="flex items-center gap-2 px-3 py-1.5 text-sm border rounded-lg hover:bg-muted">
+                <FileDown size={14} />Export All Reports
+              </button>
             </div>
             <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {[
-                { title: 'Class-wise Collection', desc: 'View collection rates by class', icon: <Filter size={24} className="text-blue-600" /> },
-                { title: 'Defaulter List', desc: 'Students with overdue payments + contact info', icon: <AlertTriangle size={24} className="text-red-600" /> },
-                { title: 'Monthly Summary', desc: 'Financial summary for any period', icon: <Calendar size={24} className="text-green-600" /> },
-                { title: 'Discount Report', desc: 'All discounts and scholarships', icon: <Gift size={24} className="text-purple-600" /> },
-                { title: 'Installment Progress', desc: 'Track all installment plans', icon: <CreditCard size={24} className="text-orange-600" /> },
-                { title: 'Export All Data', desc: 'Download complete fee reports', icon: <FileDown size={24} className="text-gray-600" /> },
+                { 
+                  title: 'Class-wise Collection', 
+                  desc: 'View collection rates by class', 
+                  icon: <Filter size={24} className="text-blue-600" />,
+                  action: () => {
+                    const classData = classes.filter(c => c !== 'All Classes').map(cls => {
+                      const classStudents = students.filter(s => s.class === cls);
+                      const classFee = feeStructure.find(f => f.class.startsWith(cls.split(' ')[0]))?.total || 0;
+                      const totalExpected = classStudents.length * classFee;
+                      const totalPaid = payments
+                        .filter(p => p.status === 'Confirmed' && classStudents.some(s => s.id === p.studentId))
+                        .reduce((sum, p) => sum + p.amount, 0);
+                      const rate = totalExpected > 0 ? Math.round((totalPaid / totalExpected) * 100) : 0;
+                      return [cls, classStudents.length, formatUGX(totalExpected), formatUGX(totalPaid), `${rate}%`];
+                    });
+                    const csv = 'Class,Students,Expected,Collected,Rate\n' + classData.map(r => r.join(',')).join('\n');
+                    const blob = new Blob([csv], { type: 'text/csv' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `class-collection-${new Date().toISOString().split('T')[0]}.csv`;
+                    a.click();
+                  }
+                },
+                { 
+                  title: 'Defaulter List', 
+                  desc: 'Students with overdue payments + contact info', 
+                  icon: <AlertTriangle size={24} className="text-red-600" />,
+                  action: () => {
+                    const defaulters = studentBalances.filter(s => s.balance > 0);
+                    const csv = 'Name,Class,Balance,Phone,Email\n' + 
+                      defaulters.map(s => {
+                        const student = students.find(st => st.id === s.id);
+                        return `${s.name},${s.class},${s.balance},${student?.phone || ''},${student?.email || ''}`;
+                      }).join('\n');
+                    const blob = new Blob([csv], { type: 'text/csv' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `defaulters-${new Date().toISOString().split('T')[0]}.csv`;
+                    a.click();
+                  }
+                },
+                { 
+                  title: 'Monthly Summary', 
+                  desc: 'Financial summary for any period', 
+                  icon: <Calendar size={24} className="text-green-600" />,
+                  action: () => {
+                    const monthlyData = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map(month => {
+                      const monthPayments = payments.filter(p => {
+                        const date = new Date(p.date);
+                        return date.toLocaleString('default', { month: 'short' }) === month && p.status === 'Confirmed';
+                      });
+                      const collected = monthPayments.reduce((sum, p) => sum + p.amount, 0);
+                      return [month, formatUGX(collected), monthPayments.length];
+                    });
+                    const csv = 'Month,Collected,Payments\n' + monthlyData.map(r => r.join(',')).join('\n');
+                    const blob = new Blob([csv], { type: 'text/csv' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `monthly-summary-${new Date().toISOString().split('T')[0]}.csv`;
+                    a.click();
+                  }
+                },
+                { 
+                  title: 'Discount Report', 
+                  desc: 'All discounts and scholarships', 
+                  icon: <Gift size={24} className="text-purple-600" />,
+                  action: () => {
+                    const csv = 'Student,Type,Percentage,Amount,Reason\n' + 
+                      discounts.map(d => {
+                        const student = students.find(s => s.id === d.studentId);
+                        return `${student?.name || 'Unknown'},${d.type},${d.percentage}%,${d.amount},${d.reason}`;
+                      }).join('\n');
+                    const blob = new Blob([csv], { type: 'text/csv' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `discounts-${new Date().toISOString().split('T')[0]}.csv`;
+                    a.click();
+                  }
+                },
+                { 
+                  title: 'Installment Progress', 
+                  desc: 'Track all installment plans', 
+                  icon: <CreditCard size={24} className="text-orange-600" />,
+                  action: () => {
+                    const csv = 'Student,Total Amount,Paid,Remaining,Status\n' + 
+                      installmentPlans.map(p => {
+                        const student = students.find(s => s.id === p.studentId);
+                        const paid = p.installments.filter(i => i.status === 'paid').reduce((sum, i) => sum + i.amount, 0);
+                        const remaining = p.totalAmount - paid;
+                        return `${student?.name || 'Unknown'},${p.totalAmount},${paid},${remaining},${remaining === 0 ? 'Complete' : 'Active'}`;
+                      }).join('\n');
+                    const blob = new Blob([csv], { type: 'text/csv' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `installments-${new Date().toISOString().split('T')[0]}.csv`;
+                    a.click();
+                  }
+                },
+                { 
+                  title: 'Export All Data', 
+                  desc: 'Download complete fee reports', 
+                  icon: <FileDown size={24} className="text-gray-600" />,
+                  action: () => {
+                    const allData = [
+                      ['=== STUDENT BALANCES ==='],
+                      ['Name', 'Class', 'Paid', 'Expected', 'Balance'],
+                      ...studentBalances.map(s => [s.name, s.class, s.totalPaid, s.classFee, s.balance]),
+                      [],
+                      ['=== PAYMENTS ==='],
+                      ['Student', 'Amount', 'Date', 'Method', 'Status'],
+                      ...payments.map(p => [p.studentName, p.amount, p.date, p.method, p.status]),
+                      [],
+                      ['=== INSTALLMENTS ==='],
+                      ['Student', 'Total', 'Paid', 'Balance', 'Status'],
+                      ...installmentPlans.map(p => {
+                        const student = students.find(s => s.id === p.studentId);
+                        const paid = p.installments.filter(i => i.status === 'paid').reduce((sum, i) => sum + i.amount, 0);
+                        return [student?.name || 'Unknown', p.totalAmount, paid, p.totalAmount - paid, p.totalAmount - paid === 0 ? 'Complete' : 'Active'];
+                      }),
+                    ];
+                    const csv = allData.map(r => Array.isArray(r) ? r.join(',') : r).join('\n');
+                    const blob = new Blob([csv], { type: 'text/csv' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `all-fee-data-${new Date().toISOString().split('T')[0]}.csv`;
+                    a.click();
+                  }
+                },
               ].map((report, idx) => (
-                <div key={idx} className="border rounded-lg p-4 hover:bg-muted/30 cursor-pointer">
+                <div key={idx} className="border rounded-lg p-4 hover:bg-muted/30 cursor-pointer" onClick={report.action}>
                   <div className="flex items-center gap-3 mb-3">
                     {report.icon}
                     <h4 className="font-medium">{report.title}</h4>
@@ -1245,7 +1399,7 @@ export default function FeesPage() {
                   
                   const installmentAmount = Math.floor(total / count);
                   const lastAmount = total - (installmentAmount * (count - 1));
-                  const installments = [];
+                  const installments: { dueDate: string; amount: number; status: 'pending' }[] = [];
                   
                   for (let i = 0; i < count; i++) {
                     const date = new Date();
@@ -1427,12 +1581,12 @@ export default function FeesPage() {
               </div>
               <div className="flex gap-4 pt-4">
                 <button type="button" onClick={() => setShowReminderModal(false)} className="flex-1 px-4 py-2 border border-border rounded-lg">Cancel</button>
-                <button onClick={() => {
+                <button                   onClick={() => {
                   if (!reminderForm.message) { alert('Please enter a message'); return; }
                   if (editingReminder) {
-                    setReminders(prev => prev.map(r => r.id === editingReminder.id ? { ...r, ...reminderForm, channels: reminderForm.channels as any } : r));
+                    setReminders(prev => prev.map(r => r.id === editingReminder.id ? { ...r, ...reminderForm } : r));
                   } else {
-                    setReminders(prev => [...prev, { id: Date.now(), ...reminderForm, channels: reminderForm.channels as any, isActive: true }]);
+                    setReminders(prev => [...prev, { id: Date.now(), ...reminderForm, isActive: true }]);
                   }
                   setShowReminderModal(false);
                   alert(`Reminder ${editingReminder ? 'updated' : 'added'} successfully!`);
