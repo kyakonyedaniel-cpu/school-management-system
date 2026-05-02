@@ -136,21 +136,35 @@ export default function FeesPage() {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('fee_reminders');
       return saved ? JSON.parse(saved) : [
-        { id: 1, type: 'before_due', daysBeforeDue: 3, message: 'Dear parent, fee payment for {student} is due in 3 days. Amount: {amount}.', channels: ['sms', 'whatsapp'], isActive: true },
-        { id: 2, type: 'on_due', message: 'Dear parent, fee payment for {student} is due today. Amount: {amount}.', channels: ['sms'], isActive: true },
-        { id: 3, type: 'after_due', daysAfterDue: 3, message: 'ALERT: Fee payment for {student} is overdue by 3 days. Amount: {amount}. Please pay immediately.', channels: ['sms', 'whatsapp'], isActive: true },
+        { id: 1, type: 'before_due', daysBeforeDue: 3, message: 'Dear parent, fee payment for {{student}} is due in 3 days. Amount: {{amount}}.', channels: ['sms', 'whatsapp'], isActive: true },
+        { id: 2, type: 'on_due', message: 'Dear parent, fee payment for {{student}} is due today. Amount: {{amount}}.', channels: ['sms'], isActive: true },
+        { id: 3, type: 'after_due', daysAfterDue: 3, message: 'ALERT: Fee payment for {{student}} is overdue by 3 days. Amount: {{amount}}. Please pay immediately.', channels: ['sms', 'whatsapp'], isActive: true },
       ];
     }
     return [
-      { id: 1, type: 'before_due', daysBeforeDue: 3, message: 'Dear parent, fee payment for {student} is due in 3 days. Amount: {amount}.', channels: ['sms', 'whatsapp'], isActive: true },
-      { id: 2, type: 'on_due', message: 'Dear parent, fee payment for {student} is due today. Amount: {amount}.', channels: ['sms'], isActive: true },
-      { id: 3, type: 'after_due', daysAfterDue: 3, message: 'ALERT: Fee payment for {student} is overdue by 3 days. Amount: {amount}. Please pay immediately.', channels: ['sms', 'whatsapp'], isActive: true },
+      { id: 1, type: 'before_due', daysBeforeDue: 3, message: 'Dear parent, fee payment for {{student}} is due in 3 days. Amount: {{amount}}.', channels: ['sms', 'whatsapp'], isActive: true },
+      { id: 2, type: 'on_due', message: 'Dear parent, fee payment for {{student}} is due today. Amount: {{amount}}.', channels: ['sms'], isActive: true },
+      { id: 3, type: 'after_due', daysAfterDue: 3, message: 'ALERT: Fee payment for {{student}} is overdue by 3 days. Amount: {{amount}}. Please pay immediately.', channels: ['sms', 'whatsapp'], isActive: true },
     ];
   });
   const [showReminderModal, setShowReminderModal] = useState(false);
   const [editingReminder, setEditingReminder] = useState<AutomatedReminder | null>(null);
-  const [reminderForm, setReminderForm] = useState({
-    type: 'before_due' as string, daysBeforeDue: 3, daysAfterDue: 3, message: '', channels: ['sms'] as string[]
+  const [reminderForm, setReminderForm] = useState<{
+    type: AutomatedReminder['type'];
+    daysBeforeDue: number;
+    daysAfterDue: number;
+    message: string;
+    channels: AutomatedReminder['channels'];
+  }>({
+    type: 'before_due', daysBeforeDue: 3, daysAfterDue: 3, message: '', channels: ['sms']
+  });
+  
+  const [templates, setTemplates] = useState<FeeTemplate[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('fee_templates');
+      return saved ? JSON.parse(saved) as FeeTemplate[] : [];
+    }
+    return [] as FeeTemplate[];
   });
   
   const [credits, setCredits] = useState<Credit[]>(() => {
@@ -1647,13 +1661,13 @@ export default function FeesPage() {
                 </div>
               )}
               <div>
-                <label className="block text-sm font-medium mb-1">Message (use {student} and {amount} as placeholders)</label>
-                <textarea 
-                  value={reminderForm.message} 
+                <label className="block text-sm font-medium mb-1">Message (use {'{student}'} and {'{amount}'} as placeholders)</label>
+                 <textarea
+                  value={reminderForm.message}
                   onChange={(e) => setReminderForm({ ...reminderForm, message: e.target.value })}
-                  placeholder="Dear parent, fee payment for {student} is due in 3 days. Amount: {amount}."
+                  placeholder="Dear parent, fee payment for {{student}} is due in 3 days. Amount: {{amount}}."
                   rows={3}
-                  className="w-full px-4 py-2 rounded-lg border border-border" 
+                  className="w-full px-4 py-2 rounded-lg border border-border"
                 />
               </div>
               <div>
@@ -1682,9 +1696,24 @@ export default function FeesPage() {
                 <button                   onClick={() => {
                   if (!reminderForm.message) { alert('Please enter a message'); return; }
                   if (editingReminder) {
-                    setReminders(prev => prev.map(r => r.id === editingReminder.id ? { ...r, ...reminderForm } : r));
+                    setReminders(prev => prev.map(r => r.id === editingReminder.id ? { 
+                      ...r, 
+                      type: reminderForm.type,
+                      daysBeforeDue: reminderForm.daysBeforeDue,
+                      daysAfterDue: reminderForm.daysAfterDue,
+                      message: reminderForm.message,
+                      channels: reminderForm.channels
+                    } : r));
                   } else {
-                    setReminders(prev => [...prev, { id: Date.now(), ...reminderForm, isActive: true }]);
+                    setReminders(prev => [...prev, { 
+                      id: Date.now(), 
+                      type: reminderForm.type,
+                      daysBeforeDue: reminderForm.daysBeforeDue,
+                      daysAfterDue: reminderForm.daysAfterDue,
+                      message: reminderForm.message,
+                      channels: reminderForm.channels,
+                      isActive: true 
+                    }]);
                   }
                   setShowReminderModal(false);
                   alert(`Reminder ${editingReminder ? 'updated' : 'added'} successfully!`);
