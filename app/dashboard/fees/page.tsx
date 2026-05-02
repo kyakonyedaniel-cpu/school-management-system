@@ -338,16 +338,14 @@ export default function FeesPage() {
               </div>
             </div>
             <table>
-              <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+              <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>              </thead>
               <tbody>
                 ${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}
               </tbody>
-              <tfoot>
-                <tr>
-                  <td colspan="10" class="total">Total Expected Revenue: ${formatUGX(feeStructure.reduce((sum, f) => sum + f.total, 0))}</td>
-                </tr>
-              </tfoot>
             </table>
+            <p class="total" style="margin-top: 20px; font-weight: bold; font-size: 1.1em;">
+              Total Expected Revenue: ${formatUGX(feeStructure.reduce((sum, f) => sum + f.total, 0))}
+            </p>
           </body>
         </html>
       `;
