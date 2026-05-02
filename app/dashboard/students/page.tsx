@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from 'react';
-import { Plus, Search, Edit, Trash2, X, MessageSquare, Printer, Download, Upload, CheckSquare, Square, RefreshCw, Camera } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Search, Edit, Trash2, X, MessageSquare, Printer, Download, Upload, CheckSquare, Square, RefreshCw, Camera, Eye, Users, Filter, Send, School, TrendingUp, DollarSign, UserCheck } from 'lucide-react';
 import { useStudents, classes, generateId, parseCSV } from '@/lib/data';
 import { generateStudentIdCard } from '@/lib/print';
 import { sendWhatsApp, sendFeeReminder } from '@/lib/whatsapp';
@@ -14,6 +14,14 @@ export default function StudentsPage() {
   const [editingStudent, setEditingStudent] = useState<any>(null);
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
   const [photoPreview, setPhotoPreview] = useState<string>('');
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [viewingStudent, setViewingStudent] = useState<any>(null);
+  const [showBulkTransferModal, setShowBulkTransferModal] = useState(false);
+  const [bulkTransferClass, setBulkTransferClass] = useState('');
+  const [feesFilter, setFeesFilter] = useState<'All' | 'Paid' | 'Pending' | 'Overdue'>('All');
+  const [showBulkMessageModal, setShowBulkMessageModal] = useState(false);
+  const [bulkMessage, setBulkMessage] = useState('');
+  const [studentStats, setStudentStats] = useState({ total: 0, male: 0, female: 0, paid: 0, pending: 0, overdue: 0 });
   const [formData, setFormData] = useState({
     name: '', class: 'P.1', gender: 'Male', parent: '', phone: '', admissionNo: '', fees: 'Pending', photo: ''
   });
@@ -22,8 +30,18 @@ export default function StudentsPage() {
     const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.admissionNo.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesClass = selectedClass === 'All Classes' || student.class === selectedClass;
-    return matchesSearch && matchesClass;
+    const matchesFees = feesFilter === 'All' || student.fees === feesFilter;
+    return matchesSearch && matchesClass && matchesFees;
   });
+
+  useEffect(() => {
+    const male = students.filter(s => s.gender === 'Male').length;
+    const female = students.filter(s => s.gender === 'Female').length;
+    const paid = students.filter(s => s.fees === 'Paid').length;
+    const pending = students.filter(s => s.fees === 'Pending').length;
+    const overdue = students.filter(s => s.fees === 'Overdue').length;
+    setStudentStats({ total: students.length, male, female, paid, pending, overdue });
+  }, [students]);
 
   const getFeesColor = (fees: string) => {
     switch (fees) {
@@ -140,6 +158,34 @@ export default function StudentsPage() {
     selected.forEach(s => generateStudentIdCard(s));
   };
 
+  const viewStudentDetails = (student: any) => {
+    setViewingStudent(student);
+    setShowDetailsModal(true);
+  };
+
+  const executeBulkTransfer = () => {
+    if (!bulkTransferClass || selectedStudents.length === 0) return;
+    selectedStudents.forEach(id => {
+      updateStudent(id, { class: bulkTransferClass });
+    });
+    setSelectedStudents([]);
+    setShowBulkTransferModal(false);
+    setBulkTransferClass('');
+    alert(`Transferred ${selectedStudents.length} students to ${bulkTransferClass}`);
+  };
+
+  const bulkSendCustomMessage = () => {
+    if (!bulkMessage || selectedStudents.length === 0) return;
+    const selected = students.filter(s => selectedStudents.includes(s.id));
+    selected.forEach(s => {
+      const msg = bulkMessage.replace('{student}', s.name).replace('{parent}', s.parent).replace('{class}', s.class);
+      sendWhatsApp(s.phone, msg);
+    });
+    setShowBulkMessageModal(false);
+    setBulkMessage('');
+    alert(`Message sent to ${selected.length} parents via WhatsApp`);
+  };
+
   const classesList = classes.filter(c => c !== 'All Classes');
 
   return (
@@ -168,7 +214,7 @@ export default function StudentsPage() {
 
       {/* Bulk Actions Bar */}
       {selectedStudents.length > 0 && (
-        <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 flex items-center gap-4">
+        <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 flex flex-wrap items-center gap-4">
           <span className="text-sm font-medium text-primary">{selectedStudents.length} selected</span>
           <button onClick={bulkSendReminders} className="flex items-center gap-2 px-3 py-1.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700">
             <MessageSquare size={14} />Send WhatsApp
@@ -176,11 +222,63 @@ export default function StudentsPage() {
           <button onClick={bulkPrintIdCards} className="flex items-center gap-2 px-3 py-1.5 bg-primary text-white text-sm rounded-lg hover:bg-primary/90">
             <Printer size={14} />Print ID Cards
           </button>
+          <button onClick={() => { setBulkTransferClass(''); setShowBulkTransferModal(true); }} className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
+            <School size={14} />Transfer Class
+          </button>
+          <button onClick={() => { setBulkMessage(''); setShowBulkMessageModal(true); }} className="flex items-center gap-2 px-3 py-1.5 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700">
+            <Send size={14} />Custom Message
+          </button>
           <button onClick={() => setSelectedStudents([])} className="flex items-center gap-2 px-3 py-1.5 text-sm text-foreground/70 hover:text-foreground">
             <X size={14} />Clear
           </button>
         </div>
       )}
+
+      {/* Statistics Dashboard */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+        <div className="bg-background border border-border rounded-lg p-4 flex items-center gap-3">
+          <Users className="text-blue-600" size={24} />
+          <div>
+            <p className="text-2xl font-bold">{studentStats.total}</p>
+            <p className="text-xs text-foreground/60">Total</p>
+          </div>
+        </div>
+        <div className="bg-background border border-border rounded-lg p-4 flex items-center gap-3">
+          <UserCheck className="text-indigo-600" size={24} />
+          <div>
+            <p className="text-2xl font-bold">{studentStats.male}</p>
+            <p className="text-xs text-foreground/60">Male</p>
+          </div>
+        </div>
+        <div className="bg-background border border-border rounded-lg p-4 flex items-center gap-3">
+          <UserCheck className="text-pink-600" size={24} />
+          <div>
+            <p className="text-2xl font-bold">{studentStats.female}</p>
+            <p className="text-xs text-foreground/60">Female</p>
+          </div>
+        </div>
+        <div className="bg-background border border-border rounded-lg p-4 flex items-center gap-3">
+          <DollarSign className="text-green-600" size={24} />
+          <div>
+            <p className="text-2xl font-bold">{studentStats.paid}</p>
+            <p className="text-xs text-foreground/60">Paid</p>
+          </div>
+        </div>
+        <div className="bg-background border border-border rounded-lg p-4 flex items-center gap-3">
+          <TrendingUp className="text-yellow-600" size={24} />
+          <div>
+            <p className="text-2xl font-bold">{studentStats.pending}</p>
+            <p className="text-xs text-foreground/60">Pending</p>
+          </div>
+        </div>
+        <div className="bg-background border border-border rounded-lg p-4 flex items-center gap-3">
+          <TrendingUp className="text-red-600" size={24} />
+          <div>
+            <p className="text-2xl font-bold">{studentStats.overdue}</p>
+            <p className="text-xs text-foreground/60">Overdue</p>
+          </div>
+        </div>
+      </div>
 
       <div className="bg-background rounded-xl border border-border">
         <div className="p-4 border-b border-border flex flex-col sm:flex-row gap-4">
@@ -193,6 +291,13 @@ export default function StudentsPage() {
           <select value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)}
             className="px-4 py-2 rounded-lg border border-border focus:border-primary outline-none">
             {classes.map(cls => <option key={cls} value={cls}>{cls}</option>)}
+          </select>
+          <select value={feesFilter} onChange={(e) => setFeesFilter(e.target.value as any)}
+            className="px-4 py-2 rounded-lg border border-border focus:border-primary outline-none">
+            <option value="All">All Fees Status</option>
+            <option value="Paid">Paid</option>
+            <option value="Pending">Pending</option>
+            <option value="Overdue">Overdue</option>
           </select>
         </div>
 
@@ -320,6 +425,113 @@ export default function StudentsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Student Details Modal */}
+      {showDetailsModal && viewingStudent && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <h2 className="font-semibold">Student Details</h2>
+              <button onClick={() => setShowDetailsModal(false)} className="p-1 hover:bg-muted rounded"><X size={20} /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="flex flex-col items-center gap-3 mb-4">
+                {viewingStudent.photo ? (
+                  <img src={viewingStudent.photo} alt={viewingStudent.name} className="w-24 h-24 rounded-full object-cover border-2 border-primary" />
+                ) : (
+                  <div className="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center text-primary text-3xl font-medium">
+                    {viewingStudent.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <h3 className="text-lg font-semibold">{viewingStudent.name}</h3>
+                <span className={`px-3 py-1 rounded-full text-xs ${getFeesColor(viewingStudent.fees)}`}>{viewingStudent.fees}</span>
+              </div>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-sm text-foreground/60">Admission No</span>
+                  <span className="text-sm font-medium">{viewingStudent.admissionNo}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-foreground/60">Class</span>
+                  <span className="text-sm font-medium">{viewingStudent.class}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-foreground/60">Gender</span>
+                  <span className="text-sm font-medium">{viewingStudent.gender}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-foreground/60">Parent</span>
+                  <span className="text-sm font-medium">{viewingStudent.parent}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-foreground/60">Phone</span>
+                  <span className="text-sm font-medium">{viewingStudent.phone}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-foreground/60">Status</span>
+                  <span className="text-sm font-medium">{viewingStudent.status || 'Active'}</span>
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button onClick={() => { setShowDetailsModal(false); handleEdit(viewingStudent); }} className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
+                  <Edit size={16} className="inline mr-1" />Edit
+                </button>
+                <button onClick={() => generateStudentIdCard(viewingStudent)} className="flex-1 px-4 py-2 border border-border rounded-lg hover:bg-muted">
+                  <Printer size={16} className="inline mr-1" />ID Card
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Transfer Modal */}
+      {showBulkTransferModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-xl w-full max-w-md">
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <h2 className="font-semibold">Bulk Transfer Students</h2>
+              <button onClick={() => setShowBulkTransferModal(false)} className="p-1 hover:bg-muted rounded"><X size={20} /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-sm text-foreground/60">Transfer {selectedStudents.length} selected students to:</p>
+              <select value={bulkTransferClass} onChange={(e) => setBulkTransferClass(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border border-border">
+                <option value="">Select Class</option>
+                {classesList.map(cls => <option key={cls} value={cls}>{cls}</option>)}
+              </select>
+              <div className="flex gap-3 pt-2">
+                <button onClick={() => setShowBulkTransferModal(false)} className="flex-1 px-4 py-2 border border-border rounded-lg hover:bg-muted">Cancel</button>
+                <button onClick={executeBulkTransfer} className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Transfer</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Message Modal */}
+      {showBulkMessageModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-xl w-full max-w-lg">
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <h2 className="font-semibold">Send Custom Message</h2>
+              <button onClick={() => setShowBulkMessageModal(false)} className="p-1 hover:bg-muted rounded"><X size={20} /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-sm text-foreground/60">Send to {selectedStudents.length} selected students' parents. Use {'{student}'}, {'{parent}'}, {'{class}'} as placeholders.</p>
+              <textarea value={bulkMessage} onChange={(e) => setBulkMessage(e.target.value)}
+                placeholder="Dear {parent}, this is a message about {student} in {class}..."
+                rows={4} className="w-full px-4 py-2 rounded-lg border border-border" />
+              <div className="flex gap-3 pt-2">
+                <button onClick={() => setShowBulkMessageModal(false)} className="flex-1 px-4 py-2 border border-border rounded-lg hover:bg-muted">Cancel</button>
+                <button onClick={bulkSendCustomMessage} className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                  <Send size={16} className="inline mr-1" />Send via WhatsApp
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
