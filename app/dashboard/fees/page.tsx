@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { Plus, DollarSign, AlertTriangle, Clock, TrendingUp, X, Search, Send, FileText, Download, Phone, Wallet, Edit, Trash2, Calendar, Percent, Gift, FileDown, Settings, Bell, CreditCard, Printer, Filter } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { usePayments, useStudents, formatUGX, classes } from '@/lib/data';
+import { defaultSchoolProfile } from '@/lib/school';
 
 const COLORS = ['#2563eb', '#16a34a', '#dc2626', '#f59e0b', '#8b5cf6'];
 
@@ -282,11 +283,17 @@ export default function FeesPage() {
   };
 
   const downloadFeeStructure = (format: 'csv' | 'print') => {
-    const headers = ['Class', 'Term', 'Type', 'Tuition', 'Development', 'Uniforms', 'Books', 'Boarding', 'Transport', 'Meals', 'Total'];
+    const headers = ['Class', 'Term', 'Type', 'Tuition', 'Development', 'Uniforms', 'Boarding', 'Transport', 'Meals', 'Total'];
     const rows = feeStructure.map(f => [
       f.class, f.term, f.category || 'day', f.tuition, f.development, f.uniforms, f.books,
       f.boarding || 0, f.transport || 0, f.meals || 0, f.total
     ]);
+    
+    let school = defaultSchoolProfile;
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('school_profile');
+      if (stored) school = JSON.parse(stored);
+    }
     
     if (format === 'csv') {
       const csv = headers.join(',') + '\n' + rows.map(r => r.join(',')).join('\n');
@@ -297,25 +304,39 @@ export default function FeesPage() {
       a.download = `fee-structure-${new Date().toISOString().split('T')[0]}.csv`;
       a.click();
     } else {
+      const logoHTML = school.logo ? `<img src="${school.logo}" alt="Logo" style="width: 80px; height: auto;" />` : '';
       const printContent = `
         <html>
-          <head><title>Fee Structure</title>
+          <head><title>Fee Structure - ${school.name}</title>
             <style>
               body { font-family: Arial; padding: 20px; }
-              h1 { color: #333; }
+              h1 { color: #333; margin: 0; }
+              h2 { color: #666; font-weight: normal; margin: 5px 0; }
               table { width: 100%; border-collapse: collapse; margin-top: 20px; }
               th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
               th { background-color: #f5f5f5; font-weight: bold; }
-              .header { display: flex; justify-content: space-between; align-items: center; }
+              .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+              .school-info { display: flex; align-items: center; gap: 20px; }
               .total { font-weight: bold; }
+              .motto { font-style: italic; color: #666; }
             </style>
           </head>
           <body>
             <div class="header">
-              <h1>School Fee Structure</h1>
-              <p>Generated: ${new Date().toLocaleDateString()}</p>
+              <div class="school-info">
+                ${logoHTML}
+                <div>
+                  <h1>${school.name}</h1>
+                  <p class="motto">${school.motto}</p>
+                  <p>${school.address} | ${school.phone} | ${school.email}</p>
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <p><strong>Generated:</strong> ${new Date().toLocaleDateString()}</p>
+                <p><strong>Academic Year:</strong> 2026</p>
+                <p><strong>Term:</strong> 1</p>
+              </div>
             </div>
-            <p>Academic Year: 2026 | Term: 1</p>
             <table>
               <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
               <tbody>
