@@ -283,10 +283,14 @@ export default function FeesPage() {
   };
 
   const downloadFeeStructure = (format: 'csv' | 'print') => {
-    const headers = ['Class', 'Term', 'Type', 'Tuition', 'Development', 'Uniforms', 'Boarding', 'Transport', 'Meals', 'Total'];
+    const headers = ['Class', 'Term', 'Type', 'Tuition', 'Development', 'Uniforms', 'Books', 'Boarding', 'Transport', 'Meals', 'Total'];
     const rows = feeStructure.map(f => [
-      f.class, f.term, f.category || 'day', f.tuition, f.development, f.uniforms, f.books,
-      f.boarding || 0, f.transport || 0, f.meals || 0, f.total
+      f.class, f.term, f.category || 'day', 
+      formatUGX(f.tuition), formatUGX(f.development), formatUGX(f.uniforms), formatUGX(f.books),
+      f.boarding ? formatUGX(f.boarding) : '-', 
+      f.transport ? formatUGX(f.transport) : '-', 
+      f.meals ? formatUGX(f.meals) : '-', 
+      formatUGX(f.total)
     ]);
     
     let school = defaultSchoolProfile;
@@ -344,7 +348,7 @@ export default function FeesPage() {
               </tbody>
             </table>
             <p class="total" style="margin-top: 20px; font-weight: bold; font-size: 1.1em;">
-              Total Expected Revenue: ${formatUGX(feeStructure.reduce((sum, f) => sum + f.total, 0))}
+              Total Expected Revenue: UGX ${feeStructure.reduce((sum, f) => sum + f.total, 0).toLocaleString()}
             </p>
           </body>
         </html>
