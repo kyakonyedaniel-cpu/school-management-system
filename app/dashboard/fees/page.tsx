@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Plus, DollarSign, AlertTriangle, Clock, TrendingUp, X, Search, Send, FileText, Download, Phone, Wallet, Edit, Trash2, Calendar, Percent, Gift, FileDown, Settings, Bell, CreditCard, Printer, Filter } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { usePayments, useStudents, formatUGX, classes } from '@/lib/data';
@@ -93,7 +93,13 @@ export default function FeesPage() {
   const { students } = useStudents();
   
   const [activeTab, setActiveTab] = useState<'structure' | 'balances' | 'payments' | 'installments' | 'discounts' | 'reminders' | 'templates' | 'credits' | 'reports'>('structure');
-  const [feeStructure, setFeeStructure] = useState<FeeItem[]>(defaultFeeStructure);
+  const [feeStructure, setFeeStructure] = useState<FeeItem[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('fee_structure');
+      return saved ? JSON.parse(saved) : defaultFeeStructure;
+    }
+    return defaultFeeStructure;
+  });
   const [showFeeModal, setShowFeeModal] = useState(false);
   const [editingFee, setEditingFee] = useState<FeeItem | null>(null);
   const [feeForm, setFeeForm] = useState({
@@ -108,38 +114,120 @@ export default function FeesPage() {
     studentId: '', amount: 0, method: 'Mobile Money', description: '', phone: '', sendSMS: true
   });
 
-  const [installmentPlans, setInstallmentPlans] = useState<InstallmentPlan[]>([]);
+  const [installmentPlans, setInstallmentPlans] = useState<InstallmentPlan[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('installment_plans');
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
   const [showInstallmentModal, setShowInstallmentModal] = useState(false);
-  const [discounts, setDiscounts] = useState<Discount[]>([]);
+  
+  const [discounts, setDiscounts] = useState<Discount[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('fee_discounts');
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
   const [showDiscountModal, setShowDiscountModal] = useState(false);
-  const [reminders, setReminders] = useState<AutomatedReminder[]>([
-    { id: 1, type: 'before_due', daysBeforeDue: 3, message: 'Dear parent, fee payment for {student} is due in 3 days. Amount: {amount}.', channels: ['sms', 'whatsapp'], isActive: true },
-    { id: 2, type: 'on_due', message: 'Dear parent, fee payment for {student} is due today. Amount: {amount}.', channels: ['sms'], isActive: true },
-    { id: 3, type: 'after_due', daysAfterDue: 3, message: 'ALERT: Fee payment for {student} is overdue by 3 days. Amount: {amount}. Please pay immediately.', channels: ['sms', 'whatsapp'], isActive: true },
-  ]);
+  
+  const [reminders, setReminders] = useState<AutomatedReminder[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('fee_reminders');
+      return saved ? JSON.parse(saved) : [
+        { id: 1, type: 'before_due', daysBeforeDue: 3, message: 'Dear parent, fee payment for {student} is due in 3 days. Amount: {amount}.', channels: ['sms', 'whatsapp'], isActive: true },
+        { id: 2, type: 'on_due', message: 'Dear parent, fee payment for {student} is due today. Amount: {amount}.', channels: ['sms'], isActive: true },
+        { id: 3, type: 'after_due', daysAfterDue: 3, message: 'ALERT: Fee payment for {student} is overdue by 3 days. Amount: {amount}. Please pay immediately.', channels: ['sms', 'whatsapp'], isActive: true },
+      ];
+    }
+    return [
+      { id: 1, type: 'before_due', daysBeforeDue: 3, message: 'Dear parent, fee payment for {student} is due in 3 days. Amount: {amount}.', channels: ['sms', 'whatsapp'], isActive: true },
+      { id: 2, type: 'on_due', message: 'Dear parent, fee payment for {student} is due today. Amount: {amount}.', channels: ['sms'], isActive: true },
+      { id: 3, type: 'after_due', daysAfterDue: 3, message: 'ALERT: Fee payment for {student} is overdue by 3 days. Amount: {amount}. Please pay immediately.', channels: ['sms', 'whatsapp'], isActive: true },
+    ];
+  });
   const [showReminderModal, setShowReminderModal] = useState(false);
   const [editingReminder, setEditingReminder] = useState<AutomatedReminder | null>(null);
-  const [reminderForm, setReminderForm] = useState<{
-    type: 'before_due' | 'on_due' | 'after_due' | 'custom';
-    daysBeforeDue: number;
-    daysAfterDue: number;
-    message: string;
-    channels: ('sms' | 'whatsapp' | 'email')[];
-  }>({
-    type: 'before_due', daysBeforeDue: 3, daysAfterDue: 3, message: '', channels: ['sms']
+  const [reminderForm, setReminderForm] = useState({
+    type: 'before_due' as string, daysBeforeDue: 3, daysAfterDue: 3, message: '', channels: ['sms'] as string[]
   });
-  const [templates, setTemplates] = useState<FeeTemplate[]>([
-    { id: 1, name: '2026 Term 1', academicYear: '2026', term: 'Term 1', structure: defaultFeeStructure, isActive: true }
-  ]);
-  const [credits, setCredits] = useState<Credit[]>([]);
+  
+  const [credits, setCredits] = useState<Credit[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('fee_credits');
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
   const [showCreditModal, setShowCreditModal] = useState(false);
-  const [studentTypeFees, setStudentTypeFees] = useState<StudentTypeFee[]>([
-    { studentType: 'day', class: 'P.1 - P.3', term: 'Term 1', baseFee: 780000, additionalCharges: [], total: 780000 },
-    { studentType: 'boarding', class: 'P.1 - P.3', term: 'Term 1', baseFee: 780000, additionalCharges: [{ name: 'Boarding', amount: 500000 }], total: 1280000 },
-    { studentType: 'international', class: 'P.1 - P.3', term: 'Term 1', baseFee: 780000, additionalCharges: [{ name: 'International Fee', amount: 1000000 }], total: 1780000 },
-  ]);
-  const [receipts, setReceipts] = useState<{id: number, paymentId: string, studentName: string, amount: number, date: string, receiptNo: string}[]>([]);
-
+  
+  const [studentTypeFees, setStudentTypeFees] = useState<StudentTypeFee[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('student_type_fees');
+      return saved ? JSON.parse(saved) : [
+        { studentType: 'day', class: 'P.1 - P.3', term: 'Term 1', baseFee: 780000, additionalCharges: [], total: 780000 },
+        { studentType: 'boarding', class: 'P.1 - P.3', term: 'Term 1', baseFee: 780000, additionalCharges: [{ name: 'Boarding', amount: 500000 }], total: 1280000 },
+        { studentType: 'international', class: 'P.1 - P.3', term: 'Term 1', baseFee: 780000, additionalCharges: [{ name: 'International Fee', amount: 1000000 }], total: 1780000 },
+      ];
+    }
+    return [
+      { studentType: 'day', class: 'P.1 - P.3', term: 'Term 1', baseFee: 780000, additionalCharges: [], total: 780000 },
+      { studentType: 'boarding', class: 'P.1 - P.3', term: 'Term 1', baseFee: 780000, additionalCharges: [{ name: 'Boarding', amount: 500000 }], total: 1280000 },
+      { studentType: 'international', class: 'P.1 - P.3', term: 'Term 1', baseFee: 780000, additionalCharges: [{ name: 'International Fee', amount: 1000000 }], total: 1780000 },
+    ];
+  });
+  
+  const [receipts, setReceipts] = useState<{id: number, paymentId: string, studentName: string, amount: number, date: string, receiptNo: string}[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('fee_receipts');
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('fee_structure', JSON.stringify(feeStructure));
+    }
+  }, [feeStructure]);
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('installment_plans', JSON.stringify(installmentPlans));
+    }
+  }, [installmentPlans]);
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('fee_discounts', JSON.stringify(discounts));
+    }
+  }, [discounts]);
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('fee_reminders', JSON.stringify(reminders));
+    }
+  }, [reminders]);
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('fee_templates', JSON.stringify(templates));
+    }
+  }, [templates]);
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('fee_credits', JSON.stringify(credits));
+    }
+  }, [credits]);
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('fee_receipts', JSON.stringify(receipts));
+    }
+  }, [receipts]);
+  
   const calculateTotal = () => {
     const values = [feeForm.tuition, feeForm.development, feeForm.uniforms, feeForm.books, feeForm.boarding, feeForm.transport, feeForm.meals];
     return values.reduce((sum, v) => sum + (parseInt(v) || 0), 0);
