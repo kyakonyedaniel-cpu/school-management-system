@@ -363,11 +363,64 @@ export default function FeesPage() {
   };
 
   const generateReceipt = (payment: any) => {
-    const receipt = receipts.find(r => r.paymentId === payment.id);
-    if (receipt) {
-      alert(`Receipt ${receipt.receiptNo} generated for ${receipt.studentName}\nAmount: ${formatUGX(receipt.amount)}\nDate: ${receipt.date}`);
+    const existingReceipt = receipts.find(r => r.paymentId === payment.id);
+    if (existingReceipt) {
+      const school = typeof window !== 'undefined' ? (localStorage.getItem('school_profile') ? JSON.parse(localStorage.getItem('school_profile')!) : defaultSchoolProfile) : defaultSchoolProfile;
+      const receiptContent = `
+        <html>
+          <head><title>Receipt ${existingReceipt.receiptNo}</title>
+            <style>
+              body { font-family: Arial; padding: 40px; max-width: 400px; margin: 0 auto; }
+              .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 20px; }
+              .logo { width: 80px; height: auto; }
+              .motto { font-style: italic; color: #666; }
+              .details { margin: 20px 0; }
+              .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
+              .total { font-weight: bold; font-size: 1.2em; margin-top: 20px; padding-top: 20px; border-top: 2px solid #333; }
+              .footer { text-align: center; margin-top: 30px; font-size: 0.9em; color: #666; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              ${school.logo ? `<img src="${school.logo}" alt="Logo" class="logo" />` : ''}
+              <h1>${school.name}</h1>
+              <p class="motto">${school.motto}</p>
+            </div>
+            <div class="details">
+              <div class="row"><span>Receipt No:</span><span>${existingReceipt.receiptNo}</span></div>
+              <div class="row"><span>Student:</span><span>${existingReceipt.studentName}</span></div>
+              <div class="row"><span>Date:</span><span>${existingReceipt.date}</span></div>
+              <div class="row"><span>Payment Method:</span><span>${payment.method}</span></div>
+              <div class="row"><span>Description:</span><span>${payment.description || 'School Fees'}</span></div>
+            </div>
+            <div class="total">
+              <div class="row"><span>Total Paid:</span><span>${formatUGX(existingReceipt.amount)}</span></div>
+            </div>
+            <div class="footer">
+              <p>Thank you for your payment!</p>
+              <p>${school.name} | ${school.phone} | ${school.email}</p>
+            </div>
+          </body>
+        </html>
+      `;
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(receiptContent);
+        printWindow.document.close();
+        setTimeout(() => { printWindow.print(); }, 250);
+      }
     } else {
-      alert(`Generating new receipt for ${payment.studentName}...`);
+      const newReceiptNo = `RCP-${Date.now()}`;
+      const newReceipt = {
+        id: Date.now(),
+        paymentId: payment.id,
+        studentName: payment.studentName,
+        amount: payment.amount,
+        date: payment.date,
+        receiptNo: newReceiptNo
+      };
+      setReceipts(prev => [...prev, newReceipt]);
+      alert(`Receipt ${newReceiptNo} generated for ${payment.studentName}\nAmount: ${formatUGX(payment.amount)}\nDate: ${payment.date}`);
     }
   };
 
@@ -1085,6 +1138,370 @@ export default function FeesPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showStatement && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-xl border border-border w-full max-w-2xl p-6 max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Fee Statement</h2>
+              <button onClick={() => setShowStatement(null)}><X size={20} /></button>
+            </div>
+            {(() => {
+              const student = students.find(s => s.id === showStatement);
+              const studentPayments = payments.filter(p => p.studentId === showStatement && p.status === 'Confirmed');
+              const classFee = feeStructure.find(f => f.class.startsWith(student?.class.split(' ')[0] || ''))?.total || 0;
+              const totalPaid = studentPayments.reduce((sum, p) => sum + p.amount, 0);
+              return student ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
+                    <div><p className="text-sm text-foreground/60">Student</p><p className="font-semibold">{student.name}</p></div>
+                    <div><p className="text-sm text-foreground/60">Class</p><p className="font-semibold">{student.class}</p></div>
+                    <div><p className="text-sm text-foreground/60">Total Expected</p><p className="font-semibold">{formatUGX(classFee)}</p></div>
+                    <div><p className="text-sm text-foreground/60">Balance</p><p className={`font-semibold ${classFee - totalPaid > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                      {formatUGX(Math.max(0, classFee - totalPaid))}
+                    </p></div>
+                  </div>
+                  <h4 className="font-medium">Payment History</h4>
+                  <table className="w-full">
+                    <thead className="bg-muted/30">
+                      <tr>
+                        <th className="text-left px-3 py-2 text-sm">Date</th>
+                        <th className="text-right px-3 py-2 text-sm">Amount</th>
+                        <th className="text-left px-3 py-2 text-sm">Method</th>
+                        <th className="text-left px-3 py-2 text-sm">Description</th>
+                        <th className="text-center px-3 py-2 text-sm">Receipt</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      {studentPayments.map((p, idx) => (
+                        <tr key={idx}>
+                          <td className="px-3 py-2">{p.date}</td>
+                          <td className="px-3 py-2 text-right">{formatUGX(p.amount)}</td>
+                          <td className="px-3 py-2">{p.method}</td>
+                          <td className="px-3 py-2">{p.description}</td>
+                          <td className="px-3 py-2 text-center">
+                            <button onClick={() => generateReceipt(p)} className="p-1 rounded hover:bg-muted">
+                              <Printer size={12} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : null;
+            })()}
+          </div>
+        </div>
+      )}
+
+      {showInstallmentModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-xl border border-border w-full max-w-md p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Create Installment Plan</h2>
+              <button onClick={() => setShowInstallmentModal(false)}><X size={20} /></button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Student</label>
+                <select id="installment-student" className="w-full px-4 py-2 rounded-lg border border-border">
+                  <option value="">Select student</option>
+                  {students.map(s => (
+                    <option key={s.id} value={s.id}>{s.name} - {s.class}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Total Amount (UGX)</label>
+                <input type="number" id="installment-total" placeholder="0" className="w-full px-4 py-2 rounded-lg border border-border" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Number of Installments</label>
+                <select id="installment-count" className="w-full px-4 py-2 rounded-lg border border-border">
+                  <option value="2">2 Installments</option>
+                  <option value="3">3 Installments</option>
+                  <option value="4">4 Installments</option>
+                </select>
+              </div>
+              <div id="installment-dates" className="space-y-2">
+                {/* Dates will be generated dynamically */}
+              </div>
+              <div className="flex gap-4 pt-4">
+                <button type="button" onClick={() => setShowInstallmentModal(false)} className="flex-1 px-4 py-2 border border-border rounded-lg">Cancel</button>
+                <button onClick={() => {
+                  const studentSelect = document.getElementById('installment-student') as HTMLSelectElement;
+                  const totalInput = document.getElementById('installment-total') as HTMLInputElement;
+                  const countSelect = document.getElementById('installment-count') as HTMLSelectElement;
+                  
+                  const studentId = studentSelect?.value;
+                  const total = parseInt(totalInput?.value || '0');
+                  const count = parseInt(countSelect?.value || '2');
+                  
+                  if (!studentId || total === 0) { alert('Please select student and enter amount'); return; }
+                  
+                  const installmentAmount = Math.floor(total / count);
+                  const lastAmount = total - (installmentAmount * (count - 1));
+                  const installments = [];
+                  
+                  for (let i = 0; i < count; i++) {
+                    const date = new Date();
+                    date.setMonth(date.getMonth() + i * 2); // Every 2 months
+                    installments.push({
+                      dueDate: date.toISOString().split('T')[0],
+                      amount: i === count - 1 ? lastAmount : installmentAmount,
+                      status: 'pending' as const
+                    });
+                  }
+                  
+                  setInstallmentPlans(prev => [...prev, {
+                    id: Date.now(),
+                    studentId,
+                    totalAmount: total,
+                    installments,
+                    createdAt: new Date().toISOString().split('T')[0]
+                  }]);
+                  setShowInstallmentModal(false);
+                  alert('Installment plan created successfully!');
+                }} className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
+                  Create Plan
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDiscountModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-xl border border-border w-full max-w-md p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Add Discount</h2>
+              <button onClick={() => setShowDiscountModal(false)}><X size={20} /></button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Student</label>
+                <select id="discount-student" className="w-full px-4 py-2 rounded-lg border border-border">
+                  <option value="">Select student</option>
+                  {students.map(s => (
+                    <option key={s.id} value={s.id}>{s.name} - {s.class}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Discount Type</label>
+                <select id="discount-type" className="w-full px-4 py-2 rounded-lg border border-border">
+                  <option value="merit">Merit-based</option>
+                  <option value="sibling">Sibling Discount</option>
+                  <option value="financial_aid">Financial Aid</option>
+                  <option value="sports">Sports Scholarship</option>
+                  <option value="music">Music Scholarship</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Percentage (%)</label>
+                <input type="number" id="discount-percentage" placeholder="0" className="w-full px-4 py-2 rounded-lg border border-border" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Reason</label>
+                <input type="text" id="discount-reason" placeholder="e.g., Excellent academics" className="w-full px-4 py-2 rounded-lg border border-border" />
+              </div>
+              <div className="flex gap-4 pt-4">
+                <button type="button" onClick={() => setShowDiscountModal(false)} className="flex-1 px-4 py-2 border border-border rounded-lg">Cancel</button>
+                <button onClick={() => {
+                  const studentSelect = document.getElementById('discount-student') as HTMLSelectElement;
+                  const typeSelect = document.getElementById('discount-type') as HTMLSelectElement;
+                  const percentageInput = document.getElementById('discount-percentage') as HTMLInputElement;
+                  const reasonInput = document.getElementById('discount-reason') as HTMLInputElement;
+                  
+                  const studentId = studentSelect?.value;
+                  const type = typeSelect?.value as Discount['type'];
+                  const percentage = parseInt(percentageInput?.value || '0');
+                  const reason = reasonInput?.value;
+                  
+                  if (!studentId || percentage === 0) { alert('Please fill all required fields'); return; }
+                  
+                  const student = students.find(s => s.id === studentId);
+                  const classFee = feeStructure.find(f => f.class.startsWith(student?.class.split(' ')[0] || ''))?.total || 0;
+                  const amount = Math.floor(classFee * (percentage / 100));
+                  
+                  setDiscounts(prev => [...prev, {
+                    id: Date.now(),
+                    studentId,
+                    type,
+                    percentage,
+                    amount,
+                    reason: reason || type.replace('_', ' '),
+                    approvedBy: 'Admin',
+                    date: new Date().toISOString().split('T')[0]
+                  }]);
+                  setShowDiscountModal(false);
+                  alert('Discount added successfully!');
+                }} className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
+                  Add Discount
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showReminderModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-xl border border-border w-full max-w-md p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">
+                {editingReminder ? 'Edit Reminder' : 'Add Reminder'}
+              </h2>
+              <button onClick={() => setShowReminderModal(false)}><X size={20} /></button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Reminder Type</label>
+                <select 
+                  value={reminderForm.type} 
+                  onChange={(e) => setReminderForm({ ...reminderForm, type: e.target.value as AutomatedReminder['type'] })}
+                  className="w-full px-4 py-2 rounded-lg border border-border">
+                  <option value="before_due">Before Due Date</option>
+                  <option value="on_due">On Due Date</option>
+                  <option value="after_due">After Due Date</option>
+                  <option value="custom">Custom Message</option>
+                </select>
+              </div>
+              {reminderForm.type === 'before_due' && (
+                <div>
+                  <label className="block text-sm font-medium mb-1">Days Before Due</label>
+                  <input 
+                    type="number" 
+                    value={reminderForm.daysBeforeDue} 
+                    onChange={(e) => setReminderForm({ ...reminderForm, daysBeforeDue: parseInt(e.target.value) || 3 })}
+                    className="w-full px-4 py-2 rounded-lg border border-border" 
+                  />
+                </div>
+              )}
+              {reminderForm.type === 'after_due' && (
+                <div>
+                  <label className="block text-sm font-medium mb-1">Days After Due</label>
+                  <input 
+                    type="number" 
+                    value={reminderForm.daysAfterDue} 
+                    onChange={(e) => setReminderForm({ ...reminderForm, daysAfterDue: parseInt(e.target.value) || 3 })}
+                    className="w-full px-4 py-2 rounded-lg border border-border" 
+                  />
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium mb-1">Message (use {student} and {amount} as placeholders)</label>
+                <textarea 
+                  value={reminderForm.message} 
+                  onChange={(e) => setReminderForm({ ...reminderForm, message: e.target.value })}
+                  placeholder="Dear parent, fee payment for {student} is due in 3 days. Amount: {amount}."
+                  rows={3}
+                  className="w-full px-4 py-2 rounded-lg border border-border" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Channels</label>
+                <div className="flex gap-4">
+                  {['sms', 'whatsapp', 'email'].map(channel => (
+                    <label key={channel} className="flex items-center gap-2">
+                      <input 
+                        type="checkbox" 
+                        checked={reminderForm.channels.includes(channel as any)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setReminderForm({ ...reminderForm, channels: [...reminderForm.channels, channel] as any });
+                          } else {
+                            setReminderForm({ ...reminderForm, channels: reminderForm.channels.filter(c => c !== channel) as any });
+                          }
+                        }}
+                      />
+                      <span className="text-sm capitalize">{channel}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-4 pt-4">
+                <button type="button" onClick={() => setShowReminderModal(false)} className="flex-1 px-4 py-2 border border-border rounded-lg">Cancel</button>
+                <button onClick={() => {
+                  if (!reminderForm.message) { alert('Please enter a message'); return; }
+                  if (editingReminder) {
+                    setReminders(prev => prev.map(r => r.id === editingReminder.id ? { ...r, ...reminderForm, channels: reminderForm.channels as any } : r));
+                  } else {
+                    setReminders(prev => [...prev, { id: Date.now(), ...reminderForm, channels: reminderForm.channels as any, isActive: true }]);
+                  }
+                  setShowReminderModal(false);
+                  alert(`Reminder ${editingReminder ? 'updated' : 'added'} successfully!`);
+                }} className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
+                  {editingReminder ? 'Update' : 'Add'} Reminder
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCreditModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-xl border border-border w-full max-w-md p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Add Credit</h2>
+              <button onClick={() => setShowCreditModal(false)}><X size={20} /></button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Student</label>
+                <select id="credit-student" className="w-full px-4 py-2 rounded-lg border border-border">
+                  <option value="">Select student</option>
+                  {students.map(s => (
+                    <option key={s.id} value={s.id}>{s.name} - {s.class}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Amount (UGX)</label>
+                <input type="number" id="credit-amount" placeholder="0" className="w-full px-4 py-2 rounded-lg border border-border" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Type</label>
+                <select id="credit-type" className="w-full px-4 py-2 rounded-lg border border-border">
+                  <option value="overpayment">Overpayment</option>
+                  <option value="refund">Refund</option>
+                  <option value="scholarship">Scholarship</option>
+                </select>
+              </div>
+              <div className="flex gap-4 pt-4">
+                <button type="button" onClick={() => setShowCreditModal(false)} className="flex-1 px-4 py-2 border border-border rounded-lg">Cancel</button>
+                <button onClick={() => {
+                  const studentSelect = document.getElementById('credit-student') as HTMLSelectElement;
+                  const amountInput = document.getElementById('credit-amount') as HTMLInputElement;
+                  const typeSelect = document.getElementById('credit-type') as HTMLSelectElement;
+                  
+                  const studentId = studentSelect?.value;
+                  const amount = parseInt(amountInput?.value || '0');
+                  const type = typeSelect?.value as Credit['type'];
+                  
+                  if (!studentId || amount === 0) { alert('Please fill all required fields'); return; }
+                  
+                  setCredits(prev => [...prev, {
+                    id: Date.now(),
+                    studentId,
+                    amount,
+                    type,
+                    status: 'available' as const,
+                    date: new Date().toISOString().split('T')[0]
+                  }]);
+                  setShowCreditModal(false);
+                  alert('Credit added successfully!');
+                }} className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
+                  Add Credit
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
