@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { School, Users, TrendingUp, Users as UsersIcon, FileText, Calendar, ImagePlus, Sparkles } from 'lucide-react';
+import { School, Users, TrendingUp, Users as UsersIcon, FileText, Calendar, ImagePlus, Sparkles, Plus, Send, Download, Printer, Bell, CheckCircle, Clock, AlertCircle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { getSchoolProfile, SchoolProfile } from '@/lib/school';
 
@@ -9,13 +9,47 @@ export default function DashboardPage() {
   const [schoolProfile, setSchoolProfile] = useState<SchoolProfile>(getSchoolProfile());
   const [students, setStudents] = useState<any[]>([]);
   const [fees, setFees] = useState<any[]>([]);
+  const [attendanceRecords, setAttendanceRecords] = useState<any[]>([]);
+  const [showQuickActions, setShowQuickActions] = useState(false);
 
   useEffect(() => {
     const storedStudents = JSON.parse(localStorage.getItem('school_students') || '[]');
     const storedFees = JSON.parse(localStorage.getItem('school_fees') || '[]');
+    const storedAttendance = JSON.parse(localStorage.getItem('school_attendance') || '[]');
     setStudents(storedStudents);
     setFees(storedFees);
+    setAttendanceRecords(storedAttendance);
   }, []);
+
+  const classAttendance = [
+    { class: 'P.1-P.3', present: 95, total: 280 },
+    { class: 'P.4-P.7', present: 92, total: 320 },
+    { class: 'S.1-S.4', present: 96, total: 380 },
+    { class: 'S.5-S.6', present: 89, total: 268 },
+  ];
+
+  const upcomingEvents = [
+    { date: '2026-05-04', title: 'Term 2 Begins', type: 'academic' },
+    { date: '2026-05-10', title: 'P.7 Mock Exams', type: 'exam' },
+    { date: '2026-05-15', title: 'Parent-Teacher Meeting', type: 'meeting' },
+    { date: '2026-05-20', title: 'Inter-School Sports', type: 'sports' },
+  ];
+
+  const recentActivities = [
+    { time: '2 hours ago', action: 'John Okello paid UGX 500,000 fees', icon: 'payment' },
+    { time: '3 hours ago', action: '15 students marked present in P.5', icon: 'attendance' },
+    { time: '5 hours ago', action: 'New student Mary Nambi added to S.1', icon: 'student' },
+    { time: 'Yesterday', action: 'Fee reminder sent to 25 parents', icon: 'reminder' },
+  ];
+
+  const quickActions = [
+    { label: 'Add Student', href: '/dashboard/students', icon: Users, color: 'bg-blue-500' },
+    { label: 'Record Payment', href: '/dashboard/fees', icon: FileText, color: 'bg-green-500' },
+    { label: 'Mark Attendance', href: '/dashboard/attendance', icon: CheckCircle, color: 'bg-purple-500' },
+    { label: 'Send Reminder', href: '/dashboard/fees', icon: Send, color: 'bg-orange-500' },
+    { label: 'Print Report', href: '/dashboard/fees', icon: Printer, color: 'bg-gray-500' },
+    { label: 'View Calendar', href: '/dashboard', icon: Calendar, color: 'bg-red-500' },
+  ];
 
   const totalStudents = students.length || 1248;
   const totalFees = fees.reduce((sum: number, f: any) => sum + (parseInt(f.amount) || 0), 0) || 4100000;
@@ -125,10 +159,109 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Quick Actions Panel */}
+      <div className="bg-background rounded-lg border">
+        <div className="p-4 border-b flex items-center justify-between">
+          <h3 className="font-semibold">Quick Actions</h3>
+          <button onClick={() => setShowQuickActions(!showQuickActions)} className="text-sm text-primary hover:underline">
+            {showQuickActions ? 'Collapse' : 'Expand'}
+          </button>
+        </div>
+        {showQuickActions && (
+          <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+            {quickActions.map((action, i) => (
+              <Link key={i} href={action.href} className="flex flex-col items-center gap-2 p-3 rounded-lg border hover:border-primary hover:bg-primary/5 transition-colors">
+                <div className={`w-10 h-10 rounded-lg ${action.color} flex items-center justify-center text-white`}>
+                  <action.icon size={20} />
+                </div>
+                <span className="text-xs font-medium text-center">{action.label}</span>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Upcoming Events */}
+        <div className="bg-background rounded-lg border">
+          <div className="p-4 border-b">
+            <h3 className="font-semibold flex items-center gap-2"><Calendar size={18} />Upcoming Events</h3>
+          </div>
+          <div className="p-4 space-y-3">
+            {upcomingEvents.map((event, i) => (
+              <div key={i} className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted/30">
+                <div className={`mt-1 w-2 h-2 rounded-full ${
+                  event.type === 'academic' ? 'bg-blue-500' :
+                  event.type === 'exam' ? 'bg-red-500' :
+                  event.type === 'meeting' ? 'bg-green-500' : 'bg-orange-500'
+                }`} />
+                <div className="flex-1">
+                  <p className="text-sm font-medium">{event.title}</p>
+                  <p className="text-xs text-foreground/60">{new Date(event.date).toLocaleDateString('en-UG', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Class Attendance Summary */}
+        <div className="bg-background rounded-lg border">
+          <div className="p-4 border-b">
+            <h3 className="font-semibold flex items-center gap-2"><CheckCircle size={18} />Class Attendance</h3>
+          </div>
+          <div className="p-4 space-y-4">
+            {classAttendance.map((cls, i) => (
+              <div key={i}>
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="font-medium">{cls.class}</span>
+                  <span className={cls.present/cls.total >= 0.95 ? 'text-green-600' : cls.present/cls.total >= 0.90 ? 'text-yellow-600' : 'text-red-600'}>
+                    {cls.present}/{cls.total} ({((cls.present/cls.total)*100).toFixed(1)}%)
+                  </span>
+                </div>
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <div className={`h-full rounded-full ${
+                    cls.present/cls.total >= 0.95 ? 'bg-green-500' : cls.present/cls.total >= 0.90 ? 'bg-yellow-500' : 'bg-red-500'
+                  }`} style={{ width: `${(cls.present/cls.total)*100}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Recent Activities */}
+        <div className="bg-background rounded-lg border">
+          <div className="p-4 border-b">
+            <h3 className="font-semibold flex items-center gap-2"><Bell size={18} />Recent Activities</h3>
+          </div>
+          <div className="p-4 space-y-3">
+            {recentActivities.map((activity, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <div className={`mt-0.5 ${
+                  activity.icon === 'payment' ? 'text-green-600' :
+                  activity.icon === 'attendance' ? 'text-blue-600' :
+                  activity.icon === 'student' ? 'text-purple-600' : 'text-orange-600'
+                }`}>
+                  {activity.icon === 'payment' ? <FileText size={16} /> :
+                   activity.icon === 'attendance' ? <CheckCircle size={16} /> :
+                   activity.icon === 'student' ? <Users size={16} /> : <Bell size={16} />}
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm">{activity.action}</p>
+                  <p className="text-xs text-foreground/60">{activity.time}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Recent Students */}
       <div className="bg-background rounded-lg border">
-        <div className="p-4 border-b">
+        <div className="p-4 border-b flex items-center justify-between">
           <h3 className="font-semibold">Recent Students</h3>
+          <Link href="/dashboard/students" className="text-sm text-primary hover:underline flex items-center gap-1">
+            View All <ArrowRight size={14} />
+          </Link>
         </div>
         <table className="w-full">
           <thead className="bg-muted/30">
