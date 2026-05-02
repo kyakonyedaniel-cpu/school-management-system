@@ -34,7 +34,6 @@ export default function FeesPage() {
   const { students } = useStudents();
   const [showCollect, setShowCollect] = useState(false);
   const [showStatement, setShowStatement] = useState<string | null>(null);
-  const [showReminder, setShowReminder] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedClass, setSelectedClass] = useState('All Classes');
   const [paymentForm, setPaymentForm] = useState({
@@ -44,6 +43,22 @@ export default function FeesPage() {
     description: '',
     phone: '',
     sendSMS: true
+  });
+
+  const [activeTab, setActiveTab] = useState<'structure' | 'balances' | 'payments'>('structure');
+  const [feeStructure, setFeeStructure] = useState<FeeItem[]>(defaultFeeStructure);
+  const [showFeeModal, setShowFeeModal] = useState(false);
+  const [editingFee, setEditingFee] = useState<FeeItem | null>(null);
+  const [feeForm, setFeeForm] = useState({
+    class: '',
+    term: 'Term 1',
+    tuition: '',
+    development: '',
+    uniforms: '',
+    books: '',
+    boarding: '',
+    transport: '',
+    meals: ''
   });
 
   const collectionData = [
@@ -78,7 +93,7 @@ export default function FeesPage() {
         lastPayment: studentPayments.length > 0 ? studentPayments[studentPayments.length - 1].date : null
       };
     }).filter(s => selectedClass === 'All Classes' || s.class === selectedClass);
-  }, [students, payments, selectedClass]);
+  }, [students, payments, selectedClass, feeStructure]);
 
   const filteredPayments = payments.filter(p => {
     const matchesSearch = p.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -115,7 +130,6 @@ export default function FeesPage() {
     const balance = studentBalances.find(b => b.id === studentId);
     if (student && balance) {
       alert(`Reminder sent to ${student.name}'s parent: Balance of ${formatUGX(balance.balance)}`);
-      setShowReminder(false);
     }
   };
 
@@ -139,26 +153,10 @@ export default function FeesPage() {
 
   const totalCollected = payments.filter(p => p.status === 'Confirmed').reduce((sum, p) => sum + p.amount, 0);
   const totalExpected = students.reduce((sum, s) => {
-    const classFee = feeStructure.find(f => f.class.includes(s.class.split(' ')[0]))?.total || 0;
+    const classFee = feeStructure.find(f => s.class.startsWith(f.class.split(' ')[0]))?.total || 0;
     return sum + classFee;
   }, 0);
   const totalOverdue = studentBalances.reduce((sum, s) => Math.max(0, s.balance), 0);
-
-  const [activeTab, setActiveTab] = useState<'structure' | 'balances' | 'payments'>('structure');
-  const [feeStructure, setFeeStructure] = useState<FeeItem[]>(defaultFeeStructure);
-  const [showFeeModal, setShowFeeModal] = useState(false);
-  const [editingFee, setEditingFee] = useState<FeeItem | null>(null);
-  const [feeForm, setFeeForm] = useState({
-    class: '',
-    term: 'Term 1',
-    tuition: '',
-    development: '',
-    uniforms: '',
-    books: '',
-    boarding: '',
-    transport: '',
-    meals: ''
-  });
 
   const calculateTotal = () => {
     const values = [feeForm.tuition, feeForm.development, feeForm.uniforms, feeForm.books, feeForm.boarding, feeForm.transport, feeForm.meals];
@@ -279,7 +277,7 @@ export default function FeesPage() {
             <BarChart data={collectionData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
-              <YAxis tickFormatter={(v) => `${(v/1000000).toFixed(1)}M`} />
+              <YAxis tickFormatter={(v: number) => `${(v/1000000).toFixed(1)}M`} />
               <Tooltip formatter={(v: number) => formatUGX(v)} />
               <Bar dataKey="collected" fill="#2563eb" name="Collected" />
               <Bar dataKey="expected" fill="#e5e7eb" name="Expected" />
@@ -301,7 +299,6 @@ export default function FeesPage() {
         </div>
       </div>
 
-      {/* Tabs Navigation */}
       <div className="bg-background rounded-lg border">
         <div className="border-b flex">
           <button
@@ -330,7 +327,6 @@ export default function FeesPage() {
           </button>
         </div>
 
-        {/* Fee Structure Tab */}
         {activeTab === 'structure' && (
           <div>
             <div className="p-4 border-b flex items-center justify-between">
@@ -379,7 +375,6 @@ export default function FeesPage() {
           </div>
         )}
 
-        {/* Student Balances Tab */}
         {activeTab === 'balances' && (
           <div>
             <div className="p-4 border-b flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
@@ -427,7 +422,7 @@ export default function FeesPage() {
                           className="p-1.5 rounded hover:bg-muted" title="View Statement">
                           <FileText size={14} />
                         </button>
-                        <button onClick={() => { setShowReminder(true); setShowStatement(student.id); }}
+                        <button onClick={() => sendReminder(student.id)}
                           className="p-1.5 rounded hover:bg-muted text-yellow-600" title="Send Reminder">
                           <Send size={14} />
                         </button>
@@ -440,7 +435,6 @@ export default function FeesPage() {
           </div>
         )}
 
-        {/* Recent Payments Tab */}
         {activeTab === 'payments' && (
           <div>
             <div className="p-4 border-b flex items-center gap-4">
@@ -480,7 +474,6 @@ export default function FeesPage() {
         )}
       </div>
 
-      {/* Collect Fee Modal */}
       {showCollect && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-background rounded-xl border border-border w-full max-w-md p-6">
@@ -546,7 +539,6 @@ export default function FeesPage() {
         </div>
       )}
 
-      {/* Fee Statement Modal */}
       {showStatement && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-background rounded-xl border border-border w-full max-w-2xl p-6 max-h-[80vh] overflow-y-auto">
@@ -557,7 +549,7 @@ export default function FeesPage() {
             {(() => {
               const student = students.find(s => s.id === showStatement);
               const studentPayments = payments.filter(p => p.studentId === showStatement && p.status === 'Confirmed');
-              const classFee = feeStructure.find(f => f.class.includes(student?.class.split(' ')[0] || ''))?.total || 0;
+              const classFee = feeStructure.find(f => f.class.startsWith(student?.class.split(' ')[0] || ''))?.total || 0;
               const totalPaid = studentPayments.reduce((sum, p) => sum + p.amount, 0);
               return student ? (
                 <div className="space-y-4">
@@ -607,87 +599,137 @@ export default function FeesPage() {
             })()}
           </div>
         </div>
-        )}
+      )}
 
-        {/* Fee Structure Modal */}
-        {showFeeModal && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-background rounded-xl border border-border w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold">
-                  {editingFee ? 'Edit Fee Structure' : 'Add Fee Structure'}
-                </h2>
-                <button onClick={() => setShowFeeModal(false)}><X size={20} /></button>
+      {showFeeModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-xl border border-border w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">
+                {editingFee ? 'Edit Fee Structure' : 'Add Fee Structure'}
+              </h2>
+              <button onClick={() => setShowFeeModal(false)}><X size={20} /></button>
+            </div>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Class Range</label>
+                  <input
+                    type="text"
+                    required
+                    value={feeForm.class}
+                    onChange={(e) => setFeeForm({ ...feeForm, class: e.target.value })}
+                    placeholder="e.g., P.1 - P.3"
+                    className="w-full px-4 py-2 rounded-lg border border-border"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Term</label>
+                  <select
+                    value={feeForm.term}
+                    onChange={(e) => setFeeForm({ ...feeForm, term: e.target.value })}
+                    className="w-full px-4 py-2 rounded-lg border border-border"
+                  >
+                    <option value="Term 1">Term 1</option>
+                    <option value="Term 2">Term 2</option>
+                    <option value="Term 3">Term 3</option>
+                  </select>
+                </div>
               </div>
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Class Range</label>
-                    <input type="text" required value={feeForm.class}
-                      onChange={(e) => setFeeForm({ ...feeForm, class: e.target.value })}
-                      placeholder="e.g., P.1 - P.3" className="w-full px-4 py-2 rounded-lg border border-border" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Term</label>
-                    <select value={feeForm.term} onChange={(e) => setFeeForm({ ...feeForm, term: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border border-border">
-                      <option value="Term 1">Term 1</option>
-                      <option value="Term 2">Term 2</option>
-                      <option value="Term 3">Term 3</option>
-                    </select>
-                  </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Tuition (UGX)</label>
+                  <input
+                    type="number"
+                    value={feeForm.tuition}
+                    onChange={(e) => setFeeForm({ ...feeForm, tuition: e.target.value })}
+                    placeholder="0"
+                    className="w-full px-4 py-2 rounded-lg border border-border"
+                  />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Tuition (UGX)</label>
-                    <input type="number" value={feeForm.tuition} onChange={(e) => setFeeForm({ ...feeForm, tuition: e.target.value })}
-                      placeholder="0" className="w-full px-4 py-2 rounded-lg border border-border" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Development (UGX)</label>
-                    <input type="number" value={feeForm.development} onChange={(e) => setFeeForm({ ...feeForm, development: e.target.value })}
-                      placeholder="0" className="w-full px-4 py-2 rounded-lg border border-border" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Uniforms (UGX)</label>
-                    <input type="number" value={feeForm.uniforms} onChange={(e) => setFeeForm({ ...feeForm, uniforms: e.target.value })}
-                      placeholder="0" className="w-full px-4 py-2 rounded-lg border border-border" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Books (UGX)</label>
-                    <input type="number" value={feeForm.books} onChange={(e) => setFeeForm({ ...feeForm, books: e.target.value })}
-                      placeholder="0" className="w-full px-4 py-2 rounded-lg border border-border" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Boarding (Optional)</label>
-                    <input type="number" value={feeForm.boarding} onChange={(e) => setFeeForm({ ...feeForm, boarding: e.target.value })}
-                      placeholder="0" className="w-full px-4 py-2 rounded-lg border border-border" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Transport (Optional)</label>
-                    <input type="number" value={feeForm.transport} onChange={(e) => setFeeForm({ ...feeForm, transport: e.target.value })}
-                      placeholder="0" className="w-full px-4 py-2 rounded-lg border border-border" />
-                  </div>
-                  <div className="col-span-2">
-                    <label className="block text-sm font-medium mb-1">Meals (Optional)</label>
-                    <input type="number" value={feeForm.meals} onChange={(e) => setFeeForm({ ...feeForm, meals: e.target.value })}
-                      placeholder="0" className="w-full px-4 py-2 rounded-lg border border-border" />
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Development (UGX)</label>
+                  <input
+                    type="number"
+                    value={feeForm.development}
+                    onChange={(e) => setFeeForm({ ...feeForm, development: e.target.value })}
+                    placeholder="0"
+                    className="w-full px-4 py-2 rounded-lg border border-border"
+                  />
                 </div>
-                <div className="p-3 bg-muted/30 rounded-lg">
-                  <p className="text-sm text-foreground/60">Total: <span className="font-semibold text-foreground">{formatUGX(calculateTotal())}</span></p>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Uniforms (UGX)</label>
+                  <input
+                    type="number"
+                    value={feeForm.uniforms}
+                    onChange={(e) => setFeeForm({ ...feeForm, uniforms: e.target.value })}
+                    placeholder="0"
+                    className="w-full px-4 py-2 rounded-lg border border-border"
+                  />
                 </div>
-                <div className="flex gap-4 pt-4">
-                  <button type="button" onClick={() => setShowFeeModal(false)} className="flex-1 px-4 py-2 border border-border rounded-lg">Cancel</button>
-                  <button onClick={handleSaveFee} className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
-                    {editingFee ? 'Update' : 'Add'} Fee Structure
-                  </button>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Books (UGX)</label>
+                  <input
+                    type="number"
+                    value={feeForm.books}
+                    onChange={(e) => setFeeForm({ ...feeForm, books: e.target.value })}
+                    placeholder="0"
+                    className="w-full px-4 py-2 rounded-lg border border-border"
+                  />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Boarding (Optional)</label>
+                  <input
+                    type="number"
+                    value={feeForm.boarding}
+                    onChange={(e) => setFeeForm({ ...feeForm, boarding: e.target.value })}
+                    placeholder="0"
+                    className="w-full px-4 py-2 rounded-lg border border-border"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Transport (Optional)</label>
+                  <input
+                    type="number"
+                    value={feeForm.transport}
+                    onChange={(e) => setFeeForm({ ...feeForm, transport: e.target.value })}
+                    placeholder="0"
+                    className="w-full px-4 py-2 rounded-lg border border-border"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium mb-1">Meals (Optional)</label>
+                  <input
+                    type="number"
+                    value={feeForm.meals}
+                    onChange={(e) => setFeeForm({ ...feeForm, meals: e.target.value })}
+                    placeholder="0"
+                    className="w-full px-4 py-2 rounded-lg border border-border"
+                  />
+                </div>
+              </div>
+              <div className="p-3 bg-muted/30 rounded-lg">
+                <p className="text-sm text-foreground/60">Total: <span className="font-semibold text-foreground">{formatUGX(calculateTotal())}</span></p>
+              </div>
+              <div className="flex gap-4 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowFeeModal(false)}
+                  className="flex-1 px-4 py-2 border border-border rounded-lg"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveFee}
+                  className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
+                >
+                  {editingFee ? 'Update' : 'Add'} Fee Structure
+                </button>
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
