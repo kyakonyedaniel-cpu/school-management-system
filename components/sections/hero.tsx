@@ -100,6 +100,50 @@ export function HeroSection() {
             transition={{ duration: 0.6 }}
             className="relative"
           >
+            {/* Smart School Background Illustration */}
+            <div className="absolute -top-10 -right-10 w-full h-full pointer-events-none z-0 opacity-15">
+              <svg viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                {/* School Building */}
+                <rect x="200" y="200" width="400" height="350" rx="8" fill="#059669" />
+                <rect x="220" y="220" width="160" height="200" rx="4" fill="#047857" />
+                <rect x="420" y="220" width="160" height="200" rx="4" fill="#047857" />
+                <rect x="240" y="240" width="40" height="60" rx="2" fill="#A7F3D0" />
+                <rect x="300" y="240" width="40" height="60" rx="2" fill="#A7F3D0" />
+                <rect x="360" y="240" width="40" height="60" rx="2" fill="#A7F3D0" />
+                <rect x="440" y="240" width="40" height="60" rx="2" fill="#A7F3D0" />
+                <rect x="500" y="240" width="40" height="60" rx="2" fill="#A7F3D0" />
+                <rect x="560" y="240" width="40" height="60" rx="2" fill="#A7F3D0" />
+                <rect x="380" y="420" width="40" height="130" rx="2" fill="#065F46" />
+                {/* Roof */}
+                <path d="M160 200 L400 100 L640 200 Z" fill="#047857" />
+                <rect x="200" y="200" width="400" height="10" rx="2" fill="#065F46" />
+                {/* Clock */}
+                <circle cx="400" cy="150" r="20" fill="#A7F3D0" />
+                <line x1="400" y1="150" x2="400" y2="135" stroke="#065F46" stroke-width="3" />
+                <line x1="400" y1="150" x2="410" y2="150" stroke="#065F46" stroke-width="2" />
+                {/* Door */}
+                <rect x="390" y="440" width="20" height="40" rx="10" fill="#A7F3D0" />
+                <rect x="392" y="442" width="16" height="36" rx="8" fill="#065F46" />
+                <circle cx="404" cy="460" r="2" fill="#A7F3D0" />
+                {/* Children */}
+                <g transform="translate(180, 480)"><circle cx="0" cy="0" r="12" fill="#065F46" /><rect x="-8" y="12" width="16" height="25" rx="4" fill="#065F46" /></g>
+                <g transform="translate(220, 490)"><circle cx="0" cy="0" r="10" fill="#047857" /><rect x="-6" y="10" width="12" height="20" rx="3" fill="#047857" /></g>
+                <g transform="translate(260, 485)"><circle cx="0" cy="0" r="11" fill="#065F46" /><rect x="-7" y="11" width="14" height="22" rx="4" fill="#065F46" /></g>
+                <g transform="translate(520, 480)"><circle cx="0" cy="0" r="12" fill="#047857" /><rect x="-8" y="12" width="16" height="25" rx="4" fill="#047857" /></g>
+                <g transform="translate(560, 490)"><circle cx="0" cy="0" r="10" fill="#065F46" /><rect x="-6" y="10" width="12" height="20" rx="3" fill="#065F46" /></g>
+                <g transform="translate(600, 485)"><circle cx="0" cy="0" r="11" fill="#047857" /><rect x="-7" y="11" width="14" height="22" rx="4" fill="#047857" /></g>
+                {/* Trees */}
+                <path d="M130 400 C130 320 160 320 160 400 Z" fill="#065F46" />
+                <rect x="140" y="400" width="10" height="30" fill="#047857" />
+                <path d="M640 400 C640 320 670 320 670 400 Z" fill="#065F46" />
+                <rect x="650" y="400" width="10" height="30" fill="#047857" />
+                {/* Sun */}
+                <circle cx="680" cy="120" r="40" fill="#FCD34D" opacity="0.6" />
+                {/* Grass */}
+                <rect x="0" y="550" width="800" height="50" fill="#065F46" opacity="0.5" />
+              </svg>
+            </div>
+
             {/* Floating Glow */}
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent rounded-2xl blur-3xl -z-10" />
             
