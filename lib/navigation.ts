@@ -32,6 +32,11 @@ export const navigation: NavigationItem[] = [
   { name: 'Reports', href: '/dashboard/reports', icon: 'FileBarChart', roles: ['ADMIN', 'TEACHER'] },
   { name: 'Curriculum', href: '/dashboard/curriculum', icon: 'BookOpen', roles: ['ADMIN', 'TEACHER'] },
   { name: 'Academics', href: '/dashboard/academics', icon: 'GraduationCap', roles: ['ADMIN', 'TEACHER'] },
+  { name: 'Communications', href: '/dashboard/communications', icon: 'Send', roles: ['ADMIN', 'TEACHER', 'ACCOUNTANT'] },
+  { name: 'Lesson Plans', href: '/dashboard/lesson-plans', icon: 'BookOpen', roles: ['ADMIN', 'HEADTEACHER', 'TEACHER'] },
+  { name: 'Transfers', href: '/dashboard/transfers', icon: 'ArrowRightLeft', roles: ['ADMIN'] },
+  { name: 'Alumni', href: '/dashboard/alumni', icon: 'GraduationCap', roles: ['ADMIN'] },
+  { name: 'Assets', href: '/dashboard/assets', icon: 'Package', roles: ['ADMIN'] },
   { name: 'Settings', href: '/dashboard/settings', icon: 'Settings', roles: ['ADMIN'] },
   { name: 'Profile', href: '/dashboard/profile', icon: 'User', roles: ['ADMIN', 'TEACHER', 'ACCOUNTANT', 'PARENT'] },
 ];
